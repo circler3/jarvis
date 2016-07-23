@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Jarvis</title>
+
+   <style type="text/css">
+
+      body 
+      {
+         text-align: left;    
+         background-color: black; 
+         color: white;     
+      }
+      
+      p
+      {
+         font-family: Courier;
+      }
+
+   </style>
+
+</head>
+<body style=''>
+   <img style='display: block; margin-left: auto; margin-right: auto;' src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />     
+   <h1 style='text-align: center;'>Results</h1>
+   <h2>Style Check</h2>
+   <p>@Model.StyleMessage</p>
+   <h2>Compile</h2>
+   <p>@Model.CompileMessage</p>
+   <h2>Output</h2>
+   <p>@Model.OutputMessage</p>
+</body>
+</html>

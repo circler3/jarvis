@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Jarvis</title>
+
+	<style type="text/css">
+		body 
+      {
+			text-align: center;
+         background-color: black; 
+         color: white;
+		}
+	</style>
+
+</head>
+<body>
+	<img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />	   
+    <form method='post' action='results' enctype='multipart/form-data'>
+       Title: <input type='text' name='title' id='title' />
+       <br />
+       File: <input type='file' name='file' id='file' />
+       <br />
+       <input type='submit' value='Go!' />   
+       <br />
+    </form>   
+</body>
+</html>
