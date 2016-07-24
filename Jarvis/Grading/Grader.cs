@@ -59,8 +59,9 @@ namespace Jarvis
       p.StartInfo.UseShellExecute = false;
       p.StartInfo.RedirectStandardOutput = true;
       p.StartInfo.RedirectStandardError = true;
-      
-      p.StartInfo.FileName = "/home/jacob/jarvis/style/cpplint.py";
+
+      string styleExe = Jarvis.Config.AppSettings.Settings ["styleExe"].Value;
+      p.StartInfo.FileName = styleExe;
       p.StartInfo.Arguments = homework.FullName;
       p.Start ();
       

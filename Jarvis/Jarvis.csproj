@@ -48,6 +48,7 @@
     <Reference Include="HtmlDiff">
       <HintPath>..\packages\htmldiff.net.1.3\lib\net35\HtmlDiff.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
@@ -59,7 +60,6 @@
     <Compile Include="Uploader\FileUploadRequestBinder.cs" />
     <Compile Include="Grading\Grader.cs" />
     <Compile Include="Grading\GradingResult.cs" />
-    <Compile Include="Uploader\FileUploadResult.cs" />
     <Compile Include="Grading\CheatDetection.cs" />
     <Compile Include="Assignment.cs" />
   </ItemGroup>
@@ -78,13 +78,11 @@
     <None Include="Views\error.sshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="jarvis.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="Content\nancy-logo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

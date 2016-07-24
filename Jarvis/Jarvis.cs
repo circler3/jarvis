@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.IO;
+using System.Configuration;
 
 namespace Jarvis
 {
@@ -8,12 +9,27 @@ namespace Jarvis
 
   public class Jarvis
   {
+    public static Configuration Config = null;
+
     public static void Main(string[] args)
     {
+      // Load config file
+      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap ();
+      configMap.ExeConfigFilename = "jarvis.config";
+      Config = ConfigurationManager.OpenMappedExeConfiguration (configMap, ConfigurationUserLevel.None);
+
+      // Register Unhandled exceptions
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (ExceptionHandler);
 
-      var uri = new Uri("http://localhost:8080");
+      // Setup course directory if needed
+      string baseDir = Config.AppSettings.Settings["workingDir"].Value;
+      if (!Directory.Exists(baseDir + "/courses"))
+      {
+        Directory.CreateDirectory (baseDir + "/courses");
+      }
 
+      // Start Nancy
+      var uri = new Uri("http://localhost:8080");
       var config = new HostConfiguration();
       config.UrlReservations.CreateAutomatically = true;
 

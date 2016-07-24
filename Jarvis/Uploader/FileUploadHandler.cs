@@ -17,13 +17,24 @@ namespace Jarvis
       
       if (homework.ValidHeader) 
       {
-        // Upload to correct directory
-        homework.Path = "/home/jacob/jarvis/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
 
-        using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
+        // Check that directories exist
+        if (Directory.Exists(baseDir + "/courses/" + homework.Course.ToLower()) && 
+            Directory.Exists(baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId))
         {
-          file.Value.Position = 0;
-          file.Value.CopyTo (destinationStream);
+          // Upload to correct directory
+          homework.Path = baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+          
+          using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
+          {
+            file.Value.Position = 0;
+            file.Value.CopyTo (destinationStream);
+          }          
+        }
+        else
+        {
+          homework.ValidHeader = false;
         }
       }
 
