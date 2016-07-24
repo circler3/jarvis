@@ -45,12 +45,6 @@
       File: <input type='file' name='file' id='file' />
       <input type='submit' value='Go!' />   
    </form> 
-   <h1 style=''>Results - @Model.Grade</h1>
-   <h2>Style Check</h2>
-   <p>@Model.StyleMessage</p>
-   <h2>Compile</h2>
-   <p>@Model.CompileMessage</p>
-   <h2>Output</h2>
-   @Model.OutputMessage
+   <p>Sir, the file header is invalid. I'm afraid I can't grade this file.</p>
 </body>
 </html>

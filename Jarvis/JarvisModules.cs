@@ -17,7 +17,7 @@ namespace Jarvis
         return View["index"];
       };
 
-      Get["/results"] = x =>
+      Get["/results"] = x => // TODO Make this return all of a students past results
       {
         //var model = new Index() { Name = "Boss Hawg" };
 
@@ -40,21 +40,29 @@ namespace Jarvis
         GradingResult result = null;
 
         var request = this.Bind<FileUploadRequest>();
-        var uploadResult = uploadHandler.HandleUpload(request.File);
+        var assignment = uploadHandler.HandleUpload(request.File);
 
-        if (uploadResult.IsValid)
+        if (assignment.ValidHeader)
         {
          // Run grader
-         result = grader.Grade(uploadResult);
+          result = grader.Grade(assignment);
+          result.ValidHeader = true;
         }
         else
         {
-
+          result = new GradingResult();
+          result.ValidHeader = false;
         }
 
         //var response = new FileUploadResponse() { Identifier = uploadResult.Identifier };
-
-        return View["results", result];
+        if (result.ValidHeader)
+        {
+         return View["results", result];
+        }
+        else
+        {
+          return View["error"];
+        }
       };
 
       // Need to provide a way to close an assignment and get MOSS report

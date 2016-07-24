@@ -10,35 +10,50 @@ namespace Jarvis
 {
   public class FileUploadHandler
   {    
-    public FileUploadResult HandleUpload(HttpFile file)
+    public Assignment HandleUpload(HttpFile file)
     {
-      string targetDirectory = CreateTempDirectory();
-
-      using (FileStream destinationStream = File.Create(targetDirectory + "/" + file.Name))
+      // Check file header
+      Assignment homework = ParseHeader(file);        
+      
+      if (homework.ValidHeader) 
       {
-        file.Value.CopyTo(destinationStream);
+        // Upload to correct directory
+        homework.Path = "/home/jacob/jarvis/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+
+        using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
+        {
+          file.Value.Position = 0;
+          file.Value.CopyTo (destinationStream);
+        }
       }
 
-      // TODO Add some verification 
-
-      return new FileUploadResult()
-      {
-        FileName = file.Name,
-        Path = targetDirectory,
-        IsValid = true
-      };
+      return homework;
     }
 
-    private string CreateTempDirectory()
+    private Assignment ParseHeader (HttpFile file)
     {
-      var uploadDirectory = Path.GetTempPath() + "jarvisUploads/" + Guid.NewGuid().ToString(); // TODO Make this part of the app.config, probably want to change it per class and assignment?
-
-      if (!Directory.Exists(uploadDirectory))
+      Assignment homework = new Assignment ();
+      List<string> header = new List<string>();
+      StreamReader reader = new StreamReader(file.Value);      
+      for(int i = 0; i < 5; ++i)
       {
-        Directory.CreateDirectory(uploadDirectory);
+        header.Add (reader.ReadLine ());
+      }
+        
+      if (header[1].Contains("A#:") && header[2].Contains("Course:") && header[3].Contains("HW#:"))
+      {
+        homework.StudentId = header [1].Split (':') [1].Trim();
+        homework.Course = header [2].Split (':') [1].Trim();
+        homework.HomeworkId = header [3].Split (':') [1].Trim();
+        homework.ValidHeader = true;
+      }
+      else
+      {
+        // Invalid header, reject assignment
+        homework.ValidHeader = false;
       }
 
-      return uploadDirectory;
+      return homework;
     }
   }
 }

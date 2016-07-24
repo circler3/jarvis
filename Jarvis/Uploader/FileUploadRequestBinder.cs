@@ -16,8 +16,6 @@ namespace Jarvis
 
       var form = context.Request.Form;
 
-
-      fileUploadRequest.Title = form["title"];
       fileUploadRequest.File = GetFileByKey(context, "file");
 
       return fileUploadRequest;
