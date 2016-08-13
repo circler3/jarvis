@@ -14,6 +14,7 @@ namespace Jarvis
     protected override void ApplicationStartup(Nancy.TinyIoc.TinyIoCContainer container, IPipelines pipelines)
     {
       StaticConfiguration.EnableRequestTracing = true;
+      StaticConfiguration.DisableErrorTraces = false;
     }
   }
 }
