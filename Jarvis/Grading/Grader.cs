@@ -4,15 +4,17 @@ using System.Text;
 using HtmlDiff;
 using System.IO;
 using System.Timers;
-using System.Threading;
 
 namespace Jarvis
 {
   public class Grader
   {
+    private Process executionProcess;
+    private Timer executionTimer = new Timer(10000);
+
     public Grader()
     {
-
+      executionTimer.Elapsed += ExecutionTimer_Elapsed;
     }
 
     public GradingResult Grade(Assignment homework)
@@ -20,15 +22,18 @@ namespace Jarvis
       GradingResult result = new GradingResult();
 
       // Style check
+      Trace.TraceInformation("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
-      // Compile
+      // Compile      
+      Trace.TraceInformation("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);      
       result.CompileMessage = Compile(homework);
 
       // Run tests
       if (result.CompileMessage == "Success!!")
       {
-        result.OutputMessage = RunProgram(homework);
+        Trace.TraceInformation("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
+        result.OutputMessage = GetExecutionOutput(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
       }
@@ -52,7 +57,6 @@ namespace Jarvis
       writer.Flush();
       writer.Close();
     }
-
 
     private string StyleCheck(Assignment homework)
     {
@@ -97,53 +101,12 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string RunProgram(Assignment homework)
+    private string GetExecutionOutput(Assignment homework)
     {
-      Timer hangCheckingTimer = new Timer();
-      hangCheckingTimer.Elapsed += HangCheckingTimer_Elapsed;
-
-      Process p = new Process();
-
-      p.StartInfo.UseShellExecute = false;
-      p.StartInfo.RedirectStandardOutput = true;
-      p.StartInfo.RedirectStandardError = true;
-      p.StartInfo.RedirectStandardInput = true;
-
-      p.StartInfo.FileName = homework.Path + homework.StudentId;
-      //p.StartInfo.Arguments = file;
-      p.Start();
-
-      if (File.Exists(homework.Path + "input.txt"))
-      {
-        StreamReader reader = new StreamReader(homework.Path + "input.txt");
-
-        while (!reader.EndOfStream)
-        {
-          p.StandardInput.WriteLine(reader.ReadLine());
-        }
-      }
-
-      string actualOutput = p.StandardOutput.ReadToEnd();
-      int timeout = 60; // seconds
-
-      while (!p.HasExited && timeout > 0)
-      {
-        timeout--;
-        Thread.Sleep(1000); // 1 second sleep
-      }
-
-      if (!p.HasExited)
-      {
-        p.Kill();
-      }
-      else
-      {
-        p.WaitForExit();
-      }
-      p.Dispose();
+      string actualOutput = ExecuteProgram(homework);
+      string expectedOutput = GetExpectedOutput(homework);
 
       StringBuilder result = new StringBuilder();
-      string expectedOutput = GetExpectedOutput(homework);
 
       result.AppendLine("<h3>Actual</h3>");
       result.AppendLine("<p>" + ToHtmlEncoding(actualOutput) + "</p>");
@@ -166,15 +129,57 @@ namespace Jarvis
 
       result.AppendLine("<p>" + testDiff + "</p>");
 
-      // Don't leave binaries hanging around
-      File.Delete(homework.Path + homework.StudentId);
-
       return !string.IsNullOrEmpty(actualOutput) ? result.ToString() : "No output...";
     }
 
-    private void HangCheckingTimer_Elapsed(object sender, ElapsedEventArgs e)
+    private string ExecuteProgram(Assignment homework)
+    {      
+      executionProcess = new Process();
+
+      executionProcess.StartInfo.UseShellExecute = false;
+      executionProcess.StartInfo.RedirectStandardOutput = true;
+      executionProcess.StartInfo.RedirectStandardError = true;
+      executionProcess.StartInfo.RedirectStandardInput = true;
+
+      executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;      
+      executionProcess.Start();
+
+      executionTimer.Enabled = true;
+
+      if (File.Exists(homework.Path + "input.txt"))
+      {
+        StreamReader reader = new StreamReader(homework.Path + "input.txt");
+
+        while (!reader.EndOfStream)
+        {
+          executionProcess.StandardInput.WriteLine(reader.ReadLine());
+        }
+      }
+
+      string output = executionProcess.StandardOutput.ReadToEnd();
+
+      if (executionTimer.Enabled)
+      {
+        Trace.TraceWarning("Process was killed");
+      }
+
+      executionTimer.Enabled = false;
+
+      executionProcess.Close();
+      executionProcess.Dispose();
+
+      // Don't leave binaries hanging around
+      File.Delete(homework.Path + homework.StudentId);
+
+      return output;
+    }
+
+    private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
     {
-      throw new NotImplementedException();
+      // It's been long enough... kill the process
+      Trace.TraceWarning("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
+      executionProcess.Kill();
+      executionProcess.Close();
     }
 
     private string GetExpectedOutput(Assignment homework)

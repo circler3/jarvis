@@ -8,7 +8,6 @@ namespace Jarvis
   public class JarvisModules : NancyModule
   {
     private FileUploadHandler uploadHandler = new FileUploadHandler();
-    private Grader grader = new Grader();
 
     public JarvisModules()
     {
@@ -37,6 +36,7 @@ namespace Jarvis
       
       Post["/results"] = _ =>
       {
+        Grader grader = new Grader();
         GradingResult result = null;
 
         var request = this.Bind<FileUploadRequest>();

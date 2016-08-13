@@ -1,11 +1,12 @@
-﻿using System.Threading;
-using System.IO;
+﻿using System.IO;
 using System.Configuration;
 
 namespace Jarvis
 {
   using System;
   using Nancy.Hosting.Self;
+  using System.Diagnostics;
+  using System.Timers;
 
   public class Jarvis
   {
@@ -13,6 +14,13 @@ namespace Jarvis
 
     public static void Main(string[] args)
     {
+      Timer processReaper = new Timer(10000);
+      processReaper.AutoReset = true;
+      processReaper.Elapsed += ProcessReaper_Elapsed;
+      processReaper.Start();
+
+      Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
+      
       // Load config file
       ExeConfigurationFileMap configMap = new ExeConfigurationFileMap ();
       configMap.ExeConfigFilename = "jarvis.config";
@@ -40,7 +48,26 @@ namespace Jarvis
         Console.WriteLine("Jarvis is running on " + uri);
         Console.WriteLine("Press any [Enter] to close Jarvis.");
         Console.ReadLine();
-      }     
+      }
+
+      Trace.Flush();
+      processReaper.Stop();
+    }
+
+    private static void ProcessReaper_Elapsed(object sender, ElapsedEventArgs e)
+    {
+      Process[] processes = Process.GetProcesses();
+
+      foreach (Process p in processes)
+      {
+        TimeSpan runtime = DateTime.Now - p.StartTime;
+
+        if (!p.ProcessName.Contains("Jarvis") && runtime.TotalMinutes > 1)
+        {
+          Trace.TraceWarning("Killing process with name {0}", p.ProcessName);
+          p.Kill();
+        }
+      }
     }
 
     // Catches all unhandled exceptions and logs them to a file
