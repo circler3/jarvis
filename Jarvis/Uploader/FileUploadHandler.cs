@@ -17,14 +17,19 @@ namespace Jarvis
       
       if (homework.ValidHeader) 
       {
-        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
+        homework.AssignmentPath = Jarvis.Config.AppSettings.Settings["workingDir"].Value + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+        string sectionDir = homework.AssignmentPath + "section" + homework.Section;
 
         // Check that directories exist
-        if (Directory.Exists(baseDir + "/courses/" + homework.Course.ToLower()) && 
-            Directory.Exists(baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId))
+        if (Directory.Exists(sectionDir))
         {
           // Upload to correct directory
-          homework.Path = baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+          homework.Path = sectionDir + "/" + homework.StudentId + "/";
+
+          if (!Directory.Exists(homework.Path))
+          {
+            Directory.CreateDirectory(homework.Path);
+          }
           
           using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
           {
@@ -45,19 +50,36 @@ namespace Jarvis
     {
       Assignment homework = new Assignment ();
       List<string> header = new List<string>();
-      StreamReader reader = new StreamReader(file.Value);      
+      StreamReader reader = new StreamReader(file.Value);
 
-      for(int i = 0; i < 5; ++i)
+      for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
       {
-        header.Add (reader.ReadLine ());
+        header.Add(reader.ReadLine().ToLower());
+      }
+
+      foreach (String s in header)
+      {
+        if (s.Contains("a#:"))
+        {
+          homework.StudentId = s.Split(':')[1].Trim();
+        }
+        else if (s.Contains("course:"))
+        {
+          homework.Course = s.Split(':')[1].Trim();
+        }
+        else if (s.Contains("section:"))
+        {
+          homework.Section = s.Split(':')[1].Trim();
+        }
+        else if (s.Contains("hw#:"))
+        {
+          homework.HomeworkId = s.Split(':')[1].Trim();
+        }
       }
         
-      if (header[1].Contains("A#:") && header[2].Contains("Course:") && header[3].Contains("HW#:"))
+      if (homework.StudentId != String.Empty && homework.Course != String.Empty && homework.Section != String.Empty && homework.HomeworkId != String.Empty)
       {
-        homework.StudentId = header [1].Split (':') [1].Trim();
-        homework.Course = header [2].Split (':') [1].Trim();
-        homework.HomeworkId = header [3].Split (':') [1].Trim();
-        homework.ValidHeader = true;
+        homework.ValidHeader = true;        
       }
       else
       {

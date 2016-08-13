@@ -52,16 +52,16 @@ namespace Jarvis
     {
       string timestamp = DateTime.Now.ToString();
 
-      StreamWriter writer = new StreamWriter(homework.Path + "results.txt", true);
-      writer.WriteLine(timestamp + " " + homework.StudentId + " " + result.Grade);
+      StreamWriter writer = new StreamWriter (homework.AssignmentPath + "results.txt", true);
+      writer.WriteLine (timestamp + " " + homework.StudentId + " " + result.Grade); 
       writer.Flush();
-      writer.Close();
+      writer.Close();      
     }
 
-    private string StyleCheck(Assignment homework)
+    private string StyleCheck (Assignment homework)
     {
-      Process p = new Process();
-
+      Process p = new Process ();
+      
       p.StartInfo.UseShellExecute = false;
       p.StartInfo.RedirectStandardOutput = true;
       p.StartInfo.RedirectStandardError = true;
@@ -184,7 +184,7 @@ namespace Jarvis
 
     private string GetExpectedOutput(Assignment homework)
     {
-      StreamReader reader = new StreamReader(homework.Path + "output.txt");
+      StreamReader reader = new StreamReader (homework.AssignmentPath + "output.txt");
 
       return reader.ReadToEnd();
     }
@@ -196,8 +196,6 @@ namespace Jarvis
 
       return text;
     }
-
-
   }
 }
 
