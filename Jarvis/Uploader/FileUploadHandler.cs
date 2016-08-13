@@ -25,6 +25,11 @@ namespace Jarvis
         {
           // Upload to correct directory
           homework.Path = sectionDir + homework + "/" + homework.StudentId + "/";
+
+          if (!Directory.Exists(homework.Path))
+          {
+            Directory.CreateDirectory(homework.Path);
+          }
           
           using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
           {
