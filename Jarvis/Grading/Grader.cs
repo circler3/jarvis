@@ -148,7 +148,7 @@ namespace Jarvis
 
       if (File.Exists(homework.Path + "input.txt"))
       {
-        StreamReader reader = new StreamReader(homework.Path + "input.txt");
+        StreamReader reader = new StreamReader(homework.AssignmentPath + "input.txt");
 
         while (!reader.EndOfStream)
         {
