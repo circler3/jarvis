@@ -68,12 +68,12 @@ namespace Jarvis
 
       string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
       p.StartInfo.FileName = styleExe;
-      p.StartInfo.Arguments = homework.FullName;
+      p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.FullName;
       p.Start();
-
-      string result = p.StandardError.ReadToEnd();
-      result = result.Replace(homework.Path, "");
-      result = result.Replace(" ", "&nbsp;");
+      string result = p.StandardError.ReadToEnd ();
+      result = result.Replace (homework.Path, "");
+      result = result.Replace (" ", "&nbsp;");
+      
       result = result.Replace("\n", "<br />");
       p.WaitForExit();
 
