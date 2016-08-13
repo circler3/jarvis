@@ -19,14 +19,17 @@ namespace Jarvis
       GradingResult result = new GradingResult();
 
       // Style check
+      Console.WriteLine("Running style check on " + homework.StudentId + " " + homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
       // Compile
+      Console.WriteLine("Compiling " + homework.StudentId + " " + homework.HomeworkId);
       result.CompileMessage = Compile(homework);
 
       // Run tests
       if (result.CompileMessage == "Success!!")
       {
+        Console.WriteLine("Running " + homework.StudentId + " " + homework.HomeworkId);
         result.OutputMessage = RunProgram(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
