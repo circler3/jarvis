@@ -124,12 +124,14 @@ namespace Jarvis
 
       while (!p.HasExited && timeout > 0)
       {
+        Console.WriteLine("Waiting...");
         timeout--;
         Thread.Sleep(1000); // 1 second sleep
       }
 
       if (!p.HasExited)
       {
+        Console.WriteLine("User program not exited after 60 seconds... killing it now!");
         p.Kill();
       }
       else
