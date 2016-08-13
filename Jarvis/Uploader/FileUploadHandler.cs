@@ -64,15 +64,15 @@ namespace Jarvis
         }
         else if (s.Contains("section:"))
         {
-          homework.Course = s.Split(':')[1].Trim();
+          homework.Section = s.Split(':')[1].Trim();
         }
         else if (s.Contains("hw#:"))
         {
-          homework.Course = s.Split(':')[1].Trim();
+          homework.HomeworkId = s.Split(':')[1].Trim();
         }
       }
         
-      if (homework.StudentId != "" && homework.Course != "" && homework.Section != "" && homework.HomeworkId != "")
+      if (homework.StudentId != String.Empty && homework.Course != String.Empty && homework.Section != String.Empty && homework.HomeworkId != String.Empty)
       {
         homework.ValidHeader = true;        
       }
