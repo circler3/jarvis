@@ -11,6 +11,7 @@ namespace Jarvis
     public string HomeworkId { get; set; }
     public string Section { get; set; }
     public string Path { get; set; }
+    public string AssignmentPath { get; set; }
     public string Filename 
     { 
       get 

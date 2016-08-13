@@ -108,9 +108,9 @@ namespace Jarvis
       //p.StartInfo.Arguments = file;
       p.Start ();
 
-      if (File.Exists(homework.Path + "input.txt"))
+      if (File.Exists(homework.AssignmentPath + "input.txt"))
       {
-        StreamReader reader = new StreamReader (homework.Path + "input.txt");
+        StreamReader reader = new StreamReader (homework.AssignmentPath + "input.txt");
 
         while (!reader.EndOfStream)
         {          
@@ -153,7 +153,7 @@ namespace Jarvis
 
     private string GetExpectedOutput(Assignment homework)
     {
-      StreamReader reader = new StreamReader (homework.Path + "output.txt");
+      StreamReader reader = new StreamReader (homework.AssignmentPath + "output.txt");
 
       return reader.ReadToEnd ();
     }

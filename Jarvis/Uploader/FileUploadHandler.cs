@@ -17,8 +17,8 @@ namespace Jarvis
       
       if (homework.ValidHeader) 
       {
-        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
-        string sectionDir = baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/section" + homework.Section;
+        homework.AssignmentPath = Jarvis.Config.AppSettings.Settings["workingDir"].Value + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
+        string sectionDir = homework.AssignmentPath + "section" + homework.Section;
 
         // Check that directories exist
         if (Directory.Exists(sectionDir))
