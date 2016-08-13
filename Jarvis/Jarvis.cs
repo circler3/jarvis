@@ -6,6 +6,7 @@ namespace Jarvis
 {
   using System;
   using Nancy.Hosting.Self;
+  using System.Diagnostics;
 
   public class Jarvis
   {
@@ -13,6 +14,8 @@ namespace Jarvis
 
     public static void Main(string[] args)
     {
+      Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
+      
       // Load config file
       ExeConfigurationFileMap configMap = new ExeConfigurationFileMap ();
       configMap.ExeConfigFilename = "jarvis.config";

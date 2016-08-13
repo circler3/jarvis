@@ -46,6 +46,7 @@ namespace Jarvis
       Assignment homework = new Assignment ();
       List<string> header = new List<string>();
       StreamReader reader = new StreamReader(file.Value);      
+
       for(int i = 0; i < 5; ++i)
       {
         header.Add (reader.ReadLine ());

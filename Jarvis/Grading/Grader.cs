@@ -19,17 +19,17 @@ namespace Jarvis
       GradingResult result = new GradingResult();
 
       // Style check
-      Console.WriteLine("Running style check on " + homework.StudentId + " " + homework.HomeworkId);
+      Trace.TraceInformation("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
-      // Compile
-      Console.WriteLine("Compiling " + homework.StudentId + " " + homework.HomeworkId);
+      // Compile      
+      Trace.TraceInformation("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
       result.CompileMessage = Compile(homework);
 
       // Run tests
       if (result.CompileMessage == "Success!!")
       {
-        Console.WriteLine("Running " + homework.StudentId + " " + homework.HomeworkId);
+        Trace.TraceInformation("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
         result.OutputMessage = RunProgram(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
@@ -54,7 +54,6 @@ namespace Jarvis
       writer.Flush();
       writer.Close();
     }
-
 
     private string StyleCheck(Assignment homework)
     {
@@ -127,14 +126,14 @@ namespace Jarvis
 
       while (!p.HasExited && timeout > 0)
       {
-        Console.WriteLine("Waiting...");
+        Trace.TraceInformation("Waiting for {0} {1} to complete", homework.StudentId, homework.HomeworkId);
         timeout--;
         Thread.Sleep(1000); // 1 second sleep
       }
 
       if (!p.HasExited)
       {
-        Console.WriteLine("User program not exited after 60 seconds... killing it now!");
+        Trace.TraceInformation("{0} {1} program not exited after 60 seconds... killing it now!", homework.StudentId, homework.HomeworkId);
         p.Kill();
       }
       else
