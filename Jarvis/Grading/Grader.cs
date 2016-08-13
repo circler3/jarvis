@@ -3,15 +3,18 @@ using System.Diagnostics;
 using System.Text;
 using HtmlDiff;
 using System.IO;
-using System.Threading;
+using System.Timers;
 
 namespace Jarvis
 {
   public class Grader
   {
+    private Process executionProcess;
+    private Timer executionTimer = new Timer(30000);
+
     public Grader()
     {
-
+      executionTimer.Elapsed += ExecutionTimer_Elapsed;
     }
 
     public GradingResult Grade(Assignment homework)
@@ -30,7 +33,7 @@ namespace Jarvis
       if (result.CompileMessage == "Success!!")
       {
         Trace.TraceInformation("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
-        result.OutputMessage = RunProgram(homework);
+        result.OutputMessage = GetExecutionOutput(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
       }
@@ -98,52 +101,12 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string RunProgram(Assignment homework)
+    private string GetExecutionOutput(Assignment homework)
     {
-      Process p = new Process();
-
-      p.StartInfo.UseShellExecute = false;
-      p.StartInfo.RedirectStandardOutput = true;
-      p.StartInfo.RedirectStandardError = true;
-      p.StartInfo.RedirectStandardInput = true;
-
-      p.StartInfo.FileName = homework.Path + homework.StudentId;
-      //p.StartInfo.Arguments = file;
-      p.Start();
-
-      if (File.Exists(homework.Path + "input.txt"))
-      {
-        StreamReader reader = new StreamReader(homework.Path + "input.txt");
-
-        while (!reader.EndOfStream)
-        {
-          p.StandardInput.WriteLine(reader.ReadLine());
-        }
-      }
-
-      string actualOutput = p.StandardOutput.ReadToEnd();
-      int timeout = 60; // seconds
-
-      while (!p.HasExited && timeout > 0)
-      {
-        Trace.TraceInformation("Waiting for {0} {1} to complete", homework.StudentId, homework.HomeworkId);
-        timeout--;
-        Thread.Sleep(1000); // 1 second sleep
-      }
-
-      if (!p.HasExited)
-      {
-        Trace.TraceInformation("{0} {1} program not exited after 60 seconds... killing it now!", homework.StudentId, homework.HomeworkId);
-        p.Kill();
-      }
-      else
-      {
-        p.WaitForExit();
-      }
-      p.Dispose();
+      string actualOutput = ExecuteProgram(homework);
+      string expectedOutput = GetExpectedOutput(homework);
 
       StringBuilder result = new StringBuilder();
-      string expectedOutput = GetExpectedOutput(homework);
 
       result.AppendLine("<h3>Actual</h3>");
       result.AppendLine("<p>" + ToHtmlEncoding(actualOutput) + "</p>");
@@ -166,10 +129,51 @@ namespace Jarvis
 
       result.AppendLine("<p>" + testDiff + "</p>");
 
+      return !string.IsNullOrEmpty(actualOutput) ? result.ToString() : "No output...";
+    }
+
+    private string ExecuteProgram(Assignment homework)
+    {      
+      executionProcess = new Process();
+
+      executionProcess.StartInfo.UseShellExecute = false;
+      executionProcess.StartInfo.RedirectStandardOutput = true;
+      executionProcess.StartInfo.RedirectStandardError = true;
+      executionProcess.StartInfo.RedirectStandardInput = true;
+
+      executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;      
+      executionProcess.Start();
+
+      executionTimer.Enabled = true;
+
+      if (File.Exists(homework.Path + "input.txt"))
+      {
+        StreamReader reader = new StreamReader(homework.Path + "input.txt");
+
+        while (!reader.EndOfStream)
+        {
+          executionProcess.StandardInput.WriteLine(reader.ReadLine());
+        }
+      }
+
+      string output = executionProcess.StandardOutput.ReadToEnd();
+
+
+      executionTimer.Enabled = false;
+
+      executionProcess.Close();
+      executionProcess.Dispose();
+
       // Don't leave binaries hanging around
       File.Delete(homework.Path + homework.StudentId);
 
-      return !string.IsNullOrEmpty(actualOutput) ? result.ToString() : "No output...";
+      return output;
+    }
+
+    private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
+    {
+      // It's been long enough... kill the process
+      executionProcess.Kill();
     }
 
     private string GetExpectedOutput(Assignment homework)
