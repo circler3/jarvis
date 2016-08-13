@@ -18,13 +18,13 @@ namespace Jarvis
       if (homework.ValidHeader) 
       {
         string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
-        string sectionDir = baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/section" + homework.Section;
+        string sectionDir = baseDir + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/section" + homework.Section + "/";
 
         // Check that directories exist
         if (Directory.Exists(sectionDir))
         {
           // Upload to correct directory
-          homework.Path = sectionDir + homework + "/" + homework.StudentId + "/";
+          homework.Path = sectionDir + "/" + homework.StudentId + "/";
 
           if (!Directory.Exists(homework.Path))
           {
