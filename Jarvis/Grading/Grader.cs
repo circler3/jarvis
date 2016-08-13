@@ -158,6 +158,10 @@ namespace Jarvis
 
       string output = executionProcess.StandardOutput.ReadToEnd();
 
+      if (executionTimer.Enabled)
+      {
+        Trace.TraceWarning("Process was killed");
+      }
 
       executionTimer.Enabled = false;
 
@@ -175,6 +179,7 @@ namespace Jarvis
       // It's been long enough... kill the process
       Trace.TraceWarning("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
       executionProcess.Kill();
+      executionProcess.Close();
     }
 
     private string GetExpectedOutput(Assignment homework)
