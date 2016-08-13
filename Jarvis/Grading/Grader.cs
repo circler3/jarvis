@@ -21,12 +21,12 @@ namespace Jarvis
       result.StyleMessage = StyleCheck(homework);
 
       // Compile
-      result.CompileMessage = Compile (homework);     
+      result.CompileMessage = Compile(homework);     
 
       // Run tests
       if (result.CompileMessage == "Success!!") 
       {
-        result.OutputMessage = RunProgram (homework);
+        result.OutputMessage = RunProgram(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
       }
@@ -165,8 +165,6 @@ namespace Jarvis
 
       return text;
     }
-
-
   }
 }
 
