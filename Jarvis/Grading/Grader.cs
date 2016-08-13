@@ -23,7 +23,7 @@ namespace Jarvis
       result.StyleMessage = StyleCheck(homework);
 
       // Compile      
-      Trace.TraceInformation("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
+      Trace.TraceInformation("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);      
       result.CompileMessage = Compile(homework);
 
       // Run tests

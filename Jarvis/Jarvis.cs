@@ -43,7 +43,9 @@ namespace Jarvis
         Console.WriteLine("Jarvis is running on " + uri);
         Console.WriteLine("Press any [Enter] to close Jarvis.");
         Console.ReadLine();
-      }     
+      }
+
+      Trace.Flush();
     }
 
     // Catches all unhandled exceptions and logs them to a file
