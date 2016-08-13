@@ -16,6 +16,11 @@ namespace Jarvis
         return View["index"];
       };
 
+      Get["/help"] = parameters =>
+      {
+        return View["help"];
+      };
+
       Get["/results"] = x => // TODO Make this return all of a students past results
       {
         //var model = new Index() { Name = "Boss Hawg" };

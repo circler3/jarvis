@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Jarvis</title>
+
+	<style type="text/css">
+		body 
+      {			
+         background-color: black; 
+         color: white;
+		}
+	</style>
+
+</head>
+<body>
+	<img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />	   
+  <div style="position: absolute; top:0; right:0;">
+    <a href="/help">
+      <img src="@Path['~/Content/help.png']" alt="Help" />
+    </a>
+  </div>
+  <p>
+    <h2>Uploading your code</h2>
+    In order to grade your assignments, Jarvis requires the following header at the top of your cpp file.<br />	
+/************************<br />	
+ * A#: A09999999<br />	
+ * Course: CS1400<br />	
+ * HW#: 1<br />	
+ ***********************/<br />	
+    <h2>Understanding the results</h2>
+    Three parts<br />	
+    Style (link to Google style guide)<br />	
+    Compilation (link to understanding g++ errors guide)<br />	
+    Output (link to understanding diff syntax guide)<br />	
+    
+  </p>
+</body>
+</html>

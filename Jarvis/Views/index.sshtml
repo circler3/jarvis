@@ -15,9 +15,14 @@
 </head>
 <body>
 	<img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />	   
-    <form method='post' action='results' enctype='multipart/form-data'>      
-       File: <input type='file' name='file' id='file' />
-       <input type='submit' value='Go!' />   
-    </form>   
+  <div style="position: absolute; top:0; right:0;">
+    <a href="/help">
+      <img src="@Path['~/Content/help.png']" alt="Help" />
+    </a>
+  </div>
+  <form method='post' action='results' enctype='multipart/form-data'>      
+      File: <input type='file' name='file' id='file' />
+      <input type='submit' value='Go!' />
+  </form>
 </body>
 </html>
