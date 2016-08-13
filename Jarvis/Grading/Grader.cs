@@ -10,7 +10,7 @@ namespace Jarvis
   public class Grader
   {
     private Process executionProcess;
-    private Timer executionTimer = new Timer(30000);
+    private Timer executionTimer = new Timer(10000);
 
     public Grader()
     {
@@ -173,6 +173,7 @@ namespace Jarvis
     private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
     {
       // It's been long enough... kill the process
+      Trace.TraceWarning("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
       executionProcess.Kill();
     }
 
