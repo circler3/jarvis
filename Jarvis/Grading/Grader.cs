@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Text;
 using HtmlDiff;
 using System.IO;
-using System.Timers;
 using System.Threading;
 
 namespace Jarvis
@@ -99,9 +98,6 @@ namespace Jarvis
 
     private string RunProgram(Assignment homework)
     {
-      Timer hangCheckingTimer = new Timer();
-      hangCheckingTimer.Elapsed += HangCheckingTimer_Elapsed;
-
       Process p = new Process();
 
       p.StartInfo.UseShellExecute = false;
@@ -170,11 +166,6 @@ namespace Jarvis
       File.Delete(homework.Path + homework.StudentId);
 
       return !string.IsNullOrEmpty(actualOutput) ? result.ToString() : "No output...";
-    }
-
-    private void HangCheckingTimer_Elapsed(object sender, ElapsedEventArgs e)
-    {
-      throw new NotImplementedException();
     }
 
     private string GetExpectedOutput(Assignment homework)
