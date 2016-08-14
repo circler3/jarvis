@@ -5,6 +5,7 @@ using Nancy.Hosting.Self;
 using System.Diagnostics;
 using System.Timers;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace Jarvis
 {
@@ -12,38 +13,17 @@ namespace Jarvis
   {
     public static Configuration Config = null;
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
+    private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
 
     public static void Main()
     {
-      Console.CancelKeyPress += Console_CancelKeyPress;
+      Init();
 
-      //System.Timers.Timer processReaper = new System.Timers.Timer(10000);
-      //processReaper.AutoReset = true;
-      //processReaper.Elapsed += ProcessReaper_Elapsed;
-      //processReaper.Start();
-
-      Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
-      
-      // Load config file
-      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-      configMap.ExeConfigFilename = "/home/jarvis/jarvis/Jarvis/bin/Debug/jarvis.config";
-      Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-
-      // Register Unhandled exceptions
-      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
-      
-      // Setup course directory if needed
-      string baseDir = Config.AppSettings.Settings["workingDir"].Value;
-      if (!Directory.Exists(baseDir + "/courses"))
-      {
-        Directory.CreateDirectory(baseDir + "/courses");
-      }
-      
       // Start Nancy
       var uri = new Uri("http://localhost:8080");
       var config = new HostConfiguration();
       config.UrlReservations.CreateAutomatically = true;
-      Console.WriteLine("1");
+      
       using (var host = new NancyHost(config, uri))
       {
         host.Start();
@@ -53,8 +33,44 @@ namespace Jarvis
         autoEvent.WaitOne();
       }
 
+      Cleanup();
+    }
+
+    private static void Init()
+    {
+      // Register Unhandled exceptions
+      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
+
+      // Catch Ctrl-C
+      Console.CancelKeyPress += Console_CancelKeyPress;
+
+      // Clean up student processes
+      processReaper.AutoReset = true;
+      processReaper.Elapsed += ProcessReaper_Elapsed;
+      processReaper.Start();
+
+      // Setup logger
+      Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
+
+      // Load config file
+      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+      configMap.ExeConfigFilename = "jarvis.config";
+      Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+      
+      // Setup course directory if needed
+      string baseDir = Config.AppSettings.Settings["workingDir"].Value;
+      if (!Directory.Exists(baseDir + "/courses"))
+      {
+        Directory.CreateDirectory(baseDir + "/courses");
+      }
+
+    }
+
+    private static void Cleanup()
+    {
       Trace.Flush();
-      //processReaper.Stop();
+      processReaper.Stop();
+
     }
 
     private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
@@ -64,17 +80,20 @@ namespace Jarvis
 
     private static void ProcessReaper_Elapsed(object sender, ElapsedEventArgs e)
     {
+      Regex regex = new Regex(@"^A\d{8}");
       Process[] processes = Process.GetProcesses();
 
       foreach (Process p in processes)
       {
-        TimeSpan runtime = DateTime.Now - p.StartTime;
-
-        // Right now this is trying to kill too many processes, needs to be refined
-        if (!p.ProcessName.Contains("Jarvis") && runtime.TotalMinutes > 1)
+        if (regex.IsMatch(p.ProcessName))
         {
-          Trace.TraceWarning("Killing process with name {0}", p.ProcessName);
-          p.Kill();
+          // Nexted if statements instead of compound conditional due to access priveleges
+          TimeSpan runtime = DateTime.Now - p.StartTime;
+          if (runtime.TotalMinutes > 1)
+          {
+            Trace.TraceWarning("Killing process with name {0}", p.ProcessName);
+            p.Kill();
+          }
         }
       }
     }
