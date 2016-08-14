@@ -16,6 +16,8 @@ namespace Jarvis
 
     public static void Main(string[] args)
     {
+      Console.CancelKeyPress += Console_CancelKeyPress;
+
       System.Timers.Timer processReaper = new System.Timers.Timer(10000);
       processReaper.AutoReset = true;
       processReaper.Elapsed += ProcessReaper_Elapsed;
@@ -54,6 +56,11 @@ namespace Jarvis
 
       Trace.Flush();
       processReaper.Stop();
+    }
+
+    private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+    {
+      autoEvent.Set(); // Unblocks the main thread
     }
 
     private static void ProcessReaper_Elapsed(object sender, ElapsedEventArgs e)
