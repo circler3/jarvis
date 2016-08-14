@@ -1,50 +1,49 @@
 ﻿using System.IO;
 using System.Configuration;
+using System;
+using Nancy.Hosting.Self;
+using System.Diagnostics;
+using System.Timers;
+using System.Threading;
 
 namespace Jarvis
 {
-  using System;
-  using Nancy.Hosting.Self;
-  using System.Diagnostics;
-  using System.Timers;
-  using System.Threading;
-
   public class Jarvis
   {
     public static Configuration Config = null;
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
 
-    public static void Main(string[] args)
+    public static void Main()
     {
       Console.CancelKeyPress += Console_CancelKeyPress;
 
-      System.Timers.Timer processReaper = new System.Timers.Timer(10000);
-      processReaper.AutoReset = true;
-      processReaper.Elapsed += ProcessReaper_Elapsed;
-      processReaper.Start();
+      //System.Timers.Timer processReaper = new System.Timers.Timer(10000);
+      //processReaper.AutoReset = true;
+      //processReaper.Elapsed += ProcessReaper_Elapsed;
+      //processReaper.Start();
 
       Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
       
       // Load config file
-      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap ();
-      configMap.ExeConfigFilename = "jarvis.config";
-      Config = ConfigurationManager.OpenMappedExeConfiguration (configMap, ConfigurationUserLevel.None);
+      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+      configMap.ExeConfigFilename = "/home/jarvis/jarvis/Jarvis/bin/Debug/jarvis.config";
+      Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
 
       // Register Unhandled exceptions
-      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler (ExceptionHandler);
-
+      AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
+      
       // Setup course directory if needed
       string baseDir = Config.AppSettings.Settings["workingDir"].Value;
       if (!Directory.Exists(baseDir + "/courses"))
       {
-        Directory.CreateDirectory (baseDir + "/courses");
+        Directory.CreateDirectory(baseDir + "/courses");
       }
-
+      
       // Start Nancy
       var uri = new Uri("http://localhost:8080");
       var config = new HostConfiguration();
       config.UrlReservations.CreateAutomatically = true;
-
+      Console.WriteLine("1");
       using (var host = new NancyHost(config, uri))
       {
         host.Start();
@@ -55,7 +54,7 @@ namespace Jarvis
       }
 
       Trace.Flush();
-      processReaper.Stop();
+      //processReaper.Stop();
     }
 
     private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
@@ -71,6 +70,7 @@ namespace Jarvis
       {
         TimeSpan runtime = DateTime.Now - p.StartTime;
 
+        // Right now this is trying to kill too many processes, needs to be refined
         if (!p.ProcessName.Contains("Jarvis") && runtime.TotalMinutes > 1)
         {
           Trace.TraceWarning("Killing process with name {0}", p.ProcessName);
@@ -83,14 +83,14 @@ namespace Jarvis
     public static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
       Exception e = (Exception)args.ExceptionObject;
-      StreamWriter writer = new StreamWriter ("jarvisExceptionLog.txt", true);
-      writer.WriteLine ("-------------------------------");
-      writer.WriteLine (DateTime.Now.ToString ());
-      writer.WriteLine (e.TargetSite);
-      writer.WriteLine (e.Message);
-      writer.WriteLine (e.StackTrace);
-      writer.Flush ();
-      writer.Close ();
+      StreamWriter writer = new StreamWriter("jarvisExceptionLog.txt", true);
+      writer.WriteLine("-------------------------------");
+      writer.WriteLine(DateTime.Now.ToString());
+      writer.WriteLine(e.TargetSite);
+      writer.WriteLine(e.Message);
+      writer.WriteLine(e.StackTrace);
+      writer.Flush();
+      writer.Close();
     }
   }
 }
