@@ -2,20 +2,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO.Compression;
 
 namespace Jarvis
 {
   public class FileUploadHandler
-  {    
-    public Assignment HandleUpload(HttpFile file)
+  {
+    // Note: Students upload single cpp files  
+    public Assignment HandleStudentUpload(HttpFile file)
     {
       // Check file header
-      Assignment homework = ParseHeader(file);        
-      
-      if (homework.ValidHeader) 
+      StreamReader reader = new StreamReader(file.Value);
+
+      List<string> header = new List<string>();
+      for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+      {
+        header.Add(reader.ReadLine().ToLower());
+      }
+
+      Assignment homework = ParseHeader(header);
+
+      if (homework.ValidHeader)
       {
         homework.AssignmentPath = Jarvis.Config.AppSettings.Settings["workingDir"].Value + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
         string sectionDir = homework.AssignmentPath + "section" + homework.Section;
@@ -30,12 +37,12 @@ namespace Jarvis
           {
             Directory.CreateDirectory(homework.Path);
           }
-          
-          using (FileStream destinationStream = File.Create (homework.Path + "/" + homework.Filename)) 
+
+          using (FileStream destinationStream = File.Create(homework.Path + "/" + homework.Filename))
           {
             file.Value.Position = 0;
-            file.Value.CopyTo (destinationStream);
-          }          
+            file.Value.CopyTo(destinationStream);
+          }
         }
         else
         {
@@ -46,16 +53,65 @@ namespace Jarvis
       return homework;
     }
 
-    private Assignment ParseHeader (HttpFile file)
+    // Note: Graders upload zip files containing many cpp files
+    public List<Assignment> HandleGraderUpload(string gradingDir, HttpFile file)
     {
-      Assignment homework = new Assignment ();
-      List<string> header = new List<string>();
-      StreamReader reader = new StreamReader(file.Value);
+      List<Assignment> assignments = new List<Assignment>();
 
-      for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+      // create grading directory
+      Directory.CreateDirectory(gradingDir);
+
+      // create section directories
+      int sectionCount = int.Parse(Jarvis.Config.AppSettings.Settings["sectionCount"].Value);
+
+      for (int i = 1; i <= sectionCount; ++i)
       {
-        header.Add(reader.ReadLine().ToLower());
+        Directory.CreateDirectory(gradingDir + "section" + i.ToString());
       }
+
+      // Copy zip file to grading directory
+      using (FileStream destinationStream = File.Create(gradingDir + "files.zip"))
+      {
+        file.Value.Position = 0;
+        file.Value.CopyTo(destinationStream);
+      }
+
+      // unzip contents
+      ZipFile.ExtractToDirectory(gradingDir + "files.zip", gradingDir + "files");
+
+      string[] files = Directory.GetFiles(gradingDir + "files");
+      // for each file
+      foreach (string cppFile in files)
+      {
+        StreamReader reader = new StreamReader(File.OpenRead(cppFile));
+        List<string> header = new List<string>();
+        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+        {
+          header.Add(reader.ReadLine().ToLower());
+        }
+
+        // check header and make assigment object
+        Assignment assignment = ParseHeader(header);
+        if (assignment.ValidHeader)
+        {
+          assignment.Path = string.Format("{0}/section{1}/{2}_{3}.cpp", gradingDir, assignment.Section, assignment.StudentId, assignment.HomeworkId);
+          // move to section and rename each file
+          File.Move(cppFile, assignment.Path);
+        }
+        else
+        {
+          assignment.Path = cppFile;
+        }
+
+        assignments.Add(assignment);
+      }
+      
+      return assignments;
+    }
+
+    private Assignment ParseHeader(List<string> header)
+    {
+      Assignment homework = new Assignment();
 
       foreach (String s in header)
       {
@@ -76,10 +132,10 @@ namespace Jarvis
           homework.HomeworkId = s.Split(':')[1].Trim();
         }
       }
-        
+
       if (homework.StudentId != String.Empty && homework.Course != String.Empty && homework.Section != String.Empty && homework.HomeworkId != String.Empty)
       {
-        homework.ValidHeader = true;        
+        homework.ValidHeader = true;
       }
       else
       {

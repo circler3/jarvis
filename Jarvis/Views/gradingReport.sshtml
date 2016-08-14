@@ -14,15 +14,18 @@
 
 </head>
 <body>
-	<img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />	   
+	<img src="@Path['~/Content/gradingLogo.png']" alt="Jarvis logo" /><br />	   
   <div style="position: absolute; top:0; right:0;">
     <a href="/help">
-      <img src="@Path['~/Content/help.png']" alt="Help" />
+      <img src="@Path['~/Content/gradingHelp.png']" alt="Help" />
     </a>
   </div>
-  <form method='post' action='practiceRun' enctype='multipart/form-data'>      
+  <form method='post' action='runForRecord' enctype='multipart/form-data'>      
       File: <input type='file' name='file' id='file' />
       <input type='submit' value='Go!' />
   </form>
+  <p>
+    @Model
+  </p>
 </body>
 </html>

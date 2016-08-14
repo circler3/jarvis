@@ -46,7 +46,7 @@
       <img src="@Path['~/Content/help.png']" alt="Help" />
     </a>
    </div>
-   <form method='post' action='results' enctype='multipart/form-data'>      
+   <form method='post' action='practiceRun' enctype='multipart/form-data'>      
       File: <input type='file' name='file' id='file' />
       <input type='submit' value='Go!' />   
    </form> 

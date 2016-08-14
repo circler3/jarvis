@@ -29,7 +29,7 @@ namespace Jarvis
         host.Start();
 
         Console.WriteLine("Jarvis is running on " + uri);
-        Console.WriteLine("Press any [Enter] to close Jarvis.");
+        Console.WriteLine("Press any Ctrl-C to close Jarvis.");
         autoEvent.WaitOne();
       }
 
