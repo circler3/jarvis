@@ -7,14 +7,16 @@ namespace Jarvis
   using Nancy.Hosting.Self;
   using System.Diagnostics;
   using System.Timers;
+  using System.Threading;
 
   public class Jarvis
   {
     public static Configuration Config = null;
+    private static AutoResetEvent autoEvent = new AutoResetEvent(false);
 
     public static void Main(string[] args)
     {
-      Timer processReaper = new Timer(10000);
+      System.Timers.Timer processReaper = new System.Timers.Timer(10000);
       processReaper.AutoReset = true;
       processReaper.Elapsed += ProcessReaper_Elapsed;
       processReaper.Start();
@@ -47,7 +49,7 @@ namespace Jarvis
 
         Console.WriteLine("Jarvis is running on " + uri);
         Console.WriteLine("Press any [Enter] to close Jarvis.");
-        Console.ReadLine();
+        autoEvent.WaitOne();
       }
 
       Trace.Flush();
