@@ -11,6 +11,7 @@ namespace Jarvis
     // Note: Students upload single cpp files  
     public Assignment HandleStudentUpload(HttpFile file)
     {
+      Logger.Trace ("Handling student upload");
       // Check file header
       StreamReader reader = new StreamReader(file.Value);
 
@@ -26,6 +27,8 @@ namespace Jarvis
       {
         homework.AssignmentPath = Jarvis.Config.AppSettings.Settings["workingDir"].Value + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
         string sectionDir = homework.AssignmentPath + "section" + homework.Section;
+
+        Logger.Trace ("Checking if {0} exists", sectionDir);
 
         // Check that directories exist
         if (Directory.Exists(sectionDir))
@@ -46,6 +49,7 @@ namespace Jarvis
         }
         else
         {
+          Logger.Fatal ("Can't find directory {0}", sectionDir);
           homework.ValidHeader = false;
         }
       }
@@ -118,27 +122,33 @@ namespace Jarvis
         if (s.Contains("a#:"))
         {
           homework.StudentId = s.Split(':')[1].Trim();
+          Logger.Trace ("Parse header student id: {0}", homework.StudentId);
         }
         else if (s.Contains("course:"))
         {
           homework.Course = s.Split(':')[1].Trim();
+          Logger.Trace ("Parse header course: {0}", homework.Course);
         }
         else if (s.Contains("section:"))
         {
           homework.Section = s.Split(':')[1].Trim();
+          Logger.Trace ("Parse header section: {0}", homework.Section);
         }
         else if (s.Contains("hw#:"))
         {
           homework.HomeworkId = s.Split(':')[1].Trim();
+          Logger.Trace ("Parse header homework id: {0}", homework.HomeworkId);
         }
       }
 
       if (homework.StudentId != String.Empty && homework.Course != String.Empty && homework.Section != String.Empty && homework.HomeworkId != String.Empty)
       {
+        Logger.Trace ("Parse found valid header");
         homework.ValidHeader = true;
       }
       else
       {
+        Logger.Trace ("Parse found invalid header");
         // Invalid header, reject assignment
         homework.ValidHeader = false;
       }

@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.Timers;
 using System.Threading;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Xml;
 
 namespace Jarvis
 {
@@ -16,8 +18,10 @@ namespace Jarvis
     private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
 
     public static void Main()
-    {
+    {      
       Init();
+
+      Logger.Info("~Jarvis started~");
 
       // Start Nancy
       var uri = new Uri("http://localhost:8080");
@@ -38,6 +42,15 @@ namespace Jarvis
 
     private static void Init()
     {
+      // Load config file
+      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
+      configMap.ExeConfigFilename = "jarvis.config";
+      Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+
+      // Turn on logger
+      int logLevel = int.Parse(Jarvis.Config.AppSettings.Settings["logLevel"].Value);
+      Logger.EnableLevel(logLevel);
+
       // Register Unhandled exceptions
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
 
@@ -48,33 +61,24 @@ namespace Jarvis
       processReaper.AutoReset = true;
       processReaper.Elapsed += ProcessReaper_Elapsed;
       processReaper.Start();
-
-      // Setup logger
-      Trace.Listeners.Add(new TextWriterTraceListener("jarvis.log"));
-
-      // Load config file
-      ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-      configMap.ExeConfigFilename = "jarvis.config";
-      Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-      
+        
       // Setup course directory if needed
       string baseDir = Config.AppSettings.Settings["workingDir"].Value;
       if (!Directory.Exists(baseDir + "/courses"))
       {
         Directory.CreateDirectory(baseDir + "/courses");
-      }
-
+        CreateCourseDirectory();
+      }       
     }
 
     private static void Cleanup()
     {
-      Trace.Flush();
+      Logger.Info("~Jarvis stopped~");
       processReaper.Stop();
-
     }
 
     private static void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-    {
+    {      
       autoEvent.Set(); // Unblocks the main thread
     }
 
@@ -91,8 +95,8 @@ namespace Jarvis
           TimeSpan runtime = DateTime.Now - p.StartTime;
           if (runtime.TotalMinutes > 1)
           {
-            Trace.TraceWarning("Killing process with name {0}", p.ProcessName);
-            p.Kill();
+            Logger.Warn("Killing process with name {0}", p.ProcessName);
+            //p.Kill();
           }
         }
       }
@@ -102,14 +106,59 @@ namespace Jarvis
     public static void ExceptionHandler(object sender, UnhandledExceptionEventArgs args)
     {
       Exception e = (Exception)args.ExceptionObject;
-      StreamWriter writer = new StreamWriter("jarvisExceptionLog.txt", true);
-      writer.WriteLine("-------------------------------");
-      writer.WriteLine(DateTime.Now.ToString());
-      writer.WriteLine(e.TargetSite);
-      writer.WriteLine(e.Message);
-      writer.WriteLine(e.StackTrace);
-      writer.Flush();
-      writer.Close();
+           
+      StringBuilder sb = new StringBuilder();
+      sb.AppendLine("");
+      sb.AppendLine("-------------------------------");
+      sb.AppendLine(e.TargetSite.ToString());
+      sb.AppendLine(e.Message);
+      sb.AppendLine(e.StackTrace);
+      sb.AppendLine("-------------------------------");
+      sb.AppendLine("");
+
+      Logger.Fatal(sb.ToString());
+    }
+
+    private static void CreateCourseDirectory()
+    {
+      string baseDir = Config.AppSettings.Settings["workingDir"].Value + "/courses/";
+      string coursesFile = Config.AppSettings.Settings["courses"].Value;
+      string courseName = "";
+      int assignmentCount = 0;
+
+      using (XmlReader reader = XmlReader.Create(File.OpenRead(coursesFile)))
+      {
+        while (reader.Read())
+        {
+          switch (reader.NodeType)
+          {
+            case XmlNodeType.Element:
+              if (reader.Name.ToLower() == "course")
+              {
+                courseName = reader.GetAttribute("name");
+                assignmentCount = int.Parse(reader.GetAttribute("assignmentCount"));
+
+                Directory.CreateDirectory(baseDir + courseName);
+                for(int i = 1; i <= assignmentCount; ++i)
+                {
+                  Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString());
+                }
+              }
+              else if (reader.Name.ToLower() == "section")
+              {              
+                string id = reader.GetAttribute("id");
+                string leader = reader.GetAttribute("leader");
+
+                for(int i = 1; i <= assignmentCount; ++i)
+                {
+                  Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString() + "/section" + id);
+                  File.WriteAllText(baseDir + courseName + "/hw" + i.ToString() + "/section" + id + "/leader.txt", leader);
+                }
+              }
+              break;
+          }
+        }
+      }
     }
   }
 }

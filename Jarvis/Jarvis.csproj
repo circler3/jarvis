@@ -63,6 +63,7 @@
     <Compile Include="Grading\GradingResult.cs" />
     <Compile Include="Grading\CheatDetection.cs" />
     <Compile Include="Assignment.cs" />
+    <Compile Include="Logger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

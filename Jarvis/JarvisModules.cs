@@ -18,48 +18,36 @@ namespace Jarvis
     {
       Get["/"] = _ =>
       {
+        Logger.Trace("Handling get for /");
+
         return View["index"];
       };
 
       Get["/help"] = _ =>
       {
+        Logger.Trace("Handling get for /help");
         return View["help"];
       };
 
-      Get["/results"] = _ => // TODO Make this return all of a students past results
-      {
-        //var model = new Index() { Name = "Boss Hawg" };
-
-        //var file = Request.Files.GetEnumerator().Current;
-        //string fileDetails = "None";
-
-        //if (file != null)
-        //{
-        //          fileDetails = string.Format("{0} ({1}) {2}bytes", file.Name, file.ContentType, file.Value.Length);
-        //}
-
-        //model.Posted = fileDetails;
-
-        return View["upload"];
-      };
-
-
       Post["/practiceRun"] = _ =>
       {
+        Logger.Trace("Handling post for /practiceRun");
         Grader grader = new Grader();
         GradingResult result = null;
 
         var request = this.Bind<FileUploadRequest>();
         var assignment = uploadHandler.HandleStudentUpload(request.File);
-
+        Logger.Info("Received assignment from {0} for {1} HW#{2} with {3} header", assignment.StudentId, assignment.Course, assignment.HomeworkId, assignment.ValidHeader ? "true" : "false");
         if (assignment.ValidHeader)
         {
+          Logger.Debug("Assignment header was valid");
           // Run grader
           result = grader.Grade(assignment);
           result.ValidHeader = true;
         }
         else
         {
+          Logger.Debug("Assignment header was not valid");
           result = new GradingResult();
           result.ValidHeader = false;
         }
@@ -77,11 +65,13 @@ namespace Jarvis
 
       Get["/grade"] = _ =>
       {
+        Logger.Trace("Handling get for /grade");
         return View["grade"];
       };
 
       Post["/runForRecord"] = _ =>
       {
+        Logger.Trace("Handling post for /runForRecord");
         SmtpClient mailClient = new SmtpClient("localhost", 25);
         string currentHomework = string.Empty;
         string currentCourse = string.Empty;

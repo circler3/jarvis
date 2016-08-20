@@ -22,17 +22,17 @@ namespace Jarvis
       GradingResult result = new GradingResult();
 
       // Style check
-      Trace.TraceInformation("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
+      Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
       // Compile      
-      Trace.TraceInformation("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);      
+      Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);      
       result.CompileMessage = Compile(homework);
 
       // Run tests
       if (result.CompileMessage == "Success!!")
       {
-        Trace.TraceInformation("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
+        Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
         result.OutputMessage = GetExecutionOutput(homework);
 
         result.CorrectOutput = result.OutputMessage.Contains("No difference");
@@ -160,7 +160,7 @@ namespace Jarvis
 
       if (executionTimer.Enabled)
       {
-        Trace.TraceWarning("Process was killed");
+        Logger.Warn("Process was killed");
       }
 
       executionTimer.Enabled = false;
@@ -177,7 +177,7 @@ namespace Jarvis
     private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
     {
       // It's been long enough... kill the process
-      Trace.TraceWarning("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
+      Logger.Warn("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
       executionProcess.Kill();
       executionProcess.Close();
     }
