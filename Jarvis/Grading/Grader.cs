@@ -69,7 +69,11 @@ namespace Jarvis
       string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
       p.StartInfo.FileName = styleExe;
       p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.Path;
+
+      Logger.Trace("Style checking with {0} and arguments {1}", styleExe, p.StartInfo.Arguments);
+
       p.Start();
+
       string result = p.StandardError.ReadToEnd ();
       result = result.Replace (homework.Path, "");
       result = Jarvis.ToHtmlEncoding(result);
