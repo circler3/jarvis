@@ -143,6 +143,11 @@ namespace Jarvis
           string zipFile = string.Format("{0}/../section{1}.zip", section, sectionNumber);
           
           // zip contents
+          if (File.Exists(zipFile))
+          {
+            File.Delete(zipFile);
+          }
+
           ZipFile.CreateFromDirectory(section, zipFile);
 
           string leader = File.ReadAllText(section + "/leader.txt");          
