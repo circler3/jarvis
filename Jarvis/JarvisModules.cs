@@ -84,7 +84,15 @@ namespace Jarvis
         string currentHomework = assignments[0].HomeworkId;
         string currentCourse = assignments[0].Course;
         string hwPath = string.Format("{0}/courses/{1}/hw{2}/", baseDir, currentCourse, currentHomework);
-
+        
+        string[] sections = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
+        foreach (string section in sections)
+        {
+          if (File.Exists(section + "/grades.txt"))
+          {
+            File.Delete(section + "/grades.txt");
+          }
+        }
 
         Logger.Info("Grading {0} assignments for course: {1} - HW#: {2}", assignments.Count, currentCourse, currentHomework);
 
