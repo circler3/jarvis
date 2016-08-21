@@ -20,6 +20,7 @@ namespace Jarvis
     public GradingResult Grade(Assignment homework)
     {
       GradingResult result = new GradingResult();
+      result.ValidHeader = homework.ValidHeader;
 
       // Style check
       Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
@@ -52,7 +53,7 @@ namespace Jarvis
     {
       string timestamp = DateTime.Now.ToString();
 
-      StreamWriter writer = new StreamWriter (homework.AssignmentPath + "results.txt", true);
+      StreamWriter writer = new StreamWriter (homework.Path + "results.txt", true);
       writer.WriteLine (timestamp + " " + homework.StudentId + " " + result.Grade); 
       writer.Flush();
       writer.Close();      
@@ -68,7 +69,7 @@ namespace Jarvis
 
       string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
       p.StartInfo.FileName = styleExe;
-      p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.Path;
+      p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.FullPath;
 
       Logger.Trace("Style checking with {0} and arguments {1}", styleExe, p.StartInfo.Arguments);
 
@@ -91,7 +92,7 @@ namespace Jarvis
       p.StartInfo.RedirectStandardError = true;
 
       p.StartInfo.FileName = "g++";
-      p.StartInfo.Arguments = homework.FullName + " -o" + homework.Path + homework.StudentId;
+      p.StartInfo.Arguments = homework.FullPath + " -o" + homework.Path + homework.StudentId;
       p.Start();
 
       string result = p.StandardError.ReadToEnd();
@@ -148,9 +149,9 @@ namespace Jarvis
 
       executionTimer.Enabled = true;
 
-      if (File.Exists(homework.Path + "input.txt"))
+      if (File.Exists(homework.Path + "../../input.txt"))
       {
-        StreamReader reader = new StreamReader(homework.AssignmentPath + "input.txt");
+        StreamReader reader = new StreamReader(homework.Path + "../../input.txt");
 
         while (!reader.EndOfStream)
         {
@@ -186,7 +187,7 @@ namespace Jarvis
 
     private string GetExpectedOutput(Assignment homework)
     {
-      StreamReader reader = new StreamReader (homework.AssignmentPath + "output.txt");
+      StreamReader reader = new StreamReader (homework.Path + "/../../output.txt");
 
       return reader.ReadToEnd();
     }

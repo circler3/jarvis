@@ -25,32 +25,17 @@ namespace Jarvis
 
       if (homework.ValidHeader)
       {
-        homework.AssignmentPath = Jarvis.Config.AppSettings.Settings["workingDir"].Value + "/courses/" + homework.Course.ToLower() + "/hw" + homework.HomeworkId + "/";
-        string sectionDir = homework.AssignmentPath + "section" + homework.Section;
+        string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);
 
-        Logger.Trace ("Checking if {0} exists", sectionDir);
+        homework.Path = path;
+        Logger.Trace ("Checking if {0} exists", path);
 
-        // Check that directories exist
-        if (Directory.Exists(sectionDir))
+        Directory.CreateDirectory(path);
+
+        using (FileStream destinationStream = File.Create(homework.FullPath))
         {
-          // Upload to correct directory
-          homework.Path = sectionDir + "/" + homework.StudentId + "/";
-
-          if (!Directory.Exists(homework.Path))
-          {
-            Directory.CreateDirectory(homework.Path);
-          }
-
-          using (FileStream destinationStream = File.Create(homework.Path + "/" + homework.Filename))
-          {
-            file.Value.Position = 0;
-            file.Value.CopyTo(destinationStream);
-          }
-        }
-        else
-        {
-          Logger.Fatal ("Can't find directory {0}", sectionDir);
-          homework.ValidHeader = false;
+          file.Value.Position = 0;
+          file.Value.CopyTo(destinationStream);
         }
       }
 
@@ -99,10 +84,11 @@ namespace Jarvis
 
         if (assignment.ValidHeader)
         {
-          Directory.CreateDirectory(string.Format("{0}section{1}", gradingDir, assignment.Section));
-          assignment.Path = string.Format("{0}section{1}/{2}.cpp", gradingDir, assignment.Section, assignment.StudentId, assignment.HomeworkId);
+          string path = string.Format("{0}section{1}", gradingDir, assignment.Section);
+          Directory.CreateDirectory(path);
+          assignment.Path = path;
           // move to section and rename each file
-          File.Move(cppFile, assignment.Path);
+          File.Move(cppFile, assignment.FullPath);
         }
         else
         {

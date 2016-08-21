@@ -16,10 +16,10 @@ namespace Jarvis
 
     public JarvisModules()
     {
+      #region Gets
       Get["/"] = _ =>
       {
         Logger.Trace("Handling get for /");
-
         return View["index"];
       };
 
@@ -29,6 +29,14 @@ namespace Jarvis
         return View["help"];
       };
 
+      Get["/grade"] = _ =>
+      {
+        Logger.Trace("Handling get for /grade");
+        return View["grade"];
+      };
+      #endregion
+
+      #region Posts
       Post["/practiceRun"] = _ =>
       {
         Logger.Trace("Handling post for /practiceRun");
@@ -37,22 +45,17 @@ namespace Jarvis
 
         var request = this.Bind<FileUploadRequest>();
         var assignment = uploadHandler.HandleStudentUpload(request.File);
+        
         Logger.Info("Received assignment from {0} for {1} HW#{2} with {3} header", assignment.StudentId, assignment.Course, assignment.HomeworkId, assignment.ValidHeader ? "true" : "false");
+        
         if (assignment.ValidHeader)
         {
-          Logger.Debug("Assignment header was valid");
           // Run grader
-          result = grader.Grade(assignment);
-          result.ValidHeader = true;
-        }
-        else
-        {
-          Logger.Debug("Assignment header was not valid");
-          result = new GradingResult();
-          result.ValidHeader = false;
+          Logger.Debug("Assignment header was valid");
+          result = grader.Grade(assignment);          
         }
                     
-        if (result.ValidHeader)
+        if (assignment.ValidHeader)
         {
           return View["results", result];
         }
@@ -62,74 +65,87 @@ namespace Jarvis
         }
       };
 
-      Get["/grade"] = _ =>
-      {
-        Logger.Trace("Handling get for /grade");
-        return View["grade"];
-      };
-
       Post["/runForRecord"] = _ =>
       {
         Logger.Trace("Handling post for /runForRecord");
-        SmtpClient mailClient = new SmtpClient("localhost", 25);
-        string currentHomework = string.Empty;
-        string currentCourse = string.Empty;
-        StringBuilder gradingReport = new StringBuilder();
-        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
+        
+        // extract to temp directory
+        // parse headers
+        Logger.Trace("Extracting grader zip file");
 
         Guid temp = Guid.NewGuid();
-        string gradingDir = baseDir + "/grading/" + temp.ToString() + "/";
+        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
+        string gradingDir = baseDir + "/grading/" + temp.ToString() + "/";                    
 
-        // handle file upload
-        Logger.Trace("Extracting grader zip file");
-        
         var request = this.Bind<FileUploadRequest>();
         List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.File);
-                
-        currentHomework = assignments[0].HomeworkId;
-        currentCourse = assignments[0].Course;
+          
+        // copy to course directory structure
+        string currentHomework = assignments[0].HomeworkId;
+        string currentCourse = assignments[0].Course;
+        string hwPath = string.Format("{0}/courses/{1}/hw{2}/", baseDir, currentCourse, currentHomework);
+
 
         Logger.Info("Grading {0} assignments for course: {1} - HW#: {2}", assignments.Count, currentCourse, currentHomework);
-        
-        // foreach assignment
+
         foreach (Assignment a in assignments)
         {
-          string sectionReport = string.Format("{0}section{1}/grades.txt", gradingDir, a.Section);
-          StreamWriter writer = new StreamWriter(File.OpenWrite(sectionReport));
-          if (a.ValidHeader)
+          string oldPath = a.FullPath;
+          a.Path = string.Format("{0}section{1}/{2}", hwPath, a.Section, a.StudentId);
+          
+          Directory.CreateDirectory(a.Path);
+          if (File.Exists(a.FullPath))
           {
-            // run grader on each file and save grading result
-            Grader grader = new Grader();
-
-            GradingResult result = grader.Grade(a);
-            Logger.Info("Result: {0}", result.Grade);
-
-            // write grade to section report
-            writer.WriteLine("-----------------------------------------------");
-            writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
-            writer.WriteLine(result.GradingComment);
-          }
-          else
-          {
-            writer.WriteLine("Invalid header for file " + a.Path);
+            File.Delete(a.FullPath);
           }
 
-          writer.Close();
+          File.Move(oldPath, a.FullPath);
         }
 
-        // foreach section
-        string[] directories = Directory.GetDirectories(gradingDir, "section*", SearchOption.AllDirectories);
-        string hwDir = string.Format("{0}/courses/{1}/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, currentCourse, currentHomework);
+        // run grader
+        foreach (Assignment a in assignments)
+        {
+          using (StreamWriter writer = File.AppendText(a.Path + "/../grades.txt"))
+          {
+            writer.AutoFlush = true;
+            writer.WriteLine("-----------------------------------------------");
             
+            if (a.ValidHeader)
+            {
+              // run grader on each file and save grading result
+              Grader grader = new Grader();
+              
+              GradingResult result = grader.Grade(a);
+              Logger.Info("Result: {0}", result.Grade);
+              
+              // write grade to section report              
+              writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
+              writer.WriteLine(result.GradingComment);
+            }
+            else
+            {
+              writer.WriteLine("Invalid header from " + a.StudentId);
+            }
+            
+            writer.Close();
+          }
+        }
+
+        // zip contents
+        // email to section leader
+        string[] directories = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
+        SmtpClient mailClient = new SmtpClient("localhost", 25);
+        StringBuilder gradingReport = new StringBuilder();
+
         foreach (string section in directories)
         {
-          char sectionNumber = section[section.Length - 1];
-          string zipFile = string.Format("{0}section{1}.zip", gradingDir, sectionNumber);
+          char sectionNumber = section[section.Length - 1];                    
+          string zipFile = string.Format("{0}/../section{1}.zip", section, sectionNumber);
+          
           // zip contents
           ZipFile.CreateFromDirectory(section, zipFile);
 
-          string leader = File.ReadAllText(string.Format("{0}section{1}/leader.txt", hwDir, sectionNumber));
-          //string leader = Jarvis.Config.AppSettings.Settings[string.Format("sectionLeader{0}", sectionNumber)].Value;
+          string leader = File.ReadAllText(section + "/leader.txt");          
 
           // attach to email to section leader
           MailMessage mail = new MailMessage("jarvis@jarvis.cs.usu.edu", leader);
@@ -146,7 +162,7 @@ namespace Jarvis
 
         return View["gradingReport", gradingReport.ToString()];
       };
-
+      #endregion
       // Need to provide a way to close an assignment and get MOSS report
       // MOSS - To be written to a file
     }
