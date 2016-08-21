@@ -59,19 +59,13 @@ namespace Jarvis
 
     // Note: Graders upload zip files containing many cpp files
     public List<Assignment> HandleGraderUpload(string gradingDir, HttpFile file)
-    {
+    {      
+      Logger.Trace ("Handling grader upload");
       List<Assignment> assignments = new List<Assignment>();
 
+      Logger.Trace("Creating grading directory {0}", gradingDir);
       // create grading directory
       Directory.CreateDirectory(gradingDir);
-
-      // create section directories
-      int sectionCount = int.Parse(Jarvis.Config.AppSettings.Settings["sectionCount"].Value);
-
-      for (int i = 1; i <= sectionCount; ++i)
-      {
-        Directory.CreateDirectory(gradingDir + "section" + i.ToString());
-      }
 
       // Copy zip file to grading directory
       using (FileStream destinationStream = File.Create(gradingDir + "files.zip"))
@@ -84,6 +78,8 @@ namespace Jarvis
       ZipFile.ExtractToDirectory(gradingDir + "files.zip", gradingDir + "files");
 
       string[] files = Directory.GetFiles(gradingDir + "files");
+      Logger.Trace("Found {0} files in grader zip file", files.Length);
+
       // for each file
       foreach (string cppFile in files)
       {
@@ -94,11 +90,17 @@ namespace Jarvis
           header.Add(reader.ReadLine().ToLower());
         }
 
+        reader.Close();
+
         // check header and make assigment object
         Assignment assignment = ParseHeader(header);
+
+        Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3}", assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId);
+
         if (assignment.ValidHeader)
         {
-          assignment.Path = string.Format("{0}/section{1}/{2}_{3}.cpp", gradingDir, assignment.Section, assignment.StudentId, assignment.HomeworkId);
+          Directory.CreateDirectory(string.Format("{0}section{1}", gradingDir, assignment.Section));
+          assignment.Path = string.Format("{0}section{1}/{2}.cpp", gradingDir, assignment.Section, assignment.StudentId, assignment.HomeworkId);
           // move to section and rename each file
           File.Move(cppFile, assignment.Path);
         }

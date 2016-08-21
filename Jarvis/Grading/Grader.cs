@@ -68,13 +68,11 @@ namespace Jarvis
 
       string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
       p.StartInfo.FileName = styleExe;
-      p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.FullName;
+      p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.Path;
       p.Start();
       string result = p.StandardError.ReadToEnd ();
       result = result.Replace (homework.Path, "");
-      result = result.Replace (" ", "&nbsp;");
-      
-      result = result.Replace("\n", "<br />");
+      result = Jarvis.ToHtmlEncoding(result);
       p.WaitForExit();
 
       return result;
@@ -94,7 +92,7 @@ namespace Jarvis
 
       string result = p.StandardError.ReadToEnd();
       result = result.Replace(homework.Path, "");
-      result = ToHtmlEncoding(result);
+      result = Jarvis.ToHtmlEncoding(result);
 
       p.WaitForExit();
 
@@ -109,10 +107,10 @@ namespace Jarvis
       StringBuilder result = new StringBuilder();
 
       result.AppendLine("<h3>Actual</h3>");
-      result.AppendLine("<p>" + ToHtmlEncoding(actualOutput) + "</p>");
+      result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
       result.AppendLine("<br />");
       result.AppendLine("<h3>Expected</h3>");
-      result.AppendLine("<p>" + ToHtmlEncoding(expectedOutput) + "</p>");
+      result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
       result.AppendLine("<br />");
       result.AppendLine("<h3>Diff</h3>");
 
@@ -187,14 +185,6 @@ namespace Jarvis
       StreamReader reader = new StreamReader (homework.AssignmentPath + "output.txt");
 
       return reader.ReadToEnd();
-    }
-
-    private string ToHtmlEncoding(string text)
-    {
-      text = text.Replace(" ", "&nbsp;");
-      text = text.Replace("\n", "<br />");
-
-      return text;
     }
   }
 }

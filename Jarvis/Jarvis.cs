@@ -8,6 +8,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Xml;
+using System.Collections.Generic;
 
 namespace Jarvis
 {
@@ -64,11 +65,9 @@ namespace Jarvis
         
       // Setup course directory if needed
       string baseDir = Config.AppSettings.Settings["workingDir"].Value;
-      if (!Directory.Exists(baseDir + "/courses"))
-      {
-        Directory.CreateDirectory(baseDir + "/courses");
-        CreateCourseDirectory();
-      }       
+ 
+      Directory.CreateDirectory(baseDir + "/courses");
+      CreateCourseDirectory();
     }
 
     private static void Cleanup()
@@ -134,7 +133,7 @@ namespace Jarvis
           {
             case XmlNodeType.Element:
               if (reader.Name.ToLower() == "course")
-              {
+              {                
                 courseName = reader.GetAttribute("name");
                 assignmentCount = int.Parse(reader.GetAttribute("assignmentCount"));
 
@@ -146,7 +145,7 @@ namespace Jarvis
               }
               else if (reader.Name.ToLower() == "section")
               {              
-                string id = reader.GetAttribute("id");
+                int id = int.Parse(reader.GetAttribute("id"));
                 string leader = reader.GetAttribute("leader");
 
                 for(int i = 1; i <= assignmentCount; ++i)
@@ -159,6 +158,14 @@ namespace Jarvis
           }
         }
       }
+    }
+
+    public static string ToHtmlEncoding(string text)
+    {
+      text = text.Replace(" ", "&nbsp;");
+      text = text.Replace("\n", "<br />");
+
+      return text;
     }
   }
 }

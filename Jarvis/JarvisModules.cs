@@ -51,8 +51,7 @@ namespace Jarvis
           result = new GradingResult();
           result.ValidHeader = false;
         }
-
-        //var response = new FileUploadResponse() { Identifier = uploadResult.Identifier };
+                    
         if (result.ValidHeader)
         {
           return View["results", result];
@@ -76,17 +75,22 @@ namespace Jarvis
         string currentHomework = string.Empty;
         string currentCourse = string.Empty;
         StringBuilder gradingReport = new StringBuilder();
+        string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
 
         Guid temp = Guid.NewGuid();
-        string gradingDir = "/tmp/jarvis/grading/" + temp.ToString() + "/";
+        string gradingDir = baseDir + "/grading/" + temp.ToString() + "/";
 
         // handle file upload
+        Logger.Trace("Extracting grader zip file");
+        
         var request = this.Bind<FileUploadRequest>();
         List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.File);
-
-        currentHomework = string.Format("HW {0}", assignments[0].HomeworkId);
+                
+        currentHomework = assignments[0].HomeworkId;
         currentCourse = assignments[0].Course;
 
+        Logger.Info("Grading {0} assignments for course: {1} - HW#: {2}", assignments.Count, currentCourse, currentHomework);
+        
         // foreach assignment
         foreach (Assignment a in assignments)
         {
@@ -98,6 +102,8 @@ namespace Jarvis
             Grader grader = new Grader();
 
             GradingResult result = grader.Grade(a);
+            Logger.Info("Result: {0}", result.Grade);
+
             // write grade to section report
             writer.WriteLine("-----------------------------------------------");
             writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
@@ -112,16 +118,18 @@ namespace Jarvis
         }
 
         // foreach section
-        string[] directories = Directory.GetDirectories(gradingDir, "section", SearchOption.AllDirectories);
-
+        string[] directories = Directory.GetDirectories(gradingDir, "section*", SearchOption.AllDirectories);
+        string hwDir = string.Format("{0}/courses/{1}/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, currentCourse, currentHomework);
+            
         foreach (string section in directories)
         {
-          char sectionNumber = section[section.Length];
-          string zipFile = string.Format("{0}/section{1}.zip", gradingDir, sectionNumber);
+          char sectionNumber = section[section.Length - 1];
+          string zipFile = string.Format("{0}section{1}.zip", gradingDir, sectionNumber);
           // zip contents
           ZipFile.CreateFromDirectory(section, zipFile);
 
-          string leader = Jarvis.Config.AppSettings.Settings[string.Format("sectionLeader{0}", sectionNumber)].Value;
+          string leader = File.ReadAllText(string.Format("{0}section{1}/leader.txt", hwDir, sectionNumber));
+          //string leader = Jarvis.Config.AppSettings.Settings[string.Format("sectionLeader{0}", sectionNumber)].Value;
 
           // attach to email to section leader
           MailMessage mail = new MailMessage("jarvis@jarvis.cs.usu.edu", leader);
