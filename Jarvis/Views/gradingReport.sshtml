@@ -11,7 +11,21 @@
          color: white;
 		}
 	</style>
+   <script>
+     function enableGo()
+     {
+       var x = document.getElementById("file");
 
+       if (x.value != "")
+       {
+         document.getElementById("submit").disabled = false;
+       }
+       else
+       {
+         document.getElementById("submit").disabled = true;
+       }
+     }
+  </script>
 </head>
 <body>
 	<img src="@Path['~/Content/gradingLogo.png']" alt="Jarvis logo" /><br />	   
@@ -21,8 +35,8 @@
     </a>
   </div>
   <form method='post' action='runForRecord' enctype='multipart/form-data'>      
-      File: <input type='file' name='file' id='file' />
-      <input type='submit' value='Go!' />
+      File: <input type='file' name='file' id='file' onchange="enableGo();" />
+      <input type='submit' id='submit' value='Go!' disabled/>
   </form>
   <p>
     @Model

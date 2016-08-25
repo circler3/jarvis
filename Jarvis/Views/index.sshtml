@@ -11,6 +11,22 @@
          color: white;
 		}
 	</style>
+
+   <script>
+     function enableGo()
+     {
+       var x = document.getElementById("file");
+
+       if (x.value != "")
+       {
+         document.getElementById("submit").disabled = false;
+       }
+       else
+       {
+         document.getElementById("submit").disabled = true;
+       }
+     }
+  </script>
 </head>
 <body>
 	<img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /><br />	   
@@ -23,21 +39,5 @@
       File: <input type='file' name='file' id='file' onchange="enableGo();" />
       <input type='submit' id='submit' value='Go!' disabled/>
   </form>
-
-  <script>
-   function enableGo()
-   {
-      var x = document.getElementById("file");
-
-      if (x.value != "")
-      {
-         document.getElementById("submit").disabled = false;
-      }
-      else
-      {
-         document.getElementById("submit").disabled = true;
-      }
-   }
-  </script>
 </body>
 </html>
