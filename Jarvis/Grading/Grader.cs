@@ -119,7 +119,12 @@ namespace Jarvis
 
       for (int i = 0; i < outputFiles.Length; ++i)
       {
-        string actualOutput = ExecuteProgram(homework, inputFiles[i]);
+        string input = "";
+        if (inputFiles.Length > i)
+        {
+          input = inputFiles[i];
+        }
+        string actualOutput = ExecuteProgram(homework, input);
         string expectedOutput = GetExpectedOutput(outputFiles[i]);       
 
         result.AppendLine("<h3>Test case: " + i.ToString() + "</h3>");
