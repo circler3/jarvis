@@ -21,11 +21,11 @@ namespace Jarvis
     public static void Main()
     {      
       Init();
-
-      Logger.Info("~Jarvis started~");
+      string port = Jarvis.Config.AppSettings.Settings["port"].Value;
+      Logger.Info("~Jarvis started on port {0}~", port);
 
       // Start Nancy
-      var uri = new Uri("http://localhost:8080");
+      var uri = new Uri("http://localhost:" + port);
       var config = new HostConfiguration();
       config.UrlReservations.CreateAutomatically = true;
       
