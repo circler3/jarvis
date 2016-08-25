@@ -120,41 +120,48 @@ namespace Jarvis
 
     private static void CreateCourseDirectory()
     {
+      string coursesFile = Config.AppSettings.Settings["workingDir"].Value + "/courses.xml";
       string baseDir = Config.AppSettings.Settings["workingDir"].Value + "/courses/";
-      string coursesFile = Config.AppSettings.Settings["courses"].Value;
       string courseName = "";
       int assignmentCount = 0;
 
-      using (XmlReader reader = XmlReader.Create(File.OpenRead(coursesFile)))
+      if (!File.Exists(coursesFile))
       {
-        while (reader.Read())
+        Logger.Fatal("Can't find courses file at {0}", coursesFile);
+      }
+      else
+      {
+        using (XmlReader reader = XmlReader.Create(File.OpenRead(coursesFile)))
         {
-          switch (reader.NodeType)
+          while (reader.Read())
           {
-            case XmlNodeType.Element:
-              if (reader.Name.ToLower() == "course")
-              {                
-                courseName = reader.GetAttribute("name");
-                assignmentCount = int.Parse(reader.GetAttribute("assignmentCount"));
+            switch (reader.NodeType)
+            {
+              case XmlNodeType.Element:
+                if (reader.Name.ToLower() == "course")
+                {                
+                  courseName = reader.GetAttribute("name");
+                  assignmentCount = int.Parse(reader.GetAttribute("assignmentCount"));
 
-                Directory.CreateDirectory(baseDir + courseName);
-                for(int i = 1; i <= assignmentCount; ++i)
-                {
-                  Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString());
+                  Directory.CreateDirectory(baseDir + courseName);
+                  for (int i = 1; i <= assignmentCount; ++i)
+                  {
+                    Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString());
+                  }
                 }
-              }
-              else if (reader.Name.ToLower() == "section")
-              {              
-                int id = int.Parse(reader.GetAttribute("id"));
-                string leader = reader.GetAttribute("leader");
+                else if (reader.Name.ToLower() == "section")
+                {              
+                  int id = int.Parse(reader.GetAttribute("id"));
+                  string leader = reader.GetAttribute("leader");
 
-                for(int i = 1; i <= assignmentCount; ++i)
-                {
-                  Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString() + "/section" + id);
-                  File.WriteAllText(baseDir + courseName + "/hw" + i.ToString() + "/section" + id + "/leader.txt", leader);
+                  for (int i = 1; i <= assignmentCount; ++i)
+                  {
+                    Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString() + "/section" + id);
+                    File.WriteAllText(baseDir + courseName + "/hw" + i.ToString() + "/section" + id + "/leader.txt", leader);
+                  }
                 }
-              }
-              break;
+                break;
+            }
           }
         }
       }
@@ -164,6 +171,14 @@ namespace Jarvis
     {
       text = text.Replace(" ", "&nbsp;");
       text = text.Replace("\n", "<br />");
+
+      return text;
+    }
+
+    public static string ToTextEncoding(string text)
+    {
+      text = text.Replace("&nbsp;", " ");
+      text = text.Replace("<br />", "\n");
 
       return text;
     }

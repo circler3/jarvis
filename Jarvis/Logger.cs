@@ -21,7 +21,7 @@ namespace Jarvis
 
     static Logger ()
     {
-      string logFile = Jarvis.Config.AppSettings.Settings ["logFile"].Value;
+      string logFile = Jarvis.Config.AppSettings.Settings ["workingDir"].Value + "/jarvis.log";
           
       writer = File.AppendText (logFile);
       writer.AutoFlush = true;

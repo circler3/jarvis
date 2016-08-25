@@ -53,7 +53,7 @@ namespace Jarvis
     {
       string timestamp = DateTime.Now.ToString();
 
-      StreamWriter writer = new StreamWriter (homework.Path + "results.txt", true);
+      StreamWriter writer = new StreamWriter (homework.Path + "/results.txt", true);
       writer.WriteLine (timestamp + " " + homework.StudentId + " " + result.Grade); 
       writer.Flush();
       writer.Close();      

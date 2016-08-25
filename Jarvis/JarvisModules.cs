@@ -126,9 +126,11 @@ namespace Jarvis
               GradingResult result = grader.Grade(a);
               Logger.Info("Result: {0}", result.Grade);
               
+              string gradingComment = Jarvis.ToTextEncoding(result.GradingComment);
+
               // write grade to section report              
               writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
-              writer.WriteLine(result.GradingComment);
+              writer.WriteLine(gradingComment);
             }
             else
             {
@@ -176,7 +178,7 @@ namespace Jarvis
         return View["gradingReport", gradingReport.ToString()];
       };
       #endregion
-      // Need to provide a way to close an assignment and get MOSS report
+
       // MOSS - To be written to a file
     }
   }
