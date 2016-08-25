@@ -53,7 +53,7 @@ namespace Jarvis
     {
       string timestamp = DateTime.Now.ToString();
 
-      StreamWriter writer = new StreamWriter (homework.Path + "/results.txt", true);
+      StreamWriter writer = new StreamWriter (homework.Path + "results.txt", true);
       writer.WriteLine (timestamp + " " + homework.StudentId + " " + result.Grade); 
       writer.Flush();
       writer.Close();      
@@ -113,8 +113,8 @@ namespace Jarvis
     private string GetExecutionOutput(Assignment homework)
     {
       // todo Loop and call Execute Program multiple times
-      string[] inputFiles = Directory.GetFiles(homework.Path + "/../../", "input*");
-      string[] outputFiles = Directory.GetFiles(homework.Path + "/../../", "output*");
+      string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
+      string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
       StringBuilder result = new StringBuilder();
 
       for (int i = 0; i < outputFiles.Length; ++i)
