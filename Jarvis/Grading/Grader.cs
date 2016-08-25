@@ -107,6 +107,8 @@ namespace Jarvis
       p.Close();
       p.Dispose();
 
+      Logger.Trace("Compile result: "  + result);
+
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
@@ -163,6 +165,11 @@ namespace Jarvis
       executionProcess.StartInfo.RedirectStandardOutput = true;
       executionProcess.StartInfo.RedirectStandardError = true;
       executionProcess.StartInfo.RedirectStandardInput = true;
+
+      if (!File.Exists(homework.Path + homework.StudentId))
+      {
+        Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
+      }
 
       executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;      
       executionProcess.Start();
