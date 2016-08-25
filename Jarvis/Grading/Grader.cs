@@ -113,8 +113,8 @@ namespace Jarvis
     private string GetExecutionOutput(Assignment homework)
     {
       // todo Loop and call Execute Program multiple times
-      string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
-      string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
+      string[] inputFiles = Directory.GetFiles(homework.Path + "/../../", "input*");
+      string[] outputFiles = Directory.GetFiles(homework.Path + "/../../", "output*");
       StringBuilder result = new StringBuilder();
 
       for (int i = 0; i < outputFiles.Length; ++i)
