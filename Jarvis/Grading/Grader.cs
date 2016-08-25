@@ -153,6 +153,9 @@ namespace Jarvis
         result.AppendLine("------------------------------------------------------------------");
       }
 
+      // Don't leave binaries hanging around
+      File.Delete(homework.Path + homework.StudentId);
+
       return result.ToString();
     }
 
@@ -201,8 +204,6 @@ namespace Jarvis
 
       executionProcess.Close();
       executionProcess.Dispose();
-      // Don't leave binaries hanging around
-      File.Delete(homework.Path + homework.StudentId);
 
       return output;
     }
