@@ -25,7 +25,7 @@ namespace Jarvis
 
       if (homework.ValidHeader)
       {
-        string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);
+        string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);
 
         homework.Path = path;
         Logger.Trace ("Checking if {0} exists", path);
