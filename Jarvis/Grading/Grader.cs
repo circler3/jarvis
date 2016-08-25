@@ -9,6 +9,7 @@ namespace Jarvis
 {
   public class Grader
   {
+    private bool forcedKill = false;
     private Process executionProcess;
     private Timer executionTimer = new Timer(10000);
 
@@ -80,6 +81,9 @@ namespace Jarvis
       result = Jarvis.ToHtmlEncoding(result);
       p.WaitForExit();
 
+      p.Close();
+      p.Dispose();
+
       return result;
     }
 
@@ -100,6 +104,9 @@ namespace Jarvis
       result = Jarvis.ToHtmlEncoding(result);
 
       p.WaitForExit();
+
+      p.Close();
+      p.Dispose();
 
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
@@ -161,12 +168,12 @@ namespace Jarvis
 
       string output = executionProcess.StandardOutput.ReadToEnd();
 
-      if (executionTimer.Enabled)
-      {
-        Logger.Warn("Process was killed");
-      }
-
       executionTimer.Enabled = false;
+
+      if (forcedKill)
+      {
+        output = "Oh no! I found an infinite loop, sir.";
+      }
 
       executionProcess.Close();
       executionProcess.Dispose();
@@ -180,9 +187,9 @@ namespace Jarvis
     private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
     {
       // It's been long enough... kill the process
-      Logger.Warn("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
+      Logger.Error("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
       executionProcess.Kill();
-      executionProcess.Close();
+      forcedKill = true;
     }
 
     private string GetExpectedOutput(Assignment homework)
