@@ -11,13 +11,12 @@ namespace Jarvis
   {
     private bool forcedKill = false;
     private Process executionProcess;
-    private Timer executionTimer = new Timer(10000);
 
     public Grader()
     {
-      executionTimer.Elapsed += ExecutionTimer_Elapsed;
-    }
 
+    }
+      
     public GradingResult Grade(Assignment homework)
     {
       GradingResult result = new GradingResult();
@@ -144,6 +143,7 @@ namespace Jarvis
 
     private string ExecuteProgram(Assignment homework)
     {      
+      string output = string.Empty;
       executionProcess = new Process();
 
       executionProcess.StartInfo.UseShellExecute = false;
@@ -154,30 +154,33 @@ namespace Jarvis
       executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;      
       executionProcess.Start();
 
-      executionTimer.Enabled = true;
-
-      if (File.Exists(homework.Path + "../../input.txt"))
+      using (Timer executionTimer = new Timer(10000))
       {
-        StreamReader reader = new StreamReader(homework.Path + "../../input.txt");
+        executionTimer.Elapsed += ExecutionTimer_Elapsed;
+        executionTimer.Enabled = true;
 
-        while (!reader.EndOfStream)
+        if (File.Exists(homework.Path + "../../input.txt"))
         {
-          executionProcess.StandardInput.WriteLine(reader.ReadLine());
+          StreamReader reader = new StreamReader(homework.Path + "../../input.txt");
+
+          while (!reader.EndOfStream)
+          {
+            executionProcess.StandardInput.WriteLine(reader.ReadLine());
+          }
         }
-      }
 
-      string output = executionProcess.StandardOutput.ReadToEnd();
+        output = executionProcess.StandardOutput.ReadToEnd();
 
-      executionTimer.Enabled = false;
+        executionTimer.Enabled = false;
 
-      if (forcedKill)
-      {
-        output = "Oh no! I found an infinite loop, sir.";
+        if (forcedKill)
+        {
+          output = "Oh no! I found an infinite loop, sir.";
+        }
       }
 
       executionProcess.Close();
       executionProcess.Dispose();
-
       // Don't leave binaries hanging around
       File.Delete(homework.Path + homework.StudentId);
 
