@@ -112,36 +112,44 @@ namespace Jarvis
 
     private string GetExecutionOutput(Assignment homework)
     {
-      string actualOutput = ExecuteProgram(homework);
-      string expectedOutput = GetExpectedOutput(homework);
-
+      // todo Loop and call Execute Program multiple times
+      string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
+      string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
       StringBuilder result = new StringBuilder();
 
-      result.AppendLine("<h3>Actual</h3>");
-      result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
-      result.AppendLine("<br />");
-      result.AppendLine("<h3>Expected</h3>");
-      result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
-      result.AppendLine("<br />");
-      result.AppendLine("<h3>Diff</h3>");
-
-      string testDiff = string.Empty;
-
-      if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
+      for (int i = 0; i < outputFiles.Length; ++i)
       {
-        testDiff = "No difference";
-      }
-      else
-      {
-        testDiff = HtmlDiff.HtmlDiff.Execute(actualOutput, expectedOutput);
+        string actualOutput = ExecuteProgram(homework, inputFiles[i]);
+        string expectedOutput = GetExpectedOutput(outputFiles[i]);       
+
+        result.AppendLine("<h3>Test case: " + i.ToString() + "</h3>");
+        result.AppendLine("<h3>Actual</h3>");
+        result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
+        result.AppendLine("<br />");
+        result.AppendLine("<h3>Expected</h3>");
+        result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
+        result.AppendLine("<br />");
+        result.AppendLine("<h3>Diff</h3>");
+
+        string testDiff = string.Empty;
+
+        if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
+        {
+          testDiff = "No difference";
+        }
+        else
+        {
+          testDiff = HtmlDiff.HtmlDiff.Execute(actualOutput, expectedOutput);
+        }
+
+        result.AppendLine("<p>" + testDiff + "</p>");
+        result.AppendLine("------------------------------------------------------------------");
       }
 
-      result.AppendLine("<p>" + testDiff + "</p>");
-
-      return !string.IsNullOrEmpty(actualOutput) ? result.ToString() : "No output...";
+      return result.ToString();
     }
 
-    private string ExecuteProgram(Assignment homework)
+    private string ExecuteProgram(Assignment homework, string inputFile)
     {      
       string output = string.Empty;
       executionProcess = new Process();
@@ -159,9 +167,9 @@ namespace Jarvis
         executionTimer.Elapsed += ExecutionTimer_Elapsed;
         executionTimer.Enabled = true;
 
-        if (File.Exists(homework.Path + "../../input.txt"))
+        if (File.Exists(inputFile))
         {
-          StreamReader reader = new StreamReader(homework.Path + "../../input.txt");
+          StreamReader reader = new StreamReader(inputFile);
 
           while (!reader.EndOfStream)
           {
@@ -195,9 +203,9 @@ namespace Jarvis
       forcedKill = true;
     }
 
-    private string GetExpectedOutput(Assignment homework)
+    private string GetExpectedOutput(string path)
     {
-      StreamReader reader = new StreamReader (homework.Path + "/../../output.txt");
+      StreamReader reader = new StreamReader(path);
 
       return reader.ReadToEnd();
     }
