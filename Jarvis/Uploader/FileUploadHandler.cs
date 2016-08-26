@@ -129,7 +129,7 @@ namespace Jarvis
         }
       }
 
-      if (homework.StudentId != String.Empty && homework.Course != String.Empty && homework.Section != String.Empty && homework.HomeworkId != String.Empty)
+      if (homework.StudentId != null && homework.Course != null && homework.Section != null && homework.HomeworkId != null)
       {
         Logger.Trace ("Parse found valid header");
         homework.ValidHeader = true;
