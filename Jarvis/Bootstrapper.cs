@@ -15,6 +15,14 @@ namespace Jarvis
     {
       StaticConfiguration.EnableRequestTracing = true;
       StaticConfiguration.DisableErrorTraces = false;
+
+      pipelines.OnError += (ctx, ex) => {
+        Logger.Fatal(ex.StackTrace.ToString());
+
+        return null;
+      };
     }
+
+
   }
 }
