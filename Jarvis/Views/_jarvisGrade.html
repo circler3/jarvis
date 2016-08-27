@@ -1,0 +1,11 @@
+﻿<a href="/grade"><img src="@Path['~/Content/gradingLogo.png']" alt="Jarvis logo" /></a>
+<br />      
+<div style="position: absolute; top:0; right:0;">
+  <a href="/help">
+    <img src="@Path['~/Content/gradingHelp.png']" alt="Help" />
+  </a>
+</div>
+<form method='post' action='runForRecord' enctype='multipart/form-data'>      
+  File: <input type='file' name='file' id='file' onchange="enableGo();" />
+  <input type='submit' id='submit' value='Go!' disabled/>
+</form>

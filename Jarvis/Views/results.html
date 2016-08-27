@@ -1,0 +1,17 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  @Partial['_header.html'];
+</head>
+<body>
+  @Partial['_jarvis.html'];
+
+  <h1 style=''>Results - @Model.Grade</h1>
+  <h2>Style Check</h2>
+  <p>@Model.StyleMessage</p>
+  <h2>Compile</h2>
+  <p>@Model.CompileMessage</p>
+  <h2>Output</h2>
+  @Model.OutputMessage
+</body>
+</html>

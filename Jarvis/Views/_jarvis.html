@@ -1,0 +1,11 @@
+﻿<a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /></a>
+<br />
+<div style="position: absolute; top:0; right:0;">
+  <a href="/help">
+    <img src="@Path['~/Content/help.png']" alt="Help" />
+  </a>
+</div>
+<form method='post' action='practiceRun' enctype='multipart/form-data'>      
+  File: <input type='file' name='file' id='file' onchange="enableGo();" />
+  <input type='submit' id='submit' value='Go!' disabled/>
+</form>

@@ -13,7 +13,7 @@ using System.Collections.Generic;
 namespace Jarvis
 {
   public class Jarvis
-  {
+  {    
     public static Configuration Config = null;
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
     private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
