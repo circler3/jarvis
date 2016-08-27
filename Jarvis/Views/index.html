@@ -2,8 +2,23 @@
 <html lang="en">
 <head>
   @Partial['_header.html'];
+  @Partial['_script.html'];
 </head>
 <body>   
-  @Partial['_jarvis.html'];
+  <a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /></a>
+  <br />
+  <div style="position: absolute; top:0; right:0;">
+    <a href="/help">
+      <img src="@Path['~/Content/help.png']" alt="Help" />
+    </a>
+  </div>
+  <form>      
+    File: <input type='file' name='file' id='file' onchange='enableUpload();' />
+    <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/run");' disabled/>
+  </form>
+  <br />
+  <div id='output'>
+    Select and upload a file.
+  </div>
 </body>
 </html>

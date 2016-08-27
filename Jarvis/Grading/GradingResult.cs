@@ -30,19 +30,31 @@ namespace Jarvis
         return score.ToString() + "%";
       }
     }
-
-    public string GradingComment
+      
+    public string ToHtml()
     {
-      get
-      {
-        StringBuilder builder = new StringBuilder();
-        builder.AppendLine("Header: " + ValidHeader.ToString());
-        builder.AppendLine("Compile: " + CompileMessage);
-        builder.AppendLine("Style: " + StyleMessage);
-        builder.AppendLine("Correct output: " + CorrectOutput.ToString());
+      StringBuilder builder = new StringBuilder();
 
-        return builder.ToString();
-      }
+      builder.AppendFormat("<h1>Results - {0}</h1>", Grade);
+      builder.AppendFormat("<h2>Style Check</h2>");
+      builder.AppendFormat("<p>{0}</p>", StyleMessage);
+      builder.AppendFormat("<h2>Compile</h2>");
+      builder.AppendFormat("<p>{0}</p>", CompileMessage);
+      builder.AppendFormat("<h2>Output</h2>");
+      builder.AppendFormat("{0}", OutputMessage);
+
+      return builder.ToString();        
+    }
+
+    public string ToText()
+    {
+      StringBuilder builder = new StringBuilder();
+      builder.AppendLine("Header: " + ValidHeader.ToString());
+      builder.AppendLine("Compile: " + CompileMessage);
+      builder.AppendLine("Style: " + StyleMessage);
+      builder.AppendLine("Correct output: " + CorrectOutput.ToString());
+      
+      return builder.ToString();      
     }
   }
 }

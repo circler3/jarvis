@@ -37,7 +37,7 @@ namespace Jarvis
       #endregion
 
       #region Posts
-      Post["/practiceRun"] = _ =>
+      Post["/run"] = _ =>
       {
         Logger.Trace("Handling post for /practiceRun");
         Grader grader = new Grader();
@@ -54,18 +54,22 @@ namespace Jarvis
           Logger.Debug("Assignment header was valid");
           result = grader.Grade(assignment);          
         }
-                    
-        if (assignment.ValidHeader)
-        {
-          return View["results", result];
-        }
-        else
-        {
-          return View["error"];
-        }
+        
+        string response = string.Empty;
+
+          if (assignment.ValidHeader)
+          {
+            response = result.ToHtml();
+          }
+          else
+          {
+            response = "The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.";
+          }
+
+          return response;
       };
 
-      Post["/runForRecord"] = _ =>
+      Post["/grade"] = _ =>
       {
         Logger.Trace("Handling post for /runForRecord");
         
@@ -126,7 +130,7 @@ namespace Jarvis
               GradingResult result = grader.Grade(a);
               Logger.Info("Result: {0}", result.Grade);
               
-              string gradingComment = Jarvis.ToTextEncoding(result.GradingComment);
+              string gradingComment = Jarvis.ToTextEncoding(result.ToText());
 
               // write grade to section report              
               writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
@@ -174,8 +178,7 @@ namespace Jarvis
         }
 
         // Generate some kind of grading report
-
-        return View["gradingReport", gradingReport.ToString()];
+        return gradingReport.ToString();
       };
       #endregion
 
