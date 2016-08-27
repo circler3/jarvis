@@ -95,7 +95,7 @@ namespace Jarvis
       p.StartInfo.RedirectStandardError = true;
 
       p.StartInfo.FileName = "g++";
-      p.StartInfo.Arguments = homework.FullPath + " -o" + homework.Path + homework.StudentId;
+      p.StartInfo.Arguments = "-Werror" + homework.FullPath + " -o" + homework.Path + homework.StudentId;
       p.Start();
 
       string result = p.StandardError.ReadToEnd();
