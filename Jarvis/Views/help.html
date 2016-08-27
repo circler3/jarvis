@@ -4,21 +4,30 @@
   @Partial['_header.html'];  
 </head>
 <body>  
-  <p>
-    <h2>Uploading your code</h2>
-    In order to grade your assignments, Jarvis requires the following header at the top of your cpp file.<br />	
+  <a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" /></a>
+  <br />
+  <div style="position: absolute; top:0; right:0;">
+    <a href="/help">
+      <img src="@Path['~/Content/help.png']" alt="Help" />
+    </a>
+  </div>
+  <h2>Uploading your code</h2>
+  <p>In order to grade your assignments, Jarvis requires the following header at the top of your cpp file.<br />	
 /************************<br />	
  * A#: A09999999<br />	
  * Course: CS1400<br />	
  * Section: 1<br />
  * HW#: 1<br />	
- ***********************/<br />	
+ ***********************/<br />
+   </p>	
     <h2>Understanding the results</h2>
-    Three parts<br />	
-    Style (link to Google style guide)<br />	
-    Compilation (link to understanding g++ errors guide)<br />	
-    Output (link to understanding diff syntax guide)<br />	
-    
-  </p>
+    <h3>Style</h3>
+    <p>Jarvis uses the Google C++ style guide and cpplint.py to check your code style. You can find more information <a href='https://google.github.io/styleguide/cppguide.html'>here</a>.</p>
+    <h3>Compilation</h3>
+    <p>Jarvis uses g++ 5.4.0. A good reference for understanding g++ compiler errors can be found <a href='https://en.wikibooks.org/wiki/GCC_Debugging/g%2B%2B/Errors'>here</a>.</p>
+    <h3>Output</h3>
+    <p>Jarvis provides the actual and expected output for your assignment. A diff between the two is also provided.</p>
+    <p>Example: <del class="diffmod">Hello</del><ins class="diffmod">hello,</ins> <del class="diffmod">World!</del><ins class="diffmod">world.</ins>	
+    <p>The red-highlighted struck-out text should be removed, and the green-highlighted text should be added.</p>  
 </body>
 </html>
