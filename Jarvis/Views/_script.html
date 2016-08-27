@@ -1,0 +1,61 @@
+<script>
+  var dotterTimer;
+  var dotCount = 0;
+
+  function enableUpload()
+  {
+    var x = document.getElementById("file");
+
+    if (x.value != "")
+    {
+      document.getElementById("uploadButton").disabled = false;
+    }
+    else
+    {
+      document.getElementById("uploadButton").disabled = true;
+    }
+  }
+
+  function uploadToJarvis(endpoint) 
+  {
+    window.clearTimeout(dotterTimer);
+    dotCount = 0;
+    document.getElementById("output").innerHTML = "Uploading...";
+
+    var xhttp = new XMLHttpRequest();
+
+    var formData = new FormData();
+
+    formData.append('file', document.getElementById('file').files[0], "thefile");
+
+    xhttp.onreadystatechange = function()
+    {
+      if (xhttp.readyState == 4 && xhttp.status == 200) 
+      {
+        window.clearTimeout(dotterTimer);
+        document.getElementById("output").innerHTML = xhttp.responseText;
+      }
+    };
+
+    xhttp.open("POST", endpoint, true);
+    xhttp.send(formData);
+
+    dotterTimer = setTimeout(dotter, 1000);
+  }
+
+  function dotter()
+  {   
+   dotCount++;
+
+   if (dotCount > 15)
+   {
+     document.getElementById("output").innerHTML += "Jarvis is not responding, please try again later.";  
+     window.clearTimeout(dotterTimer);
+   }
+   else
+   {
+     document.getElementById("output").innerHTML += ".";
+     dotterTimer = setTimeout(dotter, 1000);
+   }
+  }
+</script>
