@@ -107,7 +107,7 @@ namespace Jarvis
       p.Close();
       p.Dispose();
 
-      Logger.Trace("Compile result: "  + result);
+      Logger.Trace("Compile result: {0}", result);
 
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }

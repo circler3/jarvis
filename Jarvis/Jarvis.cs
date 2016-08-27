@@ -40,14 +40,31 @@ namespace Jarvis
 
     private static void Init()
     {
+      bool isLocalConfig = false;
       // Load config file
       ExeConfigurationFileMap configMap = new ExeConfigurationFileMap();
-      configMap.ExeConfigFilename = "jarvis.config";
+
+      if (File.Exists("jarvis.local.config"))
+      {       
+        configMap.ExeConfigFilename = "jarvis.local.config";
+        isLocalConfig = true;
+      }
+      else
+      {
+        configMap.ExeConfigFilename = "jarvis.config";        
+        isLocalConfig = false;
+      }
+
       Config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
 
       // Turn on logger
       int logLevel = int.Parse(Jarvis.Config.AppSettings.Settings["logLevel"].Value);
       Logger.EnableLevel(logLevel);
+
+      if (isLocalConfig)
+      {
+        Logger.Info("Loaded local config file");
+      }
 
       // Register Unhandled exceptions
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);
