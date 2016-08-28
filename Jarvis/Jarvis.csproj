@@ -89,6 +89,10 @@
     <None Include="Views\_script.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Views\_version.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="history.txt" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\gradingHelp.png">

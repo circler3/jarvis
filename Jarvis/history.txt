@@ -1,0 +1,2 @@
+﻿Aug 27, 2017 ~ v1.0.0 ~ Intial release
+Aug 27, 2017 ~ v1.0.1 ~ Added version to UI
