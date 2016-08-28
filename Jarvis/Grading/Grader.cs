@@ -19,8 +19,8 @@ namespace Jarvis
       
     public GradingResult Grade(Assignment homework)
     {
-      GradingResult result = new GradingResult();
-      result.ValidHeader = homework.ValidHeader;
+      GradingResult result = new GradingResult(homework);
+
 
       // Style check
       Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);

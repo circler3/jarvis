@@ -5,6 +5,14 @@ namespace Jarvis
 {
   public class GradingResult
   {
+    public GradingResult(Assignment assignment)
+    {
+      Assignment = assignment;
+      StyleMessage = string.Empty;
+      OutputMessage = string.Empty;
+    }
+
+    public Assignment Assignment { get; set; }
     public bool ValidHeader { get; set; }
     public string CompileMessage { get; set; }
     public string StyleMessage { get; set; }
@@ -27,7 +35,7 @@ namespace Jarvis
           score -= 80;
         }
 
-        return score.ToString() + "%";
+        return score.ToString();
       }
     }
       
@@ -35,7 +43,7 @@ namespace Jarvis
     {
       StringBuilder builder = new StringBuilder();
 
-      builder.AppendFormat("<h1>Results - {0}</h1>", Grade);
+      builder.AppendFormat("<h1>Results - {0}%</h1>", Grade);
       builder.AppendFormat("<h2>Style Check</h2>");
       builder.AppendFormat("<p>{0}</p>", StyleMessage);
       builder.AppendFormat("<h2>Compile</h2>");
