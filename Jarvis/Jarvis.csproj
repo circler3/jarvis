@@ -68,7 +68,6 @@
     <Compile Include="Assignment.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Canvas\CanvasFormatter.cs" />
-    <Compile Include="Canvas\CanvasEntry.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

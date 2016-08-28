@@ -4,6 +4,9 @@ using System.Text;
 using HtmlDiff;
 using System.IO;
 using System.Timers;
+using System.Collections.Generic;
+using System.Net.Mail;
+using System.IO.Compression;
 
 namespace Jarvis
 {
@@ -20,7 +23,6 @@ namespace Jarvis
     public GradingResult Grade(Assignment homework)
     {
       GradingResult result = new GradingResult(homework);
-
 
       // Style check
       Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
@@ -221,6 +223,139 @@ namespace Jarvis
       StreamReader reader = new StreamReader(path);
 
       return reader.ReadToEnd();
+    }
+
+    public string GenerateGrades(string baseDir, List<Assignment> assignments)
+    {
+      List<GradingResult> gradingResults = new List<GradingResult>();
+      // extract to temp directory
+      // parse headers
+      Logger.Trace("Extracting grader zip file");
+
+      // copy to course directory structure
+      string currentHomework = assignments[0].HomeworkId;
+      string currentCourse = assignments[0].Course;
+      string hwPath = string.Format("{0}/courses/{1}/hw{2}/", baseDir, currentCourse, currentHomework);
+
+      string[] sections = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
+      foreach (string section in sections)
+      {
+        if (File.Exists(section + "/grades.txt"))
+        {
+          File.Delete(section + "/grades.txt");
+        }
+      }
+
+      Logger.Info("Grading {0} assignments for course: {1} - HW#: {2}", assignments.Count, currentCourse, currentHomework);
+
+      foreach (Assignment a in assignments)
+      {
+        string oldPath = a.FullPath;
+        a.Path = string.Format("{0}section{1}/{2}", hwPath, a.Section, a.StudentId);
+
+        Directory.CreateDirectory(a.Path);
+        if (File.Exists(a.FullPath))
+        {
+          File.Delete(a.FullPath);
+        }
+
+        File.Move(oldPath, a.FullPath);
+      }
+
+      // run grader
+      foreach (Assignment a in assignments)
+      {
+        using (StreamWriter writer = File.AppendText(a.Path + "/../grades.txt"))
+        {
+          writer.AutoFlush = true;
+          writer.WriteLine("-----------------------------------------------");
+
+          if (a.ValidHeader)
+          {
+            // run grader on each file and save grading result
+            Grader grader = new Grader();
+
+            GradingResult result = grader.Grade(a);
+            gradingResults.Add(result);
+            Logger.Info("Result: {0}", result.Grade);
+
+            string gradingComment = Jarvis.ToTextEncoding(result.ToText());
+
+            // write grade to section report              
+            writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
+            writer.WriteLine(gradingComment);
+          }
+          else
+          {
+            writer.WriteLine("Invalid header from " + a.StudentId);
+          }
+
+          writer.Close();
+        }
+      }
+
+      string gradingReport = SendGradesToSectionLeaders(hwPath, currentCourse, currentHomework);
+
+      Logger.Info("Sending Canvas CSV to jacob.h.christensen@gmail.com");
+
+      CanvasFormatter canvasFormatter = new CanvasFormatter();
+
+      string canvasCsvPath = hwPath + "canvas.csv";
+      canvasFormatter.GenerateCanvasCsv(canvasCsvPath, currentHomework, gradingResults);
+
+      SendEmail("jacob.h.christensen@gmail.com", 
+                "Grades for " + currentCourse + " " + currentHomework, 
+                "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!", 
+                canvasCsvPath);
+           
+      // Generate some kind of grading report
+      return gradingReport;
+    }
+
+    private void SendEmail(string to, string subject, string body, string attachment)
+    {
+      SmtpClient mailClient = new SmtpClient("localhost", 25);
+
+      MailMessage mail = new MailMessage("jarvis@jarvis.cs.usu.edu", to);
+      mail.Subject = subject;
+      mail.Body = body;
+      mail.Attachments.Add(new Attachment(attachment));
+
+      mailClient.Send(mail);
+    }
+
+    private string SendGradesToSectionLeaders(string hwPath, string currentCourse, string currentHomework)
+    {
+      // zip contents
+      // email to section leader
+      string[] directories = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
+      StringBuilder gradingReport = new StringBuilder();
+
+      foreach (string section in directories)
+      {
+        char sectionNumber = section[section.Length - 1];                    
+        string zipFile = string.Format("{0}/../section{1}.zip", section, sectionNumber);
+
+        // zip contents
+        if (File.Exists(zipFile))
+        {
+          File.Delete(zipFile);
+        }
+
+        ZipFile.CreateFromDirectory(section, zipFile);
+
+        string leader = File.ReadAllText(section + "/leader.txt");          
+
+        // attach to email to section leader
+        SendEmail(leader, 
+          "Grades for " + currentCourse + " " + currentHomework,
+          "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
+          zipFile);        
+
+        gradingReport.AppendLine(string.Format("Emailed section {0} grading materials to {1} <br />", sectionNumber, leader));
+      }
+
+      return gradingReport.ToString();
     }
   }
 }

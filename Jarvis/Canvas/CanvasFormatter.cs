@@ -14,7 +14,7 @@ namespace Jarvis
     private const int STUDENT_ID   = 3;
     private const int SECTION      = 5;
 
-    public string GenerateCanvasCsv(string csvPath, string homeworkId, List<GradingResult> results)
+    public void GenerateCanvasCsv(string csvPath, string homeworkId, List<GradingResult> results)
     {            
       // open course csv
       CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(csvPath)));
@@ -67,8 +67,6 @@ namespace Jarvis
 
       reader.Dispose();
       writer.Dispose();
-      System.Threading.Thread.Sleep(2000);
-      return string.Empty;
     }
   }
 }
