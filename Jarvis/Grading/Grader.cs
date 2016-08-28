@@ -294,16 +294,18 @@ namespace Jarvis
         }
       }
 
-      string gradingReport = SendGradesToSectionLeaders(hwPath, currentCourse, currentHomework);
+      string gradingReport = SendFilesToSectionLeaders(hwPath, currentCourse, currentHomework);
 
-      Logger.Info("Sending Canvas CSV to jacob.h.christensen@gmail.com");
+      string graderEmail = File.ReadAllText(hwPath + "../grader.txt");
+
+      Logger.Info("Sending Canvas CSV to {0}", graderEmail);
 
       CanvasFormatter canvasFormatter = new CanvasFormatter();
 
       string canvasCsvPath = hwPath + "canvas.csv";
       canvasFormatter.GenerateCanvasCsv(canvasCsvPath, currentHomework, gradingResults);
 
-      SendEmail("jacob.h.christensen@gmail.com", 
+      SendEmail(graderEmail, 
                 "Grades for " + currentCourse + " " + currentHomework, 
                 "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!", 
                 canvasCsvPath);
@@ -324,7 +326,7 @@ namespace Jarvis
       mailClient.Send(mail);
     }
 
-    private string SendGradesToSectionLeaders(string hwPath, string currentCourse, string currentHomework)
+    private string SendFilesToSectionLeaders(string hwPath, string currentCourse, string currentHomework)
     {
       // zip contents
       // email to section leader

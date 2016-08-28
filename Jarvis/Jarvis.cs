@@ -158,6 +158,9 @@ namespace Jarvis
                   assignmentCount = int.Parse(reader.GetAttribute("assignmentCount"));
 
                   Directory.CreateDirectory(baseDir + courseName);
+
+                  File.WriteAllText(baseDir + courseName + "/grader.txt", reader.GetAttribute("grader"));
+
                   for (int i = 1; i <= assignmentCount; ++i)
                   {
                     Directory.CreateDirectory(baseDir + courseName + "/hw" + i.ToString());
