@@ -82,17 +82,12 @@ namespace Jarvis
 
         Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3}", assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId);
 
+        assignment.Path = string.Format("{0}section{1}", gradingDir, assignment.Section);
         if (assignment.ValidHeader)
         {
-          string path = string.Format("{0}section{1}", gradingDir, assignment.Section);
-          Directory.CreateDirectory(path);
-          assignment.Path = path;
+          Directory.CreateDirectory(assignment.Path);
           // move to section and rename each file
           File.Move(cppFile, assignment.FullPath);
-        }
-        else
-        {
-          assignment.Path = cppFile;
         }
 
         assignments.Add(assignment);
@@ -129,16 +124,47 @@ namespace Jarvis
         }
       }
 
-      if (homework.StudentId != null && homework.Course != null && homework.Section != null && homework.HomeworkId != null)
+      // Quality check on header
+      if (string.IsNullOrEmpty(homework.StudentId))
       {
-        Logger.Trace ("Parse found valid header");
-        homework.ValidHeader = true;
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header is missing a student ID.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (homework.StudentId.Equals("a09999999", StringComparison.OrdinalIgnoreCase))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header contains default A#: A09999999.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (string.IsNullOrEmpty(homework.Course))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header is missing course information.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (string.IsNullOrEmpty(homework.Section))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header is missing section information.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (homework.Section.StartsWith("0"))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header contains a leading 0 in section (i.e. '001' when should be '1')";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (string.IsNullOrEmpty(homework.HomeworkId))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header is missing homework ID.";
+        Logger.Trace(homework.ErrorMessage);
       }
       else
       {
-        Logger.Trace ("Parse found invalid header");
-        // Invalid header, reject assignment
-        homework.ValidHeader = false;
+        homework.ValidHeader = true;
+        Logger.Trace ("Parse found valid header");
       }
 
       return homework;

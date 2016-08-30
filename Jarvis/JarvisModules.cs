@@ -1,4 +1,5 @@
 ﻿using Nancy.ModelBinding;
+using System.Text;
 
 namespace Jarvis
 {
@@ -38,7 +39,7 @@ namespace Jarvis
       {
         Logger.Trace("Handling post for /practiceRun");
         Grader grader = new Grader();
-        GradingResult result = null;
+        StringBuilder builder = new StringBuilder();        
 
         var request = this.Bind<FileUploadRequest>();
         var assignment = uploadHandler.HandleStudentUpload(request.File);
@@ -49,21 +50,19 @@ namespace Jarvis
         {
           // Run grader
           Logger.Debug("Assignment header was valid");
+          GradingResult result = null;
           result = grader.Grade(assignment);          
-        }
-        
-        string response = string.Empty;
-
-        if (assignment.ValidHeader)
-        {
-          response = result.ToHtml();
+          builder.Append(result.ToHtml());
         }
         else
         {
-          response = "The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.";
+            builder.AppendLine("<p>");
+            builder.AppendLine("The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.");
+            builder.AppendFormat("<br />Parser error message: {0}", assignment.ErrorMessage);
+            builder.AppendLine("</p>");
         }
 
-        return response;
+        return builder.ToString();
       };
 
       Post["/grade"] = _ =>

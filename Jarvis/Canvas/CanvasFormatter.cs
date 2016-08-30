@@ -14,21 +14,23 @@ namespace Jarvis
     private const int STUDENT_ID   = 3;
     private const int SECTION      = 5;
 
-    public void GenerateCanvasCsv(string csvPath, string homeworkId, List<GradingResult> results)
+    public string GenerateCanvasCsv(string csvPath, string homeworkId, List<GradingResult> results)
     {            
       // open course csv
-      CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(csvPath)));
-      CsvWriter writer = new CsvWriter(new StreamWriter(File.OpenWrite("test.csv")));
+      string gradesPath = string.Format("{0}/grades_hw{1}.csv", csvPath, homeworkId);
+      CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(csvPath + "../canvas.csv")));
+      CsvWriter writer = new CsvWriter(new StreamWriter(File.OpenWrite(gradesPath)));
 
       reader.ReadHeader();
 
-      for (int i = 0; i < reader.FieldHeaders.Length; ++i)
-      {
-        if (i < 6)
-        {
-          writer.WriteField(reader.FieldHeaders[i]);
-        }
+      writer.WriteField<string>(reader.FieldHeaders[STUDENT_NAME]);
+      writer.WriteField<string>(reader.FieldHeaders[CANVAS_ID]);
+      writer.WriteField<string>(reader.FieldHeaders[SIS_USER_ID]);
+      writer.WriteField<string>(reader.FieldHeaders[STUDENT_ID]);
+      writer.WriteField<string>(reader.FieldHeaders[SECTION]);
 
+      for (int i = 0; i < reader.FieldHeaders.Length; ++i)
+      {        
         if (reader.FieldHeaders[i].Contains("HW" + homeworkId))
         {
           writer.WriteField(reader.FieldHeaders[i]);
@@ -67,6 +69,8 @@ namespace Jarvis
 
       reader.Dispose();
       writer.Dispose();
+
+      return gradesPath;
     }
   }
 }

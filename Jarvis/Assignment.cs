@@ -7,6 +7,7 @@ namespace Jarvis
   {
     public bool IsGrade { get; set; }
     public bool ValidHeader { get; set; }
+    public string ErrorMessage { get; set; }
     public string StudentId { get; set; }
     public string Course { get; set; }
     public string HomeworkId { get; set; }

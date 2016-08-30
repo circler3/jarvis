@@ -116,6 +116,7 @@ namespace Jarvis
 
     private string GetExecutionOutput(Assignment homework)
     {
+      Logger.Trace("Getting input from {0}", homework.Path + "../../");
       // todo Loop and call Execute Program multiple times
       string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
       string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
@@ -130,7 +131,8 @@ namespace Jarvis
         }
         string actualOutput = ExecuteProgram(homework, input);
         string expectedOutput = GetExpectedOutput(outputFiles[i]);       
-
+        Logger.Trace("Actual output: {0}", actualOutput);
+        Logger.Trace("Expected output: {0}", expectedOutput);
         result.AppendLine("<h3>Test case: " + i.ToString() + "</h3>");
         result.AppendLine("<h3>Actual</h3>");
         result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
@@ -250,28 +252,33 @@ namespace Jarvis
 
       foreach (Assignment a in assignments)
       {
-        string oldPath = a.FullPath;
-        a.Path = string.Format("{0}section{1}/{2}", hwPath, a.Section, a.StudentId);
-
-        Directory.CreateDirectory(a.Path);
-        if (File.Exists(a.FullPath))
+        if (a.ValidHeader)
         {
-          File.Delete(a.FullPath);
-        }
+          string oldPath = a.FullPath;
+          a.Path = string.Format("{0}section{1}/{2}/", hwPath, a.Section, a.StudentId);
 
-        File.Move(oldPath, a.FullPath);
+          Directory.CreateDirectory(a.Path);
+          if (File.Exists(a.FullPath))
+          {
+            File.Delete(a.FullPath);
+          }
+
+          Logger.Trace("Moving {0} to {1}", oldPath, a.FullPath);
+          File.Move(oldPath, a.FullPath);
+        }
       }
 
       // run grader
       foreach (Assignment a in assignments)
-      {
-        using (StreamWriter writer = File.AppendText(a.Path + "/../grades.txt"))
+      {     
+        if (a.ValidHeader)
         {
-          writer.AutoFlush = true;
-          writer.WriteLine("-----------------------------------------------");
-
-          if (a.ValidHeader)
+          Logger.Trace("Writing grades to {0}", a.Path + "../grades.txt");
+          using (StreamWriter writer = File.AppendText(a.Path + "../grades.txt"))
           {
+            writer.AutoFlush = true;
+            writer.WriteLine("-----------------------------------------------");
+
             // run grader on each file and save grading result
             Grader grader = new Grader();
 
@@ -284,13 +291,9 @@ namespace Jarvis
             // write grade to section report              
             writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));
             writer.WriteLine(gradingComment);
-          }
-          else
-          {
-            writer.WriteLine("Invalid header from " + a.StudentId);
-          }
 
-          writer.Close();
+            writer.Close();
+          }
         }
       }
 
@@ -302,13 +305,12 @@ namespace Jarvis
 
       CanvasFormatter canvasFormatter = new CanvasFormatter();
 
-      string canvasCsvPath = hwPath + "canvas.csv";
-      canvasFormatter.GenerateCanvasCsv(canvasCsvPath, currentHomework, gradingResults);
+      string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentHomework, gradingResults);
 
       SendEmail(graderEmail, 
                 "Grades for " + currentCourse + " " + currentHomework, 
                 "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!", 
-                canvasCsvPath);
+                gradesPath);
            
       // Generate some kind of grading report
       return gradingReport;
@@ -332,7 +334,7 @@ namespace Jarvis
       // email to section leader
       string[] directories = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
       StringBuilder gradingReport = new StringBuilder();
-
+      gradingReport.AppendLine("<p>");
       foreach (string section in directories)
       {
         char sectionNumber = section[section.Length - 1];                    
@@ -346,16 +348,25 @@ namespace Jarvis
 
         ZipFile.CreateFromDirectory(section, zipFile);
 
-        string leader = File.ReadAllText(section + "/leader.txt");          
+        if (File.Exists(section + "/leader.txt"))
+        {
+          string leader = File.ReadAllText(section + "/leader.txt");          
 
-        // attach to email to section leader
-        SendEmail(leader, 
-          "Grades for " + currentCourse + " " + currentHomework,
-          "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
-          zipFile);        
-
-        gradingReport.AppendLine(string.Format("Emailed section {0} grading materials to {1} <br />", sectionNumber, leader));
+          // attach to email to section leader
+          SendEmail(leader, 
+            "Grades for " + currentCourse + " " + currentHomework,
+            "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
+            zipFile);        
+        
+          gradingReport.AppendLine(string.Format("Emailed section {0} grading materials to {1} <br />", sectionNumber, leader));
+        }
+        else
+        {
+          gradingReport.AppendLine(string.Format("Couldn't find section leader for section {0}<br/>", sectionNumber));
+        }
       }
+
+      gradingReport.AppendLine("</p>");
 
       return gradingReport.ToString();
     }
