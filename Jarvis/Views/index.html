@@ -13,13 +13,13 @@
       <img src="@Path['~/Content/help.png']" alt="Help" />
     </a>
   </div>
-  <form>      
-    File: <input type='file' name='file' id='file' onchange='enableUpload();' />
+  <form style='font-family: Courier;'>      
+    File:<input type='file' name='file' id='file' onchange='enableUpload();' />
     <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/run");' disabled/>
   </form>
   <br />
-  <div id='output'>
-    Select and upload a file.
+  <div id='output'>    
+      <span style='font-family: Courier;'>Select and upload a file.</span>
   </div>
 </body>
 </html>
