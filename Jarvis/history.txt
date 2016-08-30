@@ -1,2 +1,3 @@
-﻿Aug 27, 2017 ~ v1.0.0 ~ Intial release
-Aug 27, 2017 ~ v1.0.1 ~ Added version to UI
+﻿Aug 27, 2016 ~ v1.0.0 ~ Intial release
+Aug 27, 2016 ~ v1.0.1 ~ Added version to UI
+Aug 29, 2016 ~ v1.1.0 ~ Added canvas CSV formatting for auto grader
