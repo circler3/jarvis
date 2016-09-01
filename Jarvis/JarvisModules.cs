@@ -32,6 +32,12 @@ namespace Jarvis
         Logger.Trace("Handling get for /grade");
         return View["grade"];
       };
+
+      Get["/stats"] = _ =>
+      {
+        Logger.Trace("Handling get for /stats");
+        return View["stats", Jarvis.Stats];
+      };
       #endregion
 
       #region Posts
@@ -56,11 +62,13 @@ namespace Jarvis
         }
         else
         {
-            builder.AppendLine("<p>");
-            builder.AppendLine("The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.");
-            builder.AppendFormat("<br />Parser error message: {0}", assignment.ErrorMessage);
-            builder.AppendLine("</p>");
+          builder.AppendLine("<p>");
+          builder.AppendLine("The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.");
+          builder.AppendFormat("<br />Parser error message: {0}", assignment.ErrorMessage);
+          builder.AppendLine("</p>");
         }
+
+        Jarvis.Stats.WriteStats();
 
         return builder.ToString();
       };

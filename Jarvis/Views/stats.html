@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  @Partial['_header.html'];
+  <style type="text/css">
+
+  h2
+  {
+     font-family: Courier;
+  }
+
+  </style>
+
+</head>
+<body>   
+  <a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" style='vertical-align: middle;'/></a>
+  @Partial['_version.html'];
+  <br />
+  <div style="position: absolute; top:0; right:0;">
+    <a href="/help">
+      <img src="@Path['~/Content/help.png']" alt="Help" />
+    </a>
+  </div>
+
+  <h2>Jarvis System Stats</h2>
+    <p>
+      Total files processed: @Model.TotalFilesProcessed<br />
+      Total bad headers:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@Model.TotalBadHeaders
+    </p>
+
+  <h2>Homework Specific Stats</h2>
+    <p>
+      Something here
+       @Each.AssignmentData.Keys
+         @Current.TotalSubmissions
+       @EndEach
+    </p>
+</body>
+</html>

@@ -11,6 +11,8 @@ namespace Jarvis
     // Note: Students upload single cpp files  
     public Assignment HandleStudentUpload(HttpFile file)
     {
+      Jarvis.Stats.TotalFilesProcessed++;
+
       Logger.Trace ("Handling student upload");
       // Check file header
       StreamReader reader = new StreamReader(file.Value);
@@ -38,6 +40,10 @@ namespace Jarvis
           file.Value.CopyTo(destinationStream);
         }
       }
+      else
+      {
+        Jarvis.Stats.TotalBadHeaders++;
+      }        
 
       return homework;
     }

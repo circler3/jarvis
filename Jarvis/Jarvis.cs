@@ -13,7 +13,8 @@ using System.Collections.Generic;
 namespace Jarvis
 {
   public class Jarvis
-  {    
+  { 
+    public static StatsManager Stats { get; set; }
     public static Configuration Config = null;
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
     private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
@@ -65,6 +66,9 @@ namespace Jarvis
       {
         Logger.Info("Loaded local config file");
       }
+        
+      Stats = new StatsManager();
+      Stats.ReadStats();
 
       // Register Unhandled exceptions
       AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(ExceptionHandler);

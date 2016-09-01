@@ -14,14 +14,27 @@ namespace Jarvis
   {
     private bool forcedKill = false;
     private Process executionProcess;
-
-    public Grader()
-    {
-
-    }
       
     public GradingResult Grade(Assignment homework)
     {
+      AssignmentStats stats = null;
+      if (!Jarvis.Stats.AssignmentData.ContainsKey(homework.Course + homework.HomeworkId))
+      {
+        stats = new AssignmentStats();
+        Jarvis.Stats.AssignmentData.Add(homework.Course + homework.HomeworkId, stats);
+      }
+      else
+      {
+        stats = Jarvis.Stats.AssignmentData[homework.Course + homework.HomeworkId];
+      }
+
+      stats.TotalSubmissions++;
+
+      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
+      {
+        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
+      }
+
       GradingResult result = new GradingResult(homework);
 
       // Style check
@@ -47,6 +60,8 @@ namespace Jarvis
 
       // Write result into results file, writes a new entry for each run
       RecordResult(homework, result);
+
+      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade;
 
       return result;
     }
@@ -228,7 +243,7 @@ namespace Jarvis
     }
 
     public string GenerateGrades(string baseDir, List<Assignment> assignments)
-    {
+    {      
       List<GradingResult> gradingResults = new List<GradingResult>();
       // extract to temp directory
       // parse headers

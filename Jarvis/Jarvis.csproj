@@ -68,6 +68,7 @@
     <Compile Include="Assignment.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Canvas\CanvasFormatter.cs" />
+    <Compile Include="StatsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -97,6 +98,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="history.txt" />
+    <None Include="Views\stats.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\gradingHelp.png">
