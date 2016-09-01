@@ -151,7 +151,7 @@ namespace Jarvis
           {
             switch (reader.NodeType)
             {
-              case XmlNodeType.Element:
+              case XmlNodeType.Element:                
                 if (reader.Name.ToLower() == "course")
                 {                
                   courseName = reader.GetAttribute("name");

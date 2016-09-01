@@ -114,7 +114,7 @@ namespace Jarvis
         }
         else if (s.Contains("section:"))
         {
-          homework.Section = s.Split(':')[1].Trim();
+          homework.Section = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }); // Trim spaces and leading 0's
           Logger.Trace ("Parse header section: {0}", homework.Section);
         }
         else if (s.Contains("hw#:"))
@@ -143,22 +143,34 @@ namespace Jarvis
         homework.ErrorMessage = "Header is missing course information.";
         Logger.Trace(homework.ErrorMessage);
       }
-      else if (string.IsNullOrEmpty(homework.Section))
+      else if (ValidateCourse(homework.Course))
       {
         homework.ValidHeader = false;
-        homework.ErrorMessage = "Header is missing section information.";
-        Logger.Trace(homework.ErrorMessage);
-      }
-      else if (homework.Section.StartsWith("0"))
-      {
-        homework.ValidHeader = false;
-        homework.ErrorMessage = "Header contains a leading 0 in section (i.e. '001' when should be '1')";
+        homework.ErrorMessage = string.Format("{0} is not a valid course.", homework.Course);
         Logger.Trace(homework.ErrorMessage);
       }
       else if (string.IsNullOrEmpty(homework.HomeworkId))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing homework ID.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (ValidateHomeworkId(homework.Course, homework.HomeworkId))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = string.Format("{0} is not a valid homework ID.", homework.HomeworkId);
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (string.IsNullOrEmpty(homework.Section))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Header is missing section information.";
+        Logger.Trace(homework.ErrorMessage);
+      }
+      else if (ValidateSection(homework.Course, homework.HomeworkId, homework.Section))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = string.Format("{0} is not a valid section.", homework.Section);
         Logger.Trace(homework.ErrorMessage);
       }
       else
@@ -169,5 +181,33 @@ namespace Jarvis
 
       return homework;
     }
+
+    private bool ValidateCourse(string course)
+    {      
+      string coursePath = string.Format("{0}/courses/{1}", Jarvis.Config.AppSettings.Settings["workingDir"].Value, course);
+
+      Logger.Trace("Validating course with path {0}", coursePath);
+
+      return !Directory.Exists(coursePath);          
+    }
+
+    private bool ValidateHomeworkId(string course, string homeworkdId)
+    {
+      string hwPath = string.Format("{0}/courses/{1}/hw{2}", Jarvis.Config.AppSettings.Settings["workingDir"].Value, course, homeworkdId);
+
+      Logger.Trace("Validating course with path {0}", hwPath);
+
+      return !Directory.Exists(hwPath);
+    }
+
+    private bool ValidateSection(string course, string hwId, string section)
+    {
+      string sectionPath = string.Format("{0}/courses/{1}/hw{2}/section{3}", Jarvis.Config.AppSettings.Settings["workingDir"].Value, course, hwId, section);
+
+      Logger.Trace("Validating course with path {0}", sectionPath);
+
+      return !Directory.Exists(sectionPath);
+    }
+
   }
 }
