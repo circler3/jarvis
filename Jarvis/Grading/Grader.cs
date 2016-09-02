@@ -18,14 +18,16 @@ namespace Jarvis
     public GradingResult Grade(Assignment homework)
     {
       AssignmentStats stats = null;
-      if (!Jarvis.Stats.AssignmentData.ContainsKey(homework.Course + homework.HomeworkId))
+      string name = homework.Course + " - hw" + homework.HomeworkId;
+      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
       {
         stats = new AssignmentStats();
-        Jarvis.Stats.AssignmentData.Add(homework.Course + homework.HomeworkId, stats);
+        stats.Name = name;
+        Jarvis.Stats.AssignmentData.Add(name, stats);
       }
       else
       {
-        stats = Jarvis.Stats.AssignmentData[homework.Course + homework.HomeworkId];
+        stats = Jarvis.Stats.AssignmentData[name];
       }
 
       stats.TotalSubmissions++;

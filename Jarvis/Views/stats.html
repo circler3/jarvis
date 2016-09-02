@@ -4,7 +4,7 @@
   @Partial['_header.html'];
   <style type="text/css">
 
-  h2
+  h2, h3
   {
      font-family: Courier;
   }
@@ -29,11 +29,13 @@
     </p>
 
   <h2>Homework Specific Stats</h2>
-    <p>
-      Something here
-       @Each.AssignmentData.Keys
-         @Current.TotalSubmissions
-       @EndEach
-    </p>
+     @Each.HomeworkStats
+       <h3>@Current.Name</h3>
+       <p>
+         Total submissions: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Current.TotalSubmissions<br />
+         Total unique submissions: @Current.GetUniqueSubmissionCount<br />
+         Total full credit: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @Current.TotalFullCredit<br />
+       </p>
+     @EndEach
 </body>
 </html>

@@ -8,14 +8,40 @@ namespace Jarvis
 {
   public class AssignmentStats
   {
+    public string Name { get; set; }
     public int TotalSubmissions { get; set; }
-    public int TotalFullCredit { get; set; }
     public Dictionary<string, string> TotalUniqueStudentsSubmissions { get; set; }
+
+    public int TotalFullCredit 
+    { 
+      get
+      {
+        int total = 0;
+
+        foreach (string grade in TotalUniqueStudentsSubmissions.Values)
+        {
+          if (grade == "100")
+          {
+            total++;
+          }
+        }
+
+        return total;
+      }
+    }
+
+    public int GetUniqueSubmissionCount 
+    {
+      get
+      {
+        return TotalUniqueStudentsSubmissions.Count;
+      }
+    }
 
     public AssignmentStats()
     {
       TotalUniqueStudentsSubmissions = new Dictionary<string, string>();
-    }
+    }      
   }
 
   public class StatsManager
@@ -24,56 +50,76 @@ namespace Jarvis
     public int TotalFilesProcessed { get; set; }    
     public Dictionary<string, AssignmentStats> AssignmentData { get; set; }
 
+    public List<AssignmentStats> HomeworkStats
+    {
+      get
+      {
+        List<AssignmentStats> stats = new List<AssignmentStats>();
+
+        foreach(AssignmentStats stat in AssignmentData.Values)
+        {
+          stats.Add(stat);
+        }
+
+        return stats;
+      }
+    }
+
     public StatsManager()
     {
       AssignmentData = new Dictionary<string, AssignmentStats>();
     }
 
     public void ReadStats()
-    {
+    {        
       string statsPath = string.Format("{0}/stats.xml", Jarvis.Config.AppSettings.Settings["workingDir"].Value);
-      string currentAssignmentKey = string.Empty;
-      FileStream stream = File.OpenRead(statsPath);
 
-      using (XmlReader reader = XmlReader.Create(stream))
+      if (File.Exists(statsPath))
       {
-        while (reader.Read())
+        string currentAssignmentKey = string.Empty;
+        FileStream stream = File.OpenRead(statsPath);
+
+        using (XmlReader reader = XmlReader.Create(stream))
         {
-          switch (reader.NodeType)
+          while (reader.Read())
           {
-            case XmlNodeType.Element:                
-              switch(reader.Name)
-              {
-                case "JarvisStats":
-                  TotalBadHeaders = int.Parse(reader.GetAttribute("TotalBadHeaders"));
-                  TotalFilesProcessed = int.Parse(reader.GetAttribute("TotalFilesProcessed"));
-                  break;  
+            switch (reader.NodeType)
+            {
+              case XmlNodeType.Element:                
+                switch (reader.Name)
+                {
+                  case "JarvisStats":
+                    TotalBadHeaders = int.Parse(reader.GetAttribute("TotalBadHeaders"));
+                    TotalFilesProcessed = int.Parse(reader.GetAttribute("TotalFilesProcessed"));
+                    break;  
 
-                case "Assignment":
-                  AssignmentStats stats = new AssignmentStats();
-                  currentAssignmentKey = reader.GetAttribute("Key");
-                  stats.TotalSubmissions = int.Parse(reader.GetAttribute("TotalSubmissions"));
-                  stats.TotalFullCredit = int.Parse(reader.GetAttribute("TotalFullCredit"));
+                  case "Assignment":
+                    AssignmentStats stats = new AssignmentStats();
+                    stats.Name = reader.GetAttribute("Name");
+                    stats.TotalSubmissions = int.Parse(reader.GetAttribute("TotalSubmissions"));
 
-                  AssignmentData.Add(currentAssignmentKey, stats);
-                  break;
+                    AssignmentData.Add(stats.Name, stats);
 
-                case "Submission":
-                  string studentId = reader.GetAttribute("Student");
-                  string grade = reader.GetAttribute("Grade");
-                  if (AssignmentData.ContainsKey(currentAssignmentKey))
-                  {
-                    AssignmentData[currentAssignmentKey].TotalUniqueStudentsSubmissions.Add(studentId, grade);
-                  }
-                  break;
-              }
-              break;
+                    currentAssignmentKey = stats.Name;
+                    break;
+
+                  case "Submission":
+                    string studentId = reader.GetAttribute("Student");
+                    string grade = reader.GetAttribute("Grade");
+                    if (AssignmentData.ContainsKey(currentAssignmentKey))
+                    {
+                      AssignmentData[currentAssignmentKey].TotalUniqueStudentsSubmissions.Add(studentId, grade);
+                    }
+                    break;
+                }
+                break;
+            }
           }
         }
-      }
 
-      stream.Close();
-      stream.Dispose();
+        stream.Close();
+        stream.Dispose();
+      }
     }
 
     public void WriteStats()
@@ -93,9 +139,8 @@ namespace Jarvis
         {        
           writer.WriteStartElement("Assignment");
 
-          writer.WriteAttributeString("Key", key);
+          writer.WriteAttributeString("Name", AssignmentData[key].Name);
           writer.WriteAttributeString("TotalSubmissions", AssignmentData[key].TotalSubmissions.ToString());
-          writer.WriteAttributeString("TotalFullCredit", AssignmentData[key].TotalFullCredit.ToString());
 
           foreach (string student in AssignmentData[key].TotalUniqueStudentsSubmissions.Keys)
           {
