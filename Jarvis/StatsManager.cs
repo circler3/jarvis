@@ -126,7 +126,7 @@ namespace Jarvis
     { 
       string statsPath = string.Format("{0}/stats.xml", Jarvis.Config.AppSettings.Settings["workingDir"].Value);
 
-      FileStream stream = File.OpenWrite(statsPath);
+      FileStream stream = File.Create(statsPath);
 
       using (XmlWriter writer = XmlWriter.Create(stream))
       {

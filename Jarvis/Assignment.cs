@@ -37,7 +37,7 @@ namespace Jarvis
     {
       get
       {
-        return Path + "/" + Filename;
+        return Path + Filename;
       }
     }
   }

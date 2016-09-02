@@ -51,7 +51,7 @@
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="CsvHelper">
-      <HintPath>..\packages\CsvHelper.2.16.0.0\lib\net45\CsvHelper.dll</HintPath>
+      <HintPath>..\packages\CsvHelper.2.16.1.0\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

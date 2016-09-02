@@ -17,26 +17,6 @@ namespace Jarvis
       
     public GradingResult Grade(Assignment homework)
     {
-      AssignmentStats stats = null;
-      string name = homework.Course + " - hw" + homework.HomeworkId;
-      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
-      {
-        stats = new AssignmentStats();
-        stats.Name = name;
-        Jarvis.Stats.AssignmentData.Add(name, stats);
-      }
-      else
-      {
-        stats = Jarvis.Stats.AssignmentData[name];
-      }
-
-      stats.TotalSubmissions++;
-
-      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
-      {
-        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
-      }
-
       GradingResult result = new GradingResult(homework);
 
       // Style check
@@ -62,10 +42,35 @@ namespace Jarvis
 
       // Write result into results file, writes a new entry for each run
       RecordResult(homework, result);
+      UpdateStats(homework, result);
 
-      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade;
 
       return result;
+    }
+
+    private void UpdateStats(Assignment homework, GradingResult result)
+    {
+      AssignmentStats stats = null;
+      string name = homework.Course + " - hw" + homework.HomeworkId;
+      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
+      {
+        stats = new AssignmentStats();
+        stats.Name = name;
+        Jarvis.Stats.AssignmentData.Add(name, stats);
+      }
+      else
+      {
+        stats = Jarvis.Stats.AssignmentData[name];
+      }
+
+      stats.TotalSubmissions++;
+
+      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
+      {
+        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
+      }
+
+      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade;
     }
 
     private void RecordResult(Assignment homework, GradingResult result)
@@ -137,45 +142,77 @@ namespace Jarvis
       // todo Loop and call Execute Program multiple times
       string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
       string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
-      StringBuilder result = new StringBuilder();
+      string result = string.Empty;
 
-      for (int i = 0; i < outputFiles.Length; ++i)
+      if (outputFiles.Length > 0)
       {
-        string input = "";
-        if (inputFiles.Length > i)
+        for (int i = 0; i < outputFiles.Length; ++i)
         {
-          input = inputFiles[i];
-        }
-        string actualOutput = ExecuteProgram(homework, input);
-        string expectedOutput = GetExpectedOutput(outputFiles[i]);       
-        Logger.Trace("Actual output: {0}", actualOutput);
-        Logger.Trace("Expected output: {0}", expectedOutput);
-        result.AppendLine("<h3>Test case: " + i.ToString() + "</h3>");
-        result.AppendLine("<h3>Actual</h3>");
-        result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
-        result.AppendLine("<br />");
-        result.AppendLine("<h3>Expected</h3>");
-        result.AppendLine("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
-        result.AppendLine("<br />");
-        result.AppendLine("<h3>Diff</h3>");
+          string input = "";
+          if (inputFiles.Length > i)
+          {
+            input = inputFiles[i];
+          }
 
-        string testDiff = string.Empty;
 
-        if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
-        {
-          testDiff = "No difference";
-        }
-        else
-        {
-          testDiff = HtmlDiff.HtmlDiff.Execute(actualOutput, expectedOutput);
+          string actualOutput = ExecuteProgram(homework, input);
+          string expectedOutput = GetExpectedOutput(outputFiles[i]);       
+          Logger.Trace("Actual output: {0}", actualOutput);
+          Logger.Trace("Expected output: {0}", expectedOutput);
+
+
+          string testDiff = string.Empty;
+
+          if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
+          {
+            testDiff = "No difference";
+          }
+          else
+          {
+            string htmlActualOutput = Jarvis.ToHtmlEncoding(actualOutput);
+            string htmlExpectedOutput = Jarvis.ToHtmlEncoding(expectedOutput);
+            testDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
+          }
+
+          result += BuildHtmlOutput(i, actualOutput, expectedOutput, testDiff);
+
         }
 
-        result.AppendLine("<p>" + testDiff + "</p>");
-        result.AppendLine("------------------------------------------------------------------");
+        // Don't leave binaries hanging around
+        File.Delete(homework.Path + homework.StudentId);
+      }
+      else
+      {
+        result = "<p>Sir, I cannot find any output files for this assignment. Perhaps the instructor hasn't set it up yet?<p>";
       }
 
-      // Don't leave binaries hanging around
-      File.Delete(homework.Path + homework.StudentId);
+      return result;
+    }
+      
+    private string BuildHtmlOutput(int testCaseId, string actualOutput, string expectedOutput, string diff)
+    {
+      StringBuilder result = new StringBuilder();
+
+      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
+      result.Append("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case: " + testCaseId.ToString() + "</h3>");
+      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
+      result.Append("<table>");
+      result.Append("<tr>");
+      result.Append("<td>");
+      result.Append("<h3>Actual</h3>");
+      result.Append("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
+      result.Append("</td>");
+      result.Append("<td>");
+      result.Append("<h3>Expected</h3>");
+      result.Append("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
+      result.Append("</td>");
+      result.Append("<td>");
+      result.Append("<h3>Diff</h3>");
+      result.Append("<p>" + diff + "</p>");
+      result.Append("</td>");
+      result.Append("</tr>");
+      result.Append("</table>");
+
 
       return result.ToString();
     }
