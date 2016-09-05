@@ -15,7 +15,7 @@ namespace Jarvis
     private bool forcedKill = false;
     private Process executionProcess;
       
-    public GradingResult Grade(Assignment homework)
+    public GradingResult Grade(Assignment homework, bool isStudent)
     {
       GradingResult result = new GradingResult(homework);
 
@@ -31,7 +31,7 @@ namespace Jarvis
       if (result.CompileMessage == "Success!!")
       {
         Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
-        result.OutputMessage = GetExecutionOutput(homework, result);
+        result.OutputMessage = GetExecutionOutput(homework, isStudent, result);
 
         //result.CorrectOutput = result.OutputMessage.Contains("No difference");
       }
@@ -136,12 +136,23 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string GetExecutionOutput(Assignment homework, GradingResult grade)
+    private string GetExecutionOutput(Assignment homework, bool isStudent, GradingResult grade)
     {
-      Logger.Trace("Getting input from {0}", homework.Path + "../../");
+      string testCaseLocation = homework.Path + "../../";
+
+      if (isStudent)
+      {
+        testCaseLocation += "studentTests/";
+      }
+      else
+      {
+        testCaseLocation += "graderTests/";
+      }
+
+      Logger.Trace("Getting input from {0}", testCaseLocation);
       // todo Loop and call Execute Program multiple times
-      string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
-      string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
+      string[] inputFiles = Directory.GetFiles(testCaseLocation, "input*");
+      string[] outputFiles = Directory.GetFiles(testCaseLocation, "output*");
       string result = string.Empty;
       int invalidTestCases = 0;
       int totalTestCases = 0;
@@ -345,7 +356,7 @@ namespace Jarvis
             // run grader on each file and save grading result
             Grader grader = new Grader();
 
-            GradingResult result = grader.Grade(a);
+            GradingResult result = grader.Grade(a, false);
             gradingResults.Add(result);
             Logger.Info("Result: {0}", result.Grade);
 

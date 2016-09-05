@@ -57,7 +57,7 @@ namespace Jarvis
           // Run grader
           Logger.Debug("Assignment header was valid");
           GradingResult result = null;
-          result = grader.Grade(assignment);          
+          result = grader.Grade(assignment, true);          
           builder.Append(result.ToHtml());
         }
         else
