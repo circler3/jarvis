@@ -31,9 +31,9 @@ namespace Jarvis
       if (result.CompileMessage == "Success!!")
       {
         Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
-        result.OutputMessage = GetExecutionOutput(homework);
+        result.OutputMessage = GetExecutionOutput(homework, result);
 
-        result.CorrectOutput = result.OutputMessage.Contains("No difference");
+        //result.CorrectOutput = result.OutputMessage.Contains("No difference");
       }
       else
       {
@@ -136,13 +136,15 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string GetExecutionOutput(Assignment homework)
+    private string GetExecutionOutput(Assignment homework, GradingResult grade)
     {
       Logger.Trace("Getting input from {0}", homework.Path + "../../");
       // todo Loop and call Execute Program multiple times
       string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
       string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
       string result = string.Empty;
+      int invalidTestCases = 0;
+      int totalTestCases = 0;
 
       if (outputFiles.Length > 0)
       {
@@ -154,14 +156,14 @@ namespace Jarvis
             input = inputFiles[i];
           }
 
-
           string actualOutput = ExecuteProgram(homework, input);
           string expectedOutput = GetExpectedOutput(outputFiles[i]);       
           Logger.Trace("Actual output: {0}", actualOutput);
           Logger.Trace("Expected output: {0}", expectedOutput);
 
-
           string testDiff = string.Empty;
+          string passed = "Passed";
+          totalTestCases++;
 
           if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
           {
@@ -172,9 +174,11 @@ namespace Jarvis
             string htmlActualOutput = Jarvis.ToHtmlEncoding(actualOutput);
             string htmlExpectedOutput = Jarvis.ToHtmlEncoding(expectedOutput);
             testDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
+            passed = "Failed";
+            invalidTestCases++;
           }
 
-          result += BuildHtmlOutput(i, actualOutput, expectedOutput, testDiff);
+          result += BuildHtmlOutput(i, actualOutput, expectedOutput, testDiff, passed);
 
         }
 
@@ -186,15 +190,20 @@ namespace Jarvis
         result = "<p>Sir, I cannot find any output files for this assignment. Perhaps the instructor hasn't set it up yet?<p>";
       }
 
+      if (totalTestCases > 0)
+      {
+        grade.InvalidOutputPercentage = invalidTestCases / (double)totalTestCases;
+      }
+
       return result;
     }
       
-    private string BuildHtmlOutput(int testCaseId, string actualOutput, string expectedOutput, string diff)
+    private string BuildHtmlOutput(int testCaseId, string actualOutput, string expectedOutput, string diff, string passed)
     {
       StringBuilder result = new StringBuilder();
 
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-      result.Append("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case: " + testCaseId.ToString() + "</h3>");
+      result.Append("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case: " + testCaseId.ToString() + ": " + passed + "</h3>");
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
       result.Append("<table>");
       result.Append("<tr>");
