@@ -3,6 +3,12 @@
 <head>
   @Partial['_header.html'];
   @Partial['_script.html'];
+  <script>
+    window.onload = function()
+    {
+      document.getElementById('version').style.color = "#C20000";
+    };
+  </script>
 </head>
 <body>
   <a href="/grade"><img src="@Path['~/Content/gradingLogo.png']" alt="Jarvis logo" style='vertical-align: middle;'/></a>
