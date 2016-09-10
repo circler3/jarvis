@@ -138,58 +138,64 @@ namespace Jarvis
       }
 
       // Quality check on header
-      if (string.IsNullOrEmpty(homework.StudentId))
+      if (!homework.StudentId.Contains("a"))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "A# should be in the format: a09999999, including the 'a'";
+        Logger.Warn(homework.ErrorMessage);
+      }
+      else if (string.IsNullOrEmpty(homework.StudentId))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing a student ID.";
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (homework.StudentId.Equals("a09999999", StringComparison.OrdinalIgnoreCase))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header contains default A#: A09999999.";
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (string.IsNullOrEmpty(homework.Course))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing course information.";
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (ValidateCourse(homework.Course))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = string.Format("{0} is not a valid course.", homework.Course);
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (string.IsNullOrEmpty(homework.HomeworkId))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing homework ID.";
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (ValidateHomeworkId(homework.Course, homework.HomeworkId))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = string.Format("{0} is not a valid homework ID.", homework.HomeworkId);
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (string.IsNullOrEmpty(homework.Section))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing section information.";
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else if (ValidateSection(homework.Course, homework.HomeworkId, homework.Section))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = string.Format("{0} is not a valid section.", homework.Section);
-        Logger.Trace(homework.ErrorMessage);
+        Logger.Warn(homework.ErrorMessage);
       }
       else
       {
         homework.ValidHeader = true;
-        Logger.Trace ("Parse found valid header");
+        Logger.Info ("Parse found valid header");
       }
 
       return homework;
