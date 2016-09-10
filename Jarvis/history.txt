@@ -2,3 +2,4 @@
 Aug 27, 2016 ~ v1.0.1 ~ Added version to UI
 Aug 29, 2016 ~ v1.1.0 ~ Added canvas CSV formatting for auto grader
 Sep 01, 2016 ~ v1.2.0 ~ Added stats page and better reporting on header errors
+Sep 09, 2016 ~ v1.2.1 ~ Hot fix to handle duplicate student IDs in grading file

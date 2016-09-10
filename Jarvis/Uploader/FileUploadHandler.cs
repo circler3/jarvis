@@ -88,15 +88,22 @@ namespace Jarvis
 
         Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3}", assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId);
 
-        assignment.Path = string.Format("{0}section{1}", gradingDir, assignment.Section);
+        assignment.Path = string.Format("{0}section{1}/", gradingDir, assignment.Section);
         if (assignment.ValidHeader)
         {
           Directory.CreateDirectory(assignment.Path);
           // move to section and rename each file
-          File.Move(cppFile, assignment.FullPath);
-        }
 
-        assignments.Add(assignment);
+          try
+          {
+            File.Move(cppFile, assignment.FullPath);
+            assignments.Add(assignment);
+          }
+          catch (IOException)
+          {
+            Logger.Warn("File " + assignment.FullPath + " already exists! Possible cheating?!");
+          }
+        }
       }
       
       return assignments;
