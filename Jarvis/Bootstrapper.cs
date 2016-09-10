@@ -1,4 +1,5 @@
 ﻿using Nancy.Bootstrapper;
+using System.Text;
 
 namespace Jarvis
 {
@@ -16,8 +17,18 @@ namespace Jarvis
       StaticConfiguration.EnableRequestTracing = true;
       StaticConfiguration.DisableErrorTraces = false;
 
-      pipelines.OnError += (ctx, ex) => {
-        Logger.Fatal(ex.StackTrace.ToString());
+      pipelines.OnError += (ctx, e) => {
+
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("");
+        sb.AppendLine("-------------------------------");
+        sb.AppendLine(e.TargetSite.ToString());
+        sb.AppendLine(e.Message);
+        sb.AppendLine(e.StackTrace);
+        sb.AppendLine("-------------------------------");
+        sb.AppendLine("");
+
+        Logger.Fatal(sb.ToString());
 
         return null;
       };
