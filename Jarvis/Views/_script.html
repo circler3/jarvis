@@ -7,7 +7,7 @@
   {
     var x = document.getElementById("file");
 
-    if (x.value != "")
+    if (x.value !== "")
     {
       document.getElementById("uploadButton").disabled = false;
     }
@@ -27,17 +27,22 @@
 
     var formData = new FormData();
 
-    if (document.getElementById('file').files[0] != undefined) {
+    if (document.getElementById('file').files[0] != undefined)
+    {
       formData.append('file', document.getElementById('file').files[0], "thefile");
-    } else if (dragFile !== undefined) {
+    }
+    else if (dragFile !== undefined)
+    {
       formData.append('file', dragFile, "thefile");
-    } else {
+    }
+    else
+    {
       alert('ooops, no file was selected');
     }
 
     xhttp.onreadystatechange = function()
     {
-      if (xhttp.readyState == 4 && xhttp.status == 200)
+      if (xhttp.readyState === 4 && xhttp.status === 200)
       {
         window.clearTimeout(dotterTimer);
         document.getElementById("output").innerHTML = xhttp.responseText;
@@ -70,11 +75,12 @@
   function FileDragHover(e) {
     e.stopPropagation();
     e.preventDefault();
-    e.target.className = (e.type == "dragover" ? "hover" : "");
+    e.target.className = (e.type === "dragover" ? "hover" : "");
   }
 
   // file selection
-  function FileSelectHandler(e) {
+  function FileSelectHandler(e)
+  {
     // cancel event and hover styling
     FileDragHover(e);
     var files = e.target.files || e.dataTransfer.files;
@@ -82,7 +88,8 @@
     uploadToJarvis('/run');
   }
 
-  function initHandlers() {
+  function initHandlers()
+  {
     var filedrag = document.getElementById("filedrag");
     filedrag.addEventListener("dragover", FileDragHover, false);
     filedrag.addEventListener("dragleave", FileDragHover, false);
