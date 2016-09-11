@@ -72,7 +72,8 @@
   }
 
   // file drag hover
-  function FileDragHover(e) {
+  function FileDragHover(e)
+  {
     e.stopPropagation();
     e.preventDefault();
     e.target.className = (e.type === "dragover" ? "hover" : "");
