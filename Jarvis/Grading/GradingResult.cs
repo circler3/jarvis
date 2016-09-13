@@ -24,16 +24,16 @@ namespace Jarvis
     {
       get
       {
-        int score = 100;
+        double score = 10.0f;
 
         if (!StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
         {
-          score -= 20;
+          score -= 2.0f;
         }
 
         if (InvalidOutputPercentage > 0.0)
         {
-          score -= (int)(80 * InvalidOutputPercentage);
+          score -= (int)(8.0f * InvalidOutputPercentage);
         }
 
         return score.ToString();
