@@ -37,7 +37,7 @@ namespace Jarvis
       }
       else
       {
-        result.OutputMessage = "Didn't compile... :(";
+        result.OutputMessage = "<p>Didn't compile... :(</p>";
       }
 
       // Write result into results file, writes a new entry for each run
