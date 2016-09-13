@@ -71,6 +71,16 @@ namespace Jarvis
       }
 
       stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
+
+      if (!result.CompileMessage.Contains("Success!!"))
+      {
+        stats.TotalNonCompile++;
+      }
+
+      if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+      {
+        stats.TotalBadStyle++;
+      }
     }
 
     private void RecordResult(Assignment homework, GradingResult result)

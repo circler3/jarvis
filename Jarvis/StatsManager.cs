@@ -10,6 +10,8 @@ namespace Jarvis
   {
     public string Name { get; set; }
     public int TotalSubmissions { get; set; }
+    public int TotalNonCompile { get; set; }
+    public int TotalBadStyle { get; set; }
     public Dictionary<string, string> TotalUniqueStudentsSubmissions { get; set; }
 
     public int TotalFullCredit 
@@ -98,6 +100,12 @@ namespace Jarvis
                     stats.Name = reader.GetAttribute("Name");
                     stats.TotalSubmissions = int.Parse(reader.GetAttribute("TotalSubmissions"));
 
+                    if (!string.IsNullOrEmpty(reader.GetAttribute("TotalNonCompile")))
+                    {
+                      stats.TotalNonCompile = int.Parse(reader.GetAttribute("TotalNonCompile"));
+                      stats.TotalBadStyle = int.Parse(reader.GetAttribute("TotalBadStyle"));
+                    }
+                      
                     AssignmentData.Add(stats.Name, stats);
 
                     currentAssignmentKey = stats.Name;
@@ -141,6 +149,8 @@ namespace Jarvis
 
           writer.WriteAttributeString("Name", AssignmentData[key].Name);
           writer.WriteAttributeString("TotalSubmissions", AssignmentData[key].TotalSubmissions.ToString());
+          writer.WriteAttributeString("TotalNonCompile", AssignmentData[key].TotalNonCompile.ToString());
+          writer.WriteAttributeString("TotalBadStyle", AssignmentData[key].TotalBadStyle.ToString());
 
           foreach (string student in AssignmentData[key].TotalUniqueStudentsSubmissions.Keys)
           {

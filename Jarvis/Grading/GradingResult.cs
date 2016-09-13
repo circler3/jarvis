@@ -31,7 +31,11 @@ namespace Jarvis
           score -= 2.0f;
         }
 
-        if (InvalidOutputPercentage > 0.0)
+        if (CompileMessage != "Success!!")
+        {
+          score -= 8.0f;
+        }
+        else if (InvalidOutputPercentage > 0.0)
         {
           score -= (int)(8.0f * InvalidOutputPercentage);
         }

@@ -43,7 +43,7 @@ namespace Jarvis
       #region Posts
       Post["/run"] = _ =>
       {
-        Logger.Trace("Handling post for /practiceRun");
+        Logger.Trace("Handling post for /run");
         Grader grader = new Grader();
         StringBuilder builder = new StringBuilder();        
 
@@ -75,7 +75,7 @@ namespace Jarvis
 
       Post["/grade"] = _ =>
       {
-        Logger.Trace("Handling post for /runForRecord");
+        Logger.Trace("Handling post for /grade");
         Guid temp = Guid.NewGuid();
         string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
         string gradingDir = baseDir + "/grading/" + temp.ToString() + "/";  
