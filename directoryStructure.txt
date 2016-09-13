@@ -1,0 +1,25 @@
+courses
+ |
+ +-cs1400
+    |
+    +-canvas.csv
+	+-grader.txt
+	+-hw1
+	   |
+	   +-input
+	   |  |
+	   |  +-file1.txt
+	   |  +-file2.txt
+	   |  +-stdin1.txt
+	   |  +-stdin2.txt
+	   +-output
+	   |  |
+	   |  +-file1.txt
+	   |  +-file2.txt
+	   |  +-stdout1.txt
+	   |  +-stdout2.txt
+	   +-section1
+	   |  |
+	   |  +-leader.txt
+	   |  +-a0000000000
+	   +-section2
