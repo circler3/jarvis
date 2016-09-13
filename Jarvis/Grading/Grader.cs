@@ -70,7 +70,7 @@ namespace Jarvis
         stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
       }
 
-      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade;
+      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
     }
 
     private void RecordResult(Assignment homework, GradingResult result)
@@ -157,7 +157,7 @@ namespace Jarvis
           }
 
           string actualOutput = ExecuteProgram(homework, input);
-          string expectedOutput = GetExpectedOutput(outputFiles[i]);       
+          string expectedOutput = GetExpectedOutput(outputFiles[i]);
           Logger.Trace("Actual output: {0}", actualOutput);
           Logger.Trace("Expected output: {0}", expectedOutput);
 
@@ -171,8 +171,8 @@ namespace Jarvis
           }
           else
           {
-            string htmlActualOutput = Jarvis.ToHtmlEncoding(actualOutput);
-            string htmlExpectedOutput = Jarvis.ToHtmlEncoding(expectedOutput);
+            string htmlActualOutput = Jarvis.ToHtmlEncodingWithNewLines(actualOutput);
+            string htmlExpectedOutput = Jarvis.ToHtmlEncodingWithNewLines(expectedOutput);
             testDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
             passed = "Failed";
             invalidTestCases++;
@@ -209,11 +209,11 @@ namespace Jarvis
       result.Append("<tr>");
       result.Append("<td>");
       result.Append("<h3>Actual</h3>");
-      result.Append("<p>" + Jarvis.ToHtmlEncoding(actualOutput) + "</p>");
+      result.Append("<p>" + Jarvis.ToHtmlEncodingWithNewLines(actualOutput) + "</p>");
       result.Append("</td>");
       result.Append("<td>");
       result.Append("<h3>Expected</h3>");
-      result.Append("<p>" + Jarvis.ToHtmlEncoding(expectedOutput) + "</p>");
+      result.Append("<p>" + Jarvis.ToHtmlEncodingWithNewLines(expectedOutput) + "</p>");
       result.Append("</td>");
       result.Append("<td>");
       result.Append("<h3>Diff</h3>");
@@ -370,11 +370,11 @@ namespace Jarvis
 
       string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentHomework, gradingResults);
 
-      SendEmail(graderEmail, 
-                "Grades for " + currentCourse + " " + currentHomework, 
-                "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!", 
+      SendEmail(graderEmail,
+                "Grades for " + currentCourse + " " + currentHomework,
+                "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
                 gradesPath);
-           
+
       // Generate some kind of grading report
       return gradingReport;
     }
@@ -413,7 +413,7 @@ namespace Jarvis
 
         if (File.Exists(section + "/leader.txt"))
         {
-          string leader = File.ReadAllText(section + "/leader.txt");          
+          string leader = File.ReadAllText(section + "/leader.txt");
 
           // attach to email to section leader
           SendEmail(leader, 

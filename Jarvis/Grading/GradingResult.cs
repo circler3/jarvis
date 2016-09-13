@@ -20,7 +20,7 @@ namespace Jarvis
     public string OutputMessage { get; set; }
     public double InvalidOutputPercentage { get; set; }
 
-    public string Grade
+    public double Grade
     {
       get
       {
@@ -36,7 +36,7 @@ namespace Jarvis
           score -= (int)(8.0f * InvalidOutputPercentage);
         }
 
-        return score.ToString();
+        return score;
       }
     }
       
@@ -44,7 +44,7 @@ namespace Jarvis
     {
       StringBuilder builder = new StringBuilder();
 
-      builder.AppendFormat("<h1>Results - {0}%</h1>", Grade);
+      builder.AppendFormat("<h1>Results - {0}%</h1>", Grade * 10);
       builder.AppendFormat("<h2>Style Check</h2>");
       builder.AppendFormat("<p>{0}</p>", StyleMessage);
       builder.AppendFormat("<h2>Compile</h2>");
@@ -61,7 +61,7 @@ namespace Jarvis
       builder.AppendLine("Header: " + ValidHeader.ToString());
       builder.AppendLine("Compile: " + CompileMessage);
       builder.AppendLine("Style: " + StyleMessage);
-      double correctPercentage = (1.0 - InvalidOutputPercentage) * 100;
+      double correctPercentage = (1.0 - InvalidOutputPercentage) * 10;
       builder.AppendLine("Correct output: " + correctPercentage + "%");
       
       return builder.ToString();      

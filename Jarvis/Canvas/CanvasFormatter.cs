@@ -60,7 +60,7 @@ namespace Jarvis
         {
           if (result.Assignment.StudentId.Equals(studentId, StringComparison.OrdinalIgnoreCase))
           {
-            writer.WriteField<string>(result.Grade);
+            writer.WriteField<string>(result.Grade.ToString());
           }  
         }
         

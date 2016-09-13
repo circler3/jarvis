@@ -196,6 +196,14 @@ namespace Jarvis
       return text;
     }
 
+    public static string ToHtmlEncodingWithNewLines(string text)
+    {
+      text = text.Replace(" ", "&nbsp;");
+      text = text.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
+
+      return text;
+    }
+
     public static string ToTextEncoding(string text)
     {
       text = text.Replace("&nbsp;", " ");
