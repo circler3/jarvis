@@ -14,6 +14,21 @@ namespace Jarvis
     public int TotalBadStyle { get; set; }
     public Dictionary<string, string> TotalUniqueStudentsSubmissions { get; set; }
 
+    public float AverageScore 
+    {
+      get
+      {
+        float total = 0;
+
+        foreach (string grade in TotalUniqueStudentsSubmissions.Values)
+        {
+          total += float.Parse(grade);
+        }
+
+        return total / (float) TotalUniqueStudentsSubmissions.Count;
+      }
+    }
+
     public int TotalFullCredit 
     { 
       get
@@ -22,7 +37,7 @@ namespace Jarvis
 
         foreach (string grade in TotalUniqueStudentsSubmissions.Values)
         {
-          if (grade == "100")
+          if (grade == "10")
           {
             total++;
           }

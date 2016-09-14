@@ -275,7 +275,7 @@ namespace Jarvis
 
         if (forcedKill)
         {
-          output = "Oh no! I found an infinite loop, sir.";
+          output = "Sir, the program became unresponsive, either due to an infinite loop or waiting for input.";
         }
       }
 
@@ -410,7 +410,7 @@ namespace Jarvis
       gradingReport.AppendLine("<p>");
       foreach (string section in directories)
       {
-        char sectionNumber = section[section.Length - 1];                    
+        string sectionNumber = section.Substring(7);
         string zipFile = string.Format("{0}/../section{1}.zip", section, sectionNumber);
 
         // zip contents
