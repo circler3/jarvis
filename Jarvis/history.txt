@@ -6,3 +6,4 @@ Sep 09, 2016 ~ v1.2.1 ~ Hot fix to handle duplicate student IDs in grading file
 Sep 12, 2016 ~ v1.3.0 ~ Update to show new lines and add drag and drop
 Sep 12, 2016 ~ v1.3.1 ~ Added new stats and fix grading bug for non-compiling programs
 Sep 14, 2016 ~ v1.3.2 ~ Fix grading zip generation bug
+Sep 14, 2016 ~ v1.3.3 ~ Really fix grading zip generation bug
