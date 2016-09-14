@@ -138,16 +138,16 @@ namespace Jarvis
       }
 
       // Quality check on header
-      if (!homework.StudentId.Contains("a"))
-      {
-        homework.ValidHeader = false;
-        homework.ErrorMessage = "A# should be in the format: a09999999, including the 'a'";
-        Logger.Warn(homework.ErrorMessage);
-      }
-      else if (string.IsNullOrEmpty(homework.StudentId))
+      if (string.IsNullOrEmpty(homework.StudentId))
       {
         homework.ValidHeader = false;
         homework.ErrorMessage = "Header is missing a student ID.";
+        Logger.Warn(homework.ErrorMessage);
+      }
+      else if (!homework.StudentId.Contains("a"))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "A# should be in the format: a09999999, including the 'a'";
         Logger.Warn(homework.ErrorMessage);
       }
       else if (homework.StudentId.Equals("a09999999", StringComparison.OrdinalIgnoreCase))

@@ -405,14 +405,17 @@ namespace Jarvis
     {
       // zip contents
       // email to section leader
+      Logger.Info("Sending files to section leaders");
       string[] directories = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
       StringBuilder gradingReport = new StringBuilder();
       gradingReport.AppendLine("<p>");
       foreach (string section in directories)
       {
-        string sectionNumber = section.Substring(7);
-        string zipFile = string.Format("{0}/../section{1}.zip", section, sectionNumber);
+        Logger.Trace("Processing section at {0}", section);
+        string sectionNumber = section.Substring(section.LastIndexOf("section"));
+        string zipFile = string.Format("{0}/../{1}.zip", section, sectionNumber);
 
+        Logger.Trace("Creating {0} zip file at {1}", sectionNumber, zipFile);
         // zip contents
         if (File.Exists(zipFile))
         {
@@ -424,6 +427,8 @@ namespace Jarvis
         if (File.Exists(section + "/leader.txt"))
         {
           string leader = File.ReadAllText(section + "/leader.txt");
+
+          Logger.Trace("Emailing zip file to {0}", leader);
 
           // attach to email to section leader
           SendEmail(leader, 
