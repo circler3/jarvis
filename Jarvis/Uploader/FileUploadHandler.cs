@@ -127,7 +127,7 @@ namespace Jarvis
         }
         else if (s.Contains("section:"))
         {
-          homework.Section = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }); // Trim spaces and leading 0's
+          homework.Section = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }).Trim(); // Trim spaces and leading 0's
           Logger.Trace ("Parse header section: {0}", homework.Section);
         }
         else if (s.Contains("hw#:"))
