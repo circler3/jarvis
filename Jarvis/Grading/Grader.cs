@@ -14,7 +14,7 @@ namespace Jarvis
   {
     private bool forcedKill = false;
     private Process executionProcess;
-      
+
     public GradingResult Grade(Assignment homework)
     {
       GradingResult result = new GradingResult(homework);
@@ -23,17 +23,18 @@ namespace Jarvis
       Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
-      // Compile      
-      Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);      
+      // Compile
+      Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
       result.CompileMessage = Compile(homework);
 
       // Run tests
       if (result.CompileMessage == "Success!!")
       {
-        Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);        
-        result.OutputMessage = GetExecutionOutput(homework, result);
+        Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);
+        result.OutputMessage = RunAllTestCases(homework, result);
 
-        //result.CorrectOutput = result.OutputMessage.Contains("No difference");
+        // Delete binary
+        File.Delete(homework.Path + homework.StudentId);
       }
       else
       {
@@ -43,7 +44,6 @@ namespace Jarvis
       // Write result into results file, writes a new entry for each run
       RecordResult(homework, result);
       UpdateStats(homework, result);
-
 
       return result;
     }
@@ -108,10 +108,11 @@ namespace Jarvis
       Logger.Trace("Style checking with {0} and arguments {1}", styleExe, p.StartInfo.Arguments);
 
       p.Start();
+      Jarvis.StudentProcesses.Add(p.Id);
 
       string result = p.StandardError.ReadToEnd ();
       result = result.Replace (homework.Path, "");
-      result = Jarvis.ToHtmlEncoding(result);
+      result = Utilities.ToHtmlEncoding(result);
       p.WaitForExit();
 
       p.Close();
@@ -132,9 +133,11 @@ namespace Jarvis
       p.StartInfo.Arguments = "-Werror " + homework.FullPath + " -o" + homework.Path + homework.StudentId;
       p.Start();
 
+      Jarvis.StudentProcesses.Add(p.Id);
+
       string result = p.StandardError.ReadToEnd();
       result = result.Replace(homework.Path, "");
-      result = Jarvis.ToHtmlEncoding(result);
+      result = Utilities.ToHtmlEncoding(result);
 
       p.WaitForExit();
 
@@ -146,92 +149,133 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string GetExecutionOutput(Assignment homework, GradingResult grade)
+    private string RunAllTestCases(Assignment homework, GradingResult grade)
     {
-      Logger.Trace("Getting input from {0}", homework.Path + "../../");
-      // todo Loop and call Execute Program multiple times
-      string[] inputFiles = Directory.GetFiles(homework.Path + "../../", "input*");
-      string[] outputFiles = Directory.GetFiles(homework.Path + "../../", "output*");
-      string result = string.Empty;
-      int invalidTestCases = 0;
-      int totalTestCases = 0;
+      string testsPath = string.Format("{0}/courses/{1}/tests/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course, homework.HomeworkId); 
 
-      if (outputFiles.Length > 0)
+      Logger.Trace("Running tests as configured in {0}", testsPath);
+      StringBuilder result = new StringBuilder();
+      int passingTestCases = 0;
+
+      if (File.Exists(testsPath + "config.xml"))
       {
-        for (int i = 0; i < outputFiles.Length; ++i)
+        List<TestCase> tests = Utilities.ReadTestCases(testsPath + "config.xml");
+
+        foreach (TestCase test in tests)
         {
-          string input = "";
-          if (inputFiles.Length > i)
+          Logger.Info("Running test case {0}", test.Id);
+          string stdInput = string.Empty;
+
+          // check for std input file
+          if (!string.IsNullOrEmpty(test.StdInputFile))
           {
-            input = inputFiles[i];
+            stdInput = testsPath + test.StdInputFile;
           }
 
-          string actualOutput = ExecuteProgram(homework, input);
-          string expectedOutput = GetExpectedOutput(outputFiles[i]);
-          Logger.Trace("Actual output: {0}", actualOutput);
-          Logger.Trace("Expected output: {0}", expectedOutput);
-
-          string testDiff = string.Empty;
-          string passed = "Passed";
-          totalTestCases++;
-
-          if (actualOutput.Equals(expectedOutput, StringComparison.Ordinal))
+          // check for file input files
+          foreach (Tuple<string,string> filein in test.FileInputFiles)
           {
-            testDiff = "No difference";
-          }
-          else
-          {
-            string htmlActualOutput = Jarvis.ToHtmlEncodingWithNewLines(actualOutput);
-            string htmlExpectedOutput = Jarvis.ToHtmlEncodingWithNewLines(expectedOutput);
-            testDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
-            passed = "Failed";
-            invalidTestCases++;
+            File.Copy(testsPath + filein.Item1, homework.Path + filein.Item2, true);
           }
 
-          result += BuildHtmlOutput(i, actualOutput, expectedOutput, testDiff, passed);
+          string actualStdOutput = ExecuteProgram(homework, stdInput);
 
+          // check for std output file
+          if (!string.IsNullOrEmpty(test.StdOutputFile))
+          {
+            string expectedStdOutput = Utilities.ReadFileContents(testsPath + test.StdOutputFile);
+
+            string htmlActualStdOutput = Utilities.ToHtmlEncodingWithNewLines(actualStdOutput);
+            string htmlExpectedStdOutput = Utilities.ToHtmlEncodingWithNewLines(expectedStdOutput);
+            string htmlDiff = string.Empty;
+
+            if (htmlActualStdOutput.Equals(htmlExpectedStdOutput, StringComparison.Ordinal))
+            {
+              htmlDiff = "No difference";
+            }
+            else
+            {
+              test.Passed = false;
+              htmlDiff = HtmlDiff.HtmlDiff.Execute(htmlActualStdOutput, htmlExpectedStdOutput);
+            }
+
+            test.DiffBlocks.Add(BuildDiffBlock("From stdout:", htmlActualStdOutput, htmlExpectedStdOutput, htmlDiff));
+          }
+
+          // check for file output files
+          if (test.FileOutputFiles.Count > 0)
+          {
+            foreach (Tuple<string, string> fileout in test.FileOutputFiles)
+            {
+              string expectedOutput = Utilities.ReadFileContents(testsPath + fileout.Item1);
+
+              if (File.Exists(homework.Path + fileout.Item2))
+              {
+                string actualOutput = Utilities.ReadFileContents(homework.Path + fileout.Item2);
+
+                string htmlExpectedOutput = Utilities.ToHtmlEncodingWithNewLines(expectedOutput);
+                string htmlActualOutput = Utilities.ToHtmlEncodingWithNewLines(actualOutput);
+
+                string htmlDiff = string.Empty;
+
+                if (htmlActualOutput.Equals(htmlExpectedOutput, StringComparison.Ordinal))
+                {
+                  htmlDiff = "No difference";
+                }
+                else
+                {
+                  test.Passed = false;
+                  htmlDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
+                }
+
+                test.DiffBlocks.Add(BuildDiffBlock("From " + fileout.Item2 + ":", htmlActualOutput, htmlExpectedOutput, htmlDiff));
+              }
+              else
+              {
+                test.Passed = false;
+                test.DiffBlocks.Add("<p>Cannot find output file: " + fileout.Item2 + "</p>");
+              }
+            }
+          }
+
+          result.AppendLine(test.Results);
+
+          if (test.Passed)
+          {
+            passingTestCases++;
+          }
         }
 
-        // Don't leave binaries hanging around
-        File.Delete(homework.Path + homework.StudentId);
+        grade.OutputPercentage = passingTestCases / (double)tests.Count;
       }
       else
       {
-        result = "<p>Sir, I cannot find any output files for this assignment. Perhaps the instructor hasn't set it up yet?<p>";
+        result.Append("<p>Sir, I cannot find any test case configurations for this assignment. Perhaps the instructor hasn't set it up yet?<p>");
       }
 
-      if (totalTestCases > 0)
-      {
-        grade.InvalidOutputPercentage = invalidTestCases / (double)totalTestCases;
-      }
-
-      return result;
+      return result.ToString();
     }
       
-    private string BuildHtmlOutput(int testCaseId, string actualOutput, string expectedOutput, string diff, string passed)
+    private string BuildDiffBlock(string source, string htmlActualOutput, string htmlExpectedOutput, string htmlDiff)
     {
       StringBuilder result = new StringBuilder();
-
-      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-      result.Append("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case: " + testCaseId.ToString() + ": " + passed + "</h3>");
-      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
+      result.Append("<p>" + source + "</p>");
       result.Append("<table>");
       result.Append("<tr>");
       result.Append("<td>");
       result.Append("<h3>Actual</h3>");
-      result.Append("<p>" + Jarvis.ToHtmlEncodingWithNewLines(actualOutput) + "</p>");
+      result.Append("<p>" + htmlActualOutput + "</p>");
       result.Append("</td>");
       result.Append("<td>");
       result.Append("<h3>Expected</h3>");
-      result.Append("<p>" + Jarvis.ToHtmlEncodingWithNewLines(expectedOutput) + "</p>");
+      result.Append("<p>" + htmlExpectedOutput + "</p>");
       result.Append("</td>");
       result.Append("<td>");
       result.Append("<h3>Diff</h3>");
-      result.Append("<p>" + diff + "</p>");
+      result.Append("<p>" + htmlDiff + "</p>");
       result.Append("</td>");
       result.Append("</tr>");
       result.Append("</table>");
-
 
       return result.ToString();
     }
@@ -241,6 +285,7 @@ namespace Jarvis
       string output = string.Empty;
       executionProcess = new Process();
 
+      executionProcess.StartInfo.WorkingDirectory = homework.Path;
       executionProcess.StartInfo.UseShellExecute = false;
       executionProcess.StartInfo.RedirectStandardOutput = true;
       executionProcess.StartInfo.RedirectStandardError = true;
@@ -251,8 +296,10 @@ namespace Jarvis
         Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
       }
 
-      executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;      
+      executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
       executionProcess.Start();
+
+      Jarvis.StudentProcesses.Add(executionProcess.Id);
 
       using (Timer executionTimer = new Timer(10000))
       {
@@ -291,13 +338,6 @@ namespace Jarvis
       Logger.Error("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
       executionProcess.Kill();
       forcedKill = true;
-    }
-
-    private string GetExpectedOutput(string path)
-    {
-      StreamReader reader = new StreamReader(path);
-
-      return reader.ReadToEnd();
     }
 
     public string GenerateGrades(string baseDir, List<Assignment> assignments)
@@ -359,7 +399,7 @@ namespace Jarvis
             gradingResults.Add(result);
             Logger.Info("Result: {0}", result.Grade);
 
-            string gradingComment = Jarvis.ToTextEncoding(result.ToText());
+            string gradingComment = Utilities.ToTextEncoding(result.ToText());
 
             // write grade to section report              
             writer.WriteLine(string.Format("{0} : {1}", a.StudentId, result.Grade));

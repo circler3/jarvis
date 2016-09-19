@@ -10,7 +10,7 @@ namespace Jarvis
       Assignment = assignment;
       StyleMessage = string.Empty;
       OutputMessage = string.Empty;
-      InvalidOutputPercentage = 0.0;
+      OutputPercentage = 0.0;
     }
 
     public Assignment Assignment { get; set; }
@@ -18,26 +18,29 @@ namespace Jarvis
     public string CompileMessage { get; set; }
     public string StyleMessage { get; set; }
     public string OutputMessage { get; set; }
-    public double InvalidOutputPercentage { get; set; }
+    public double OutputPercentage { get; set; }
 
     public double Grade
     {
       get
       {
-        double score = 10.0f;
+        double score = 0.0f;
 
-        if (!StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+        // 20% of grade for style
+        if (StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
         {
-          score -= 2.0f;
+          score += 2.0f;
         }
 
-        if (CompileMessage != "Success!!")
+        // 80% of grade for correct execution
+        if (CompileMessage == "Success!!")
         {
-          score -= 8.0f;
+          // Assign points for percentage of correct test cases
+          score += (int)(8.0f * OutputPercentage);
         }
-        else if (InvalidOutputPercentage > 0.0)
+        else
         {
-          score -= (int)(8.0f * InvalidOutputPercentage);
+          // Lose all 80% if the assignment doesn't compile
         }
 
         return score;
@@ -65,7 +68,7 @@ namespace Jarvis
       builder.AppendLine("Header: " + ValidHeader.ToString());
       builder.AppendLine("Compile: " + CompileMessage);
       builder.AppendLine("Style: " + StyleMessage);
-      double correctPercentage = (1.0 - InvalidOutputPercentage) * 10;
+      double correctPercentage = (1.0 - OutputPercentage) * 10;
       builder.AppendLine("Correct output: " + correctPercentage + "%");
       
       return builder.ToString();      

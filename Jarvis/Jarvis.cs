@@ -16,8 +16,10 @@ namespace Jarvis
   { 
     public static StatsManager Stats { get; set; }
     public static Configuration Config = null;
+    public  static List<int> StudentProcesses = new List<int>();
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
     private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
+
 
     public static void Main()
     {      
@@ -101,21 +103,38 @@ namespace Jarvis
 
     private static void ProcessReaper_Elapsed(object sender, ElapsedEventArgs e)
     {
-      Regex regex = new Regex(@"^A\d{8}");
-      Process[] processes = Process.GetProcesses();
+      List<int> expiredPids = new List<int>();
 
-      foreach (Process p in processes)
+      foreach (int pid in StudentProcesses)
       {
-        if (regex.IsMatch(p.ProcessName))
+        try 
         {
-          // Nexted if statements instead of compound conditional due to access priveleges
-          TimeSpan runtime = DateTime.Now - p.StartTime;
-          if (runtime.TotalMinutes > 1)
+          Process process = Process.GetProcessById(pid);
+
+          if (process.HasExited)
           {
-            Logger.Warn("Killing process with name {0}", p.ProcessName);
-            //p.Kill();
+            expiredPids.Add(pid);
+          }
+          else
+          {
+            TimeSpan runtime = DateTime.Now - process.StartTime;
+            if (runtime.TotalSeconds > 20)
+            {
+              Logger.Warn("Killing process with name {0}", process.ProcessName);
+              process.Kill();
+            }
           }
         }
+        catch (ArgumentException)
+        {
+          // Porcess is not running
+          expiredPids.Add(pid);
+        }
+      }
+
+      foreach (int pid in expiredPids)
+      {
+        StudentProcesses.Remove(pid);
       }
     }
 
@@ -185,64 +204,6 @@ namespace Jarvis
             }
           }
         }
-      }
-    }
-
-    public static string ToHtmlEncoding(string text)
-    {
-      text = text.Replace(" ", "&nbsp;");
-      text = text.Replace("\n", "<br />");
-
-      return text;
-    }
-
-    public static string ToHtmlEncodingWithNewLines(string text)
-    {
-      text = text.Replace(" ", "&nbsp;");
-      text = text.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
-
-      return text;
-    }
-
-    public static string ToTextEncoding(string text)
-    {
-      text = text.Replace("&nbsp;", " ");
-      text = text.Replace("<br />", "\n");
-
-      return text;
-    }
-
-    public static void DirectoryCopy(string sourceDirName, string destDirName)
-    {
-      // Get the subdirectories for the specified directory.
-      DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-      if (!dir.Exists)
-      {
-        throw new DirectoryNotFoundException(
-          "Source directory does not exist or could not be found: "
-          + sourceDirName);
-      }
-
-      DirectoryInfo[] dirs = dir.GetDirectories();
-      // If the destination directory doesn't exist, create it.
-      if (!Directory.Exists(destDirName))
-      {
-        Directory.CreateDirectory(destDirName);
-      }
-
-      // Get the files in the directory and copy them to the new location.
-      FileInfo[] files = dir.GetFiles();
-      foreach (FileInfo file in files)
-      {
-        string temppath = Path.Combine(destDirName, file.Name);
-        file.CopyTo(temppath, false);
-      }
-
-      foreach (DirectoryInfo subdir in dirs)
-      {
-        string temppath = Path.Combine(destDirName, subdir.Name);
-        DirectoryCopy(subdir.FullName, temppath);
       }
     }
   }

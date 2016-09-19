@@ -102,7 +102,7 @@ namespace Jarvis
           {
             switch (reader.NodeType)
             {
-              case XmlNodeType.Element:                
+              case XmlNodeType.Element:
                 switch (reader.Name)
                 {
                   case "JarvisStats":
