@@ -59,7 +59,7 @@ namespace Jarvis
       builder.AppendFormat("<h2>Output</h2>");
       builder.AppendFormat("{0}", OutputMessage);
 
-      return builder.ToString();        
+      return builder.ToString();
     }
 
     public string ToText()
@@ -68,10 +68,9 @@ namespace Jarvis
       builder.AppendLine("Header: " + ValidHeader.ToString());
       builder.AppendLine("Compile: " + CompileMessage);
       builder.AppendLine("Style: " + StyleMessage);
-      double correctPercentage = (1.0 - OutputPercentage) * 10;
-      builder.AppendLine("Correct output: " + correctPercentage + "%");
+      builder.AppendLine("Score: " + (Grade * 10).ToString() + "%");
       
-      return builder.ToString();      
+      return builder.ToString();
     }
   }
 }

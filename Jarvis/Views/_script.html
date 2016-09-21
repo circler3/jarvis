@@ -53,6 +53,9 @@
     xhttp.send(formData);
 
     dotterTimer = setTimeout(dotter, 1000);
+
+    document.getElementById('file').value = "";
+    document.getElementById("uploadButton").disabled = true;
   }
 
   function dotter()
