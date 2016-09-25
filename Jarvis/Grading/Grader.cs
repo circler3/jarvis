@@ -172,7 +172,6 @@ namespace Jarvis
           {
             if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
             {
-              Logger.Info("Deleting file {0}", file.Name);
               file.Delete(); 
             }
           }
