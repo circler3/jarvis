@@ -166,6 +166,17 @@ namespace Jarvis
           Logger.Info("Running test case {0}", test.Id);
           string stdInput = string.Empty;
 
+          // clear out any previously created input/output files
+          System.IO.DirectoryInfo dir = new DirectoryInfo(homework.Path);
+          foreach (FileInfo file in dir.GetFiles())
+          {
+            if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
+            {
+              Logger.Info("Deleting file {0}", file.Name);
+              file.Delete(); 
+            }
+          }
+
           // check for std input file
           if (!string.IsNullOrEmpty(test.StdInputFile))
           {
