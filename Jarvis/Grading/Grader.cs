@@ -326,11 +326,29 @@ namespace Jarvis
           }
         }
 
-        output = executionProcess.StandardOutput.ReadToEnd();
+        try
+        {
+          output = executionProcess.StandardOutput.ReadToEnd();
+        }
+        catch (OutOfMemoryException)
+        {
+          output = "Sir, the program tried to eat all of my memory. I could not let this happen.";
+          executionProcess.StandardOutput.DiscardBufferedData();
+        }
+        catch (Exception)
+        {
+          output = "Sir, the program tried to eat all of my memory. I could not let this happen.";
+          executionProcess.StandardOutput.DiscardBufferedData();
+        }
+
+        if (!executionProcess.HasExited)
+        {
+          executionProcess.Kill();
+        }
 
         executionTimer.Enabled = false;
 
-        if (forcedKill)
+        if (forcedKill && string.IsNullOrEmpty(output))
         {
           output = "Sir, the program became unresponsive, either due to an infinite loop or waiting for input.";
         }
