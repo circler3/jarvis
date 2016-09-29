@@ -341,6 +341,8 @@ namespace Jarvis
           executionProcess.StandardOutput.DiscardBufferedData();
         }
 
+        executionProcess.WaitForExit(1000);
+
         if (!executionProcess.HasExited)
         {
           executionProcess.Kill();
