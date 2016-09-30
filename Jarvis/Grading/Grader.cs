@@ -12,9 +12,6 @@ namespace Jarvis
 {
   public class Grader
   {
-    private bool forcedKill = false;
-    private Process executionProcess;
-
     public GradingResult Grade(Assignment homework)
     {
       GradingResult result = new GradingResult(homework);
@@ -293,28 +290,24 @@ namespace Jarvis
     private string ExecuteProgram(Assignment homework, string inputFile)
     {      
       string output = string.Empty;
-      executionProcess = new Process();
-
-      executionProcess.StartInfo.WorkingDirectory = homework.Path;
-      executionProcess.StartInfo.UseShellExecute = false;
-      executionProcess.StartInfo.RedirectStandardOutput = true;
-      executionProcess.StartInfo.RedirectStandardError = true;
-      executionProcess.StartInfo.RedirectStandardInput = true;
-
-      if (!File.Exists(homework.Path + homework.StudentId))
+      using (Process executionProcess = new Process())
       {
-        Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
-      }
+        executionProcess.StartInfo.WorkingDirectory = homework.Path;
+        executionProcess.StartInfo.UseShellExecute = false;
+        executionProcess.StartInfo.RedirectStandardOutput = true;
+        executionProcess.StartInfo.RedirectStandardError = true;
+        executionProcess.StartInfo.RedirectStandardInput = true;
 
-      executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
-      executionProcess.Start();
+        if (!File.Exists(homework.Path + homework.StudentId))
+        {
+          Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
+        }
 
-      Jarvis.StudentProcesses.Add(executionProcess.Id);
+        executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
+        executionProcess.Start();
 
-      using (Timer executionTimer = new Timer(10000))
-      {
-        executionTimer.Elapsed += ExecutionTimer_Elapsed;
-        executionTimer.Enabled = true;
+        Jarvis.StudentProcesses.Add(executionProcess.Id);
+
 
         if (File.Exists(inputFile))
         {
@@ -326,48 +319,22 @@ namespace Jarvis
           }
         }
 
-        try
+        executionProcess.WaitForExit(10000);
+
+        if (executionProcess.HasExited)
         {
           output = executionProcess.StandardOutput.ReadToEnd();
         }
-        catch (OutOfMemoryException)
-        {
-          output = "Sir, the program tried to eat all of my memory. I could not let this happen.";
-          executionProcess.StandardOutput.DiscardBufferedData();
-        }
-        catch (Exception)
-        {
-          output = "Sir, the program tried to eat all of my memory. I could not let this happen.";
-          executionProcess.StandardOutput.DiscardBufferedData();
-        }
-
-        executionProcess.WaitForExit(1000);
-
-        if (!executionProcess.HasExited)
+        else
         {
           executionProcess.Kill();
-        }
-
-        executionTimer.Enabled = false;
-
-        if (forcedKill && string.IsNullOrEmpty(output))
-        {
           output = "Sir, the program became unresponsive, either due to an infinite loop or waiting for input.";
         }
+
+        executionProcess.Close();
       }
-
-      executionProcess.Close();
-      executionProcess.Dispose();
-
+      
       return output;
-    }
-
-    private void ExecutionTimer_Elapsed(object sender, ElapsedEventArgs e)
-    {
-      // It's been long enough... kill the process
-      Logger.Error("Grader is killing {0} because it has been running too long", executionProcess.ProcessName);
-      executionProcess.Kill();
-      forcedKill = true;
     }
 
     public string GenerateGrades(string baseDir, List<Assignment> assignments)
