@@ -127,7 +127,7 @@ namespace Jarvis
       p.StartInfo.RedirectStandardError = true;
 
       p.StartInfo.FileName = "g++";
-      p.StartInfo.Arguments = "-Werror " + homework.FullPath + " -o" + homework.Path + homework.StudentId;
+      p.StartInfo.Arguments = "-Werror -DJARVIS " + homework.FullPath + " -o" + homework.Path + homework.StudentId;
       p.Start();
 
       Jarvis.StudentProcesses.Add(p.Id);
