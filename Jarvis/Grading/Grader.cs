@@ -381,7 +381,7 @@ namespace Jarvis
       // run grader
       foreach (Assignment a in assignments)
       {     
-        if (a.ValidHeader)
+        if (a.ValidHeader && a.HomeworkId == currentHomework)
         {
           Logger.Trace("Writing grades to {0}", a.Path + "../grades.txt");
           using (StreamWriter writer = File.AppendText(a.Path + "../grades.txt"))
@@ -405,6 +405,12 @@ namespace Jarvis
             writer.Close();
           }
         }
+        else
+        {
+          GradingResult result = new GradingResult(a);
+          gradingResults.Add(result);
+        }
+
       }
 
       string gradingReport = SendFilesToSectionLeaders(hwPath, currentCourse, currentHomework);
