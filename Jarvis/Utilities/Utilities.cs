@@ -90,6 +90,8 @@ namespace Jarvis
 
     public static string ToHtmlEncoding(string text)
     {
+      text = text.Replace("<", "&lt;");
+      text = text.Replace(">", "&gt;");
       text = text.Replace(" ", "&nbsp;");
       text = text.Replace("\n", "<br />");
 
@@ -98,6 +100,8 @@ namespace Jarvis
 
     public static string ToHtmlEncodingWithNewLines(string text)
     {
+      text = text.Replace("<", "&lt;");
+      text = text.Replace(">", "&gt;");
       text = text.Replace(" ", "&nbsp;");
       text = text.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
 
@@ -106,6 +110,8 @@ namespace Jarvis
 
     public static string ToTextEncoding(string text)
     {
+      text = text.Replace("<", "&lt;");
+      text = text.Replace(">", "&gt;");
       text = text.Replace("&nbsp;", " ");
       text = text.Replace("<br />", "\n");
 
