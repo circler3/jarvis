@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Xml;
+using System.Text;
 
 namespace Jarvis
 {
@@ -90,33 +91,39 @@ namespace Jarvis
 
     public static string ToHtmlEncoding(string text)
     {
-      text = text.Replace("<", "&lt;");
-      text = text.Replace(">", "&gt;");
-      text = text.Replace(" ", "&nbsp;");
-      text = text.Replace("\n", "<br />");
+      StringBuilder builder = new StringBuilder(text);
 
-      return text;
+      builder.Replace("<", "&lt;");
+      builder.Replace(">", "&gt;");
+      builder.Replace(" ", "&nbsp;");
+      builder.Replace("\n", "<br />");
+
+      return builder.ToString();
     }
 
     public static string ToHtmlEncodingWithNewLines(string text)
     {
-      text = text.Replace("<", "&lt;");
-      text = text.Replace(">", "&gt;");
-      text = text.Replace(" ", "&nbsp;");
-      text = text.Replace("\0", "<span style='color: #888888; font-size: 10px;'>\\0</span>");
-      text = text.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
+      StringBuilder builder = new StringBuilder(text);
 
-      return text;
+      builder.Replace("<", "&lt;");
+      builder.Replace(">", "&gt;");
+      builder.Replace(" ", "&nbsp;");
+      builder.Replace("\0", "<span style='color: #888888; font-size: 10px;'>\\0</span>");
+      builder.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
+
+      return builder.ToString();
     }
 
     public static string ToTextEncoding(string text)
     {
-      text = text.Replace("<", "&lt;");
-      text = text.Replace(">", "&gt;");
-      text = text.Replace("&nbsp;", " ");
-      text = text.Replace("<br />", "\n");
+      StringBuilder builder = new StringBuilder(text);
 
-      return text;
+      builder.Replace("<", "&lt;");
+      builder.Replace(">", "&gt;");
+      builder.Replace("&nbsp;", " ");
+      builder.Replace("<br />", "\n");
+
+      return builder.ToString();
     }
 
     public static void DirectoryCopy(string sourceDirName, string destDirName)
