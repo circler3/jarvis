@@ -103,6 +103,7 @@ namespace Jarvis
       text = text.Replace("<", "&lt;");
       text = text.Replace(">", "&gt;");
       text = text.Replace(" ", "&nbsp;");
+      text = text.Replace("\0", "<span style='color: #888888; font-size: 10px;'>\\0</span>");
       text = text.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
 
       return text;
