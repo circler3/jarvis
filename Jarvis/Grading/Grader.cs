@@ -386,6 +386,14 @@ namespace Jarvis
         }
       }
 
+      // Check MOSS before grading so we don't have to wait for grading to find out if MOSS fails
+      string mossResponse = SendToMoss(hwPath, currentCourse, currentHomework);
+
+      if (string.IsNullOrEmpty(mossResponse))
+      {
+        return "MOSS Failed!";
+      }
+
       // run grader
       foreach (Assignment a in assignments)
       {     
@@ -418,10 +426,12 @@ namespace Jarvis
           GradingResult result = new GradingResult(a);
           gradingResults.Add(result);
         }
-
       }
 
-      string gradingReport = SendFilesToSectionLeaders(hwPath, currentCourse, currentHomework);
+      // add MOSS URL to result
+      string gradingReport = "<a href='" + mossResponse + "'>" + mossResponse + "</a><br />";
+
+      gradingReport += SendFilesToSectionLeaders(hwPath, currentCourse, currentHomework);
 
       string graderEmail = File.ReadAllText(hwPath + "../grader.txt");
 
@@ -432,13 +442,50 @@ namespace Jarvis
       string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentHomework, gradingResults);
 
       SendEmail(graderEmail,
-                "Grades for " + currentCourse + " " + currentHomework,
-                "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
-                gradesPath);
+        "Grades for " + currentCourse + " " + currentHomework,
+        "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!\n" + mossResponse,
+        gradesPath);
 
       // Generate some kind of grading report
       return gradingReport;
     }
+
+    private string SendToMoss(string hwPath, string currentCourse, string currentHomework)
+    {
+      // Submit all files to MOSS
+      string mossId = Jarvis.Config.AppSettings.Settings["mossId"].Value;
+
+      // Find all *.cpp files in hw directory
+      string[] cppFiles = Directory.GetFiles(hwPath, "*.cpp", SearchOption.AllDirectories);
+
+      Logger.Info("Submitting {0} files to MOSS", cppFiles.Length);
+      // create moss interface
+      MossInterface moss = new MossInterface
+      {
+        UserId = Int32.Parse(mossId), 
+        Language = "cc", // C++
+        NumberOfResultsToShow = 500,
+        Comments = string.Format("USU - Jarvis - {0} - HW {1}", currentCourse, currentHomework),
+      };
+
+      // add files to interface
+      moss.Files = new List<string>(cppFiles);
+
+      // submit request
+      string mossReponse = string.Empty;
+      if (moss.SendRequest(out mossReponse))
+      {
+        Logger.Info("Moss returned success! {0}", mossReponse);
+      }
+      else
+      {
+        mossReponse = "";
+        Logger.Warn("Moss submission unsuccessful");
+      }
+
+      return mossReponse;
+    }
+
 
     private void SendEmail(string to, string subject, string body, string attachment)
     {
