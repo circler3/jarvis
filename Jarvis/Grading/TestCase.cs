@@ -13,6 +13,8 @@ namespace Jarvis
     public List<Tuple<string,string>> FileInputFiles { get; set; }
     public List<Tuple<string,string>> FileOutputFiles { get; set; }
 
+    public List<Tuple<string,string>> PpmOutputFiles { get; set; }
+
     public bool Passed { get; set; }
 
     public List<string> DiffBlocks { get; set; }
@@ -48,6 +50,7 @@ namespace Jarvis
       Passed = true;
       FileInputFiles = new List<Tuple<string, string>>();
       FileOutputFiles = new List<Tuple<string, string>>();
+      PpmOutputFiles = new List<Tuple<string, string>>();
       DiffBlocks = new List<string>();
     }
   }

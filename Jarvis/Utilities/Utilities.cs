@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
 using System.Xml;
@@ -62,6 +63,14 @@ namespace Jarvis
                       string courseFile = reader.GetAttribute("courseFile");
                       string studentFile = reader.GetAttribute("studentFile");
                       currentTest.FileOutputFiles.Add(new Tuple<string,string>(courseFile, studentFile));
+                    }
+                    break;
+
+                  case "ppmout":
+                    {
+                      string courseFile = reader.GetAttribute("courseFile");
+                      string studentFile = reader.GetAttribute("studentFile");
+                      currentTest.PpmOutputFiles.Add(new Tuple<string,string>(courseFile, studentFile));
                     }
                     break;
                 }
@@ -158,6 +167,31 @@ namespace Jarvis
         string temppath = Path.Combine(destDirName, subdir.Name);
         DirectoryCopy(subdir.FullName, temppath);
       }
+    }
+
+    /// <summary>
+    /// Converts the provided PPM file to a PNG file
+    /// </summary>
+    /// <returns>Error message returned by convert utility (if any)</returns>
+    /// <param name="ppmFile">Full path to PPM file to convert</param>
+    /// <param name="pngFile">Full path to PNG file output location</param>
+    public static string convertPpmToPng(string ppmFile, string pngFile)
+    {
+      Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
+      string errorMsg = "";
+
+      using (Process executionProcess = new Process())
+      {
+        executionProcess.StartInfo.RedirectStandardError = true;
+        executionProcess.StartInfo.UseShellExecute = false;
+        executionProcess.StartInfo.FileName = "convert";
+        executionProcess.StartInfo.Arguments = ppmFile + " " + pngFile;
+        executionProcess.Start();
+
+        errorMsg = executionProcess.StandardError.ReadToEnd();
+      }
+
+      return errorMsg;
     }
   }
 }

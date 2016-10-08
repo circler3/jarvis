@@ -172,6 +172,7 @@ namespace Jarvis
           {
             if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
             {
+              Logger.Trace("Deleting file {0}", file.Name);
               file.Delete(); 
             }
           }
@@ -252,6 +253,8 @@ namespace Jarvis
               }
             }
           }
+
+          checkPpmOutputFiles(homework, test, testsPath);
 
           result.AppendLine(test.Results);
 
@@ -548,6 +551,71 @@ namespace Jarvis
 
       return gradingReport.ToString();
     }
+
+    /// <summary>
+    /// Checks actual output against the expected PPM files
+    /// </summary>
+    /// <param name="homework">Homework assingment being checked</param>
+    /// <param name="test">Current test case</param>
+    /// <param name="testsPath">Path to directory containing test case files</param>
+    private void checkPpmOutputFiles(Assignment homework, TestCase test, string testsPath)
+    {
+      // check for PPM output file
+      if (test.PpmOutputFiles.Count > 0)
+      {
+        foreach (Tuple<string, string> ppmout in test.PpmOutputFiles)
+        {
+          string expectedOutput = Utilities.ReadFileContents(testsPath + ppmout.Item1);
+          FileInfo info = new FileInfo(homework.Path + ppmout.Item2);
+          if (File.Exists(homework.Path + ppmout.Item2) && info.Length < 10000000)
+          {
+            // Convert expected and actual PPMs to PNGs
+            Utilities.convertPpmToPng(testsPath + ppmout.Item1, homework.Path + ppmout.Item1 + ".png");
+            string errorMsg = Utilities.convertPpmToPng(homework.Path + ppmout.Item2, homework.Path + ppmout.Item2 + ".png");
+
+            string actualOutput = Utilities.ReadFileContents(homework.Path + ppmout.Item2);
+            string diff = "";
+
+            if (actualOutput.Equals(expectedOutput))
+            {
+              diff = "No difference";
+            }
+            else
+            {
+              test.Passed = false;
+              diff = "Images do not match!<br>";
+
+              if (errorMsg.Contains("improper image header"))
+              {
+                diff += "Invalid PPM image header<br>";
+              }
+
+              if (expectedOutput.Length != actualOutput.Length)
+              {
+                diff += "Expected Size: " + expectedOutput.Length + ", Actual Size: " + actualOutput.Length + "<br>";
+              }
+            }
+
+            // TODO Add PNGs to diff blocks displays
+
+            // TODO Might also be nice if there was a way to download the actual/expected PPMs? Otherwise how will students know how to fix things?
+
+            test.DiffBlocks.Add(BuildDiffBlock("From " + ppmout.Item2 + ":", "", "", diff));
+          }
+          else if (!File.Exists(homework.Path + ppmout.Item2))
+          {
+            test.Passed = false;
+            test.DiffBlocks.Add("<p>Cannot find output file: " + ppmout.Item2 + "</p>");
+          }
+          else if (info.Length >= 10000000)
+          {
+            test.Passed = false;
+            test.DiffBlocks.Add("<p>The file output was too large [" + info.Length.ToString() + "] bytes!!!");
+          }
+        }
+      }
+    }
+
   }
 }
 
