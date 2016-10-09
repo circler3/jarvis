@@ -62,8 +62,6 @@
     <Compile Include="Uploader\FileUploadHandler.cs" />
     <Compile Include="Uploader\FileUploadRequest.cs" />
     <Compile Include="Uploader\FileUploadRequestBinder.cs" />
-    <Compile Include="Grading\Grader.cs" />
-    <Compile Include="Grading\GradingResult.cs" />
     <Compile Include="Grading\TestCase.cs" />
     <Compile Include="Grading\Assignment.cs" />
     <Compile Include="Utilities\Logger.cs" />
@@ -77,6 +75,9 @@
     <Compile Include="Grading\InputFile.cs" />
     <Compile Include="Viewers\StdoutViewer.cs" />
     <Compile Include="Viewers\TextFileViewer.cs" />
+    <Compile Include="Grading\Runner.cs" />
+    <Compile Include="Grading\Grader.cs" />
+    <Compile Include="Grading\RunResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

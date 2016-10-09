@@ -14,7 +14,7 @@ namespace Jarvis
     private const int STUDENT_ID   = 3;
     private const int SECTION      = 5;
 
-    public string GenerateCanvasCsv(string csvPath, string homeworkId, List<GradingResult> results)
+    public string GenerateCanvasCsv(string csvPath, string homeworkId, RunResult[] results)
     {            
       // open course csv
       string gradesPath = string.Format("{0}/grades_hw{1}.csv", csvPath, homeworkId);
@@ -56,7 +56,7 @@ namespace Jarvis
         writer.WriteField<string>(section);
 
         // find students grade and write it
-        foreach(GradingResult result in results)
+        foreach(RunResult result in results)
         {
           if (result.Assignment.StudentId.Equals(studentId, StringComparison.OrdinalIgnoreCase))
           {

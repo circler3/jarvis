@@ -44,11 +44,13 @@ namespace Jarvis
       Post["/run"] = _ =>
       {
         Logger.Trace("Handling post for /run");
-        Grader grader = new Grader();
-        StringBuilder builder = new StringBuilder();        
+        Runner runner = new Runner();
+        RunResult result = null;
 
-        var request = this.Bind<FileUploadRequest>();
-        var assignment = uploadHandler.HandleStudentUpload(request.File);
+        StringBuilder builder = new StringBuilder();
+
+        FileUploadRequest request = this.Bind<FileUploadRequest>();
+        Assignment assignment = uploadHandler.HandleStudentUpload(request.File);
         
         Logger.Info("Received assignment from {0} for {1} HW#{2} with {3} header", assignment.StudentId, assignment.Course, assignment.HomeworkId, assignment.ValidHeader ? "true" : "false");
         
@@ -56,8 +58,7 @@ namespace Jarvis
         {
           // Run grader
           Logger.Debug("Assignment header was valid");
-          GradingResult result = null;
-          result = grader.Grade(assignment);          
+          result = runner.Run(assignment);
           builder.Append(result.ToHtml());
         }
         else
@@ -66,9 +67,11 @@ namespace Jarvis
           builder.AppendLine("The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.");
           builder.AppendFormat("<br />Parser error message: {0}", assignment.ErrorMessage);
           builder.AppendLine("</p>");
+
+          Jarvis.Stats.TotalBadHeaders++;
         }
 
-        Jarvis.Stats.WriteStats();
+        UpdateStats(assignment, result);
 
         return builder.ToString();
       };
@@ -85,11 +88,47 @@ namespace Jarvis
      
         Grader grader = new Grader();
 
-        return grader.GenerateGrades(baseDir, assignments);
+        return grader.Grade(baseDir, assignments);
       };
       #endregion
+    }
 
-      // MOSS - To be written to a file
+    private void UpdateStats(Assignment homework, RunResult result)
+    {
+      AssignmentStats stats = null;
+      string name = homework.Course + " - hw" + homework.HomeworkId;
+
+      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
+      {
+        stats = new AssignmentStats();
+        stats.Name = name;
+        Jarvis.Stats.AssignmentData.Add(name, stats);
+      }
+      else
+      {
+        stats = Jarvis.Stats.AssignmentData[name];
+      }
+      
+      stats.TotalSubmissions++;
+      
+      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
+      {
+        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
+      }
+      
+      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
+      
+      if (!result.CompileMessage.Contains("Success!!"))
+      {
+        stats.TotalNonCompile++;
+      }
+      
+      if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+      {
+        stats.TotalBadStyle++;
+      }
+
+      Jarvis.Stats.WriteStats();
     }
   }
 }

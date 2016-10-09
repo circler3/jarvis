@@ -3,9 +3,9 @@ using System.Text;
 
 namespace Jarvis
 {
-  public class GradingResult
+  public class RunResult
   {
-    public GradingResult(Assignment assignment)
+    public RunResult(Assignment assignment)
     {
       Assignment = assignment;
       StyleMessage = string.Empty;

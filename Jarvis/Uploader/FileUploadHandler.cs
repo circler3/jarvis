@@ -40,10 +40,6 @@ namespace Jarvis
           file.Value.CopyTo(destinationStream);
         }
       }
-      else
-      {
-        Jarvis.Stats.TotalBadHeaders++;
-      }        
 
       return homework;
     }

@@ -39,64 +39,85 @@ namespace Jarvis
 
     public static void Fatal(string text, params object[] items)
     {
-      if (enabledLevels [FATAL] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + " [FATAL]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[FATAL] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + " [FATAL]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Error(string text, params object[] items)
     {
-      if (enabledLevels [ERROR] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + " [ERROR]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[ERROR] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + " [ERROR]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Warn(string text, params object[] items)
     {
-      if (enabledLevels [WARN] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + "  [WARN]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[WARN] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + "  [WARN]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Info(string text, params object[] items)
     {
-      if (enabledLevels [INFO] || enabledLevels [ALL]) 
+      lock (writer)
       {
-         text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + "  [INFO]: " + text;
-         writer.WriteLine(text, items);
+        if (enabledLevels[INFO] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + "  [INFO]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Debug(string text, params object[] items)
     {
-      if (enabledLevels [DEBUG] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + " [DEBUG]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[DEBUG] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + " [DEBUG]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Trace(string text, params object[] items)
     {
-      if (enabledLevels [TRACE] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + " [TRACE]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[TRACE] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + " [TRACE]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
 
     public static void Test(string text, params object[] items)
     {
-      if (enabledLevels [TEST] || enabledLevels [ALL]) 
+      lock (writer)
       {
-        text = DateTime.Now.ToString ("MM/dd/yyyy hh:mm:ss tt") + "  [TEST]: " + text;
-        writer.WriteLine (text, items);
+        if (enabledLevels[TEST] || enabledLevels[ALL])
+        {
+          text = DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss tt") + "  [TEST]: " + text;
+          writer.WriteLine(text, items);
+        }
       }
     }
   }
