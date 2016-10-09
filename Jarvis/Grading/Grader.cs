@@ -172,7 +172,6 @@ namespace Jarvis
           {
             if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
             {
-              Logger.Trace("Deleting file {0}", file.Name);
               file.Delete(); 
             }
           }
@@ -184,79 +183,15 @@ namespace Jarvis
           }
 
           // check for file input files
-          foreach (Tuple<string,string> filein in test.FileInputFiles)
+          foreach (InputFile filein in test.FileInputFiles)
           {
-            File.Copy(testsPath + filein.Item1, homework.Path + filein.Item2, true);
+            File.Copy(testsPath + filein.CourseFile, homework.Path + filein.StudentFile, true);
           }
 
-          string actualStdOutput = ExecuteProgram(homework, stdInput);
+          // Execute the program
+          test.StdOutText = ExecuteProgram(homework, stdInput);
 
-          // check for std output file
-          if (!string.IsNullOrEmpty(test.StdOutputFile))
-          {
-            string expectedStdOutput = Utilities.ReadFileContents(testsPath + test.StdOutputFile);
-
-            string htmlActualStdOutput = Utilities.ToHtmlEncodingWithNewLines(actualStdOutput);
-            string htmlExpectedStdOutput = Utilities.ToHtmlEncodingWithNewLines(expectedStdOutput);
-            string htmlDiff = string.Empty;
-
-            if (htmlActualStdOutput.Equals(htmlExpectedStdOutput, StringComparison.Ordinal))
-            {
-              htmlDiff = "No difference";
-            }
-            else
-            {
-              test.Passed = false;
-              htmlDiff = HtmlDiff.HtmlDiff.Execute(htmlActualStdOutput, htmlExpectedStdOutput);
-            }
-
-            test.DiffBlocks.Add(BuildDiffBlock("From stdout:", htmlActualStdOutput, htmlExpectedStdOutput, htmlDiff));
-          }
-
-          // check for file output files
-          if (test.FileOutputFiles.Count > 0)
-          {
-            foreach (Tuple<string, string> fileout in test.FileOutputFiles)
-            {
-              string expectedOutput = Utilities.ReadFileContents(testsPath + fileout.Item1);
-              FileInfo info = new FileInfo(homework.Path + fileout.Item2);
-              if (File.Exists(homework.Path + fileout.Item2) && info.Length < 1000000)
-              {
-                string actualOutput = Utilities.ReadFileContents(homework.Path + fileout.Item2);
-
-                string htmlExpectedOutput = Utilities.ToHtmlEncodingWithNewLines(expectedOutput);
-                string htmlActualOutput = Utilities.ToHtmlEncodingWithNewLines(actualOutput);
-
-                string htmlDiff = string.Empty;
-
-                if (htmlActualOutput.Equals(htmlExpectedOutput, StringComparison.Ordinal))
-                {
-                  htmlDiff = "No difference";
-                }
-                else
-                {
-                  test.Passed = false;
-                  htmlDiff = HtmlDiff.HtmlDiff.Execute(htmlActualOutput, htmlExpectedOutput);
-                }
-
-                test.DiffBlocks.Add(BuildDiffBlock("From " + fileout.Item2 + ":", htmlActualOutput, htmlExpectedOutput, htmlDiff));
-              }
-              else if (!File.Exists(homework.Path + fileout.Item2))
-              {
-                test.Passed = false;
-                test.DiffBlocks.Add("<p>Cannot find output file: " + fileout.Item2 + "</p>");
-              }
-              else if (info.Length >= 1000000)
-              {
-                test.Passed = false;
-                test.DiffBlocks.Add("<p>The file output was too large [" + info.Length.ToString() + "] bytes!!!");
-              }
-            }
-          }
-
-          checkPpmOutputFiles(homework, test, testsPath);
-
-          result.AppendLine(test.Results);
+          result.AppendLine(test.GetResults(homework.Path, testsPath));
 
           if (test.Passed)
           {
@@ -270,30 +205,6 @@ namespace Jarvis
       {
         result.Append("<p>Sir, I cannot find any test case configurations for this assignment. Perhaps the instructor hasn't set it up yet?<p>");
       }
-
-      return result.ToString();
-    }
-      
-    private string BuildDiffBlock(string source, string htmlActualOutput, string htmlExpectedOutput, string htmlDiff)
-    {
-      StringBuilder result = new StringBuilder();
-      result.Append("<p>" + source + "</p>");
-      result.Append("<table>");
-      result.Append("<tr>");
-      result.Append("<td>");
-      result.Append("<h3>Actual</h3>");
-      result.Append("<p>" + htmlActualOutput + "</p>");
-      result.Append("</td>");
-      result.Append("<td>");
-      result.Append("<h3>Expected</h3>");
-      result.Append("<p>" + htmlExpectedOutput + "</p>");
-      result.Append("</td>");
-      result.Append("<td>");
-      result.Append("<h3>Diff</h3>");
-      result.Append("<p>" + htmlDiff + "</p>");
-      result.Append("</td>");
-      result.Append("</tr>");
-      result.Append("</table>");
 
       return result.ToString();
     }
@@ -551,71 +462,6 @@ namespace Jarvis
 
       return gradingReport.ToString();
     }
-
-    /// <summary>
-    /// Checks actual output against the expected PPM files
-    /// </summary>
-    /// <param name="homework">Homework assingment being checked</param>
-    /// <param name="test">Current test case</param>
-    /// <param name="testsPath">Path to directory containing test case files</param>
-    private void checkPpmOutputFiles(Assignment homework, TestCase test, string testsPath)
-    {
-      // check for PPM output file
-      if (test.PpmOutputFiles.Count > 0)
-      {
-        foreach (Tuple<string, string> ppmout in test.PpmOutputFiles)
-        {
-          string expectedOutput = Utilities.ReadFileContents(testsPath + ppmout.Item1);
-          FileInfo info = new FileInfo(homework.Path + ppmout.Item2);
-          if (File.Exists(homework.Path + ppmout.Item2) && info.Length < 10000000)
-          {
-            // Convert expected and actual PPMs to PNGs
-            Utilities.convertPpmToPng(testsPath + ppmout.Item1, homework.Path + ppmout.Item1 + ".png");
-            string errorMsg = Utilities.convertPpmToPng(homework.Path + ppmout.Item2, homework.Path + ppmout.Item2 + ".png");
-
-            string actualOutput = Utilities.ReadFileContents(homework.Path + ppmout.Item2);
-            string diff = "";
-
-            if (actualOutput.Equals(expectedOutput))
-            {
-              diff = "No difference";
-            }
-            else
-            {
-              test.Passed = false;
-              diff = "Images do not match!<br>";
-
-              if (errorMsg.Contains("improper image header"))
-              {
-                diff += "Invalid PPM image header<br>";
-              }
-
-              if (expectedOutput.Length != actualOutput.Length)
-              {
-                diff += "Expected Size: " + expectedOutput.Length + ", Actual Size: " + actualOutput.Length + "<br>";
-              }
-            }
-
-            // TODO Add PNGs to diff blocks displays
-
-            // TODO Might also be nice if there was a way to download the actual/expected PPMs? Otherwise how will students know how to fix things?
-
-            test.DiffBlocks.Add(BuildDiffBlock("From " + ppmout.Item2 + ":", "", "", diff));
-          }
-          else if (!File.Exists(homework.Path + ppmout.Item2))
-          {
-            test.Passed = false;
-            test.DiffBlocks.Add("<p>Cannot find output file: " + ppmout.Item2 + "</p>");
-          }
-          else if (info.Length >= 10000000)
-          {
-            test.Passed = false;
-            test.DiffBlocks.Add("<p>The file output was too large [" + info.Length.ToString() + "] bytes!!!");
-          }
-        }
-      }
-    }
-
   }
 }
 

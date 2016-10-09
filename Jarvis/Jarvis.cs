@@ -54,7 +54,7 @@ namespace Jarvis
       }
       else
       {
-        configMap.ExeConfigFilename = "jarvis.config";        
+        configMap.ExeConfigFilename = "jarvis.config";
         isLocalConfig = false;
       }
 

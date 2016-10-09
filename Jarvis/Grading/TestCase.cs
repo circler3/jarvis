@@ -6,52 +6,58 @@ namespace Jarvis
 {
   public class TestCase
   {
+    public enum Type
+    {
+      Text,
+      PPM
+    }
+
     public int Id { get; set; }
     public string StdInputFile { get; set; }
     public string StdOutputFile { get; set; }
+    public string StdOutText { get; set; }
 
-    public List<Tuple<string,string>> FileInputFiles { get; set; }
-    public List<Tuple<string,string>> FileOutputFiles { get; set; }
-
-    public List<Tuple<string,string>> PpmOutputFiles { get; set; }
+    public List<InputFile> FileInputFiles { get; set; }
+    public List<OutputFile> FileOutputFiles { get; set; }
 
     public bool Passed { get; set; }
 
-    public List<string> DiffBlocks { get; set; }
+    public List<IViewer> Viewers { get; set; }
 
-    public string Results 
+    public string TestsPath { get; private set; }
+    public string HomeworkPath { get; private set; }
+
+    public string GetResults(string outputPath, string testsPath)
     { 
-      get
+      TestsPath = testsPath;
+      HomeworkPath = outputPath;
+
+      // Run output first so test.Passed is set properly
+      StringBuilder output = new StringBuilder();
+      foreach (IViewer viewer in Viewers)
       {
-        StringBuilder result = new StringBuilder();
-
-        string passedText = Passed ? "Passed" : "Failed";
-
-        result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-        result.Append("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case " + Id.ToString() + ": " + passedText + "</h3>");
-        result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-
-        foreach (string diff in DiffBlocks)
-        {
-          result.AppendLine(diff);
-        }
-
-        result.AppendLine("<br />");
-        result.AppendLine("<br />");
-        return result.ToString();
+        output.Append(viewer.ToHtml(this) + "<br />");
       }
-    }
+        
+      StringBuilder result = new StringBuilder();
 
+      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
+      result.AppendFormat("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case {0}: {1}</h3>",  Id, Passed ? "Passed" : "Failed");
+      result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
+      result.Append("<br />");
+      result.Append(output.ToString());
+
+      return result.ToString();
+    }
 
     public TestCase(int id)
     {
       Id = id;
 
       Passed = true;
-      FileInputFiles = new List<Tuple<string, string>>();
-      FileOutputFiles = new List<Tuple<string, string>>();
-      PpmOutputFiles = new List<Tuple<string, string>>();
-      DiffBlocks = new List<string>();
+      FileInputFiles = new List<InputFile>();
+      FileOutputFiles = new List<OutputFile>();
+      Viewers = new List<IViewer>();
     }
   }
 }

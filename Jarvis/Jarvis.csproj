@@ -71,6 +71,12 @@
     <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Grading\CanvasFormatter.cs" />
     <Compile Include="Grading\MossInterface.cs" />
+    <Compile Include="Viewers\PpmViewer.cs" />
+    <Compile Include="Viewers\IViewer.cs" />
+    <Compile Include="Grading\OutputFile.cs" />
+    <Compile Include="Grading\InputFile.cs" />
+    <Compile Include="Viewers\StdoutViewer.cs" />
+    <Compile Include="Viewers\TextFileViewer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -126,5 +132,6 @@
   <ItemGroup />
   <ItemGroup>
     <Folder Include="Utilities\" />
+    <Folder Include="Viewers\" />
   </ItemGroup>
 </Project>

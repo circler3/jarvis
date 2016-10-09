@@ -48,13 +48,15 @@ namespace Jarvis
 
                   case "stdout":
                     currentTest.StdOutputFile = reader.GetAttribute("file");
+                    currentTest.Viewers.Add(new StdoutViewer());
                     break;
 
                   case "filein":
                     {
                       string courseFile = reader.GetAttribute("courseFile");
                       string studentFile = reader.GetAttribute("studentFile");
-                      currentTest.FileInputFiles.Add(new Tuple<string,string>(courseFile, studentFile));
+
+                      currentTest.FileInputFiles.Add(new InputFile(courseFile, studentFile));
                     }
                     break;
 
@@ -62,15 +64,20 @@ namespace Jarvis
                     {
                       string courseFile = reader.GetAttribute("courseFile");
                       string studentFile = reader.GetAttribute("studentFile");
-                      currentTest.FileOutputFiles.Add(new Tuple<string,string>(courseFile, studentFile));
-                    }
-                    break;
+                      OutputFile.Type fileType = (OutputFile.Type)Enum.Parse(typeof(OutputFile.Type), reader.GetAttribute("type").ToUpper());
 
-                  case "ppmout":
-                    {
-                      string courseFile = reader.GetAttribute("courseFile");
-                      string studentFile = reader.GetAttribute("studentFile");
-                      currentTest.PpmOutputFiles.Add(new Tuple<string,string>(courseFile, studentFile));
+                      switch (fileType)
+                      {
+                        case OutputFile.Type.PPM:
+                          currentTest.Viewers.Add(new PpmViewer());
+                          break;
+
+                        case OutputFile.Type.TEXT:
+                          currentTest.Viewers.Add(new TextFileViewer());
+                          break;
+                      }
+
+                      currentTest.FileOutputFiles.Add(new OutputFile(courseFile, studentFile, fileType));
                     }
                     break;
                 }
@@ -169,29 +176,52 @@ namespace Jarvis
       }
     }
 
-    /// <summary>
-    /// Converts the provided PPM file to a PNG file
-    /// </summary>
-    /// <returns>Error message returned by convert utility (if any)</returns>
-    /// <param name="ppmFile">Full path to PPM file to convert</param>
-    /// <param name="pngFile">Full path to PNG file output location</param>
-    public static string convertPpmToPng(string ppmFile, string pngFile)
+    public static string GetDiff(string actual, string expected)
     {
-      Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
-      string errorMsg = "";
+      string diff = string.Empty;
 
-      using (Process executionProcess = new Process())
+      if (actual.Equals(expected, StringComparison.Ordinal))
       {
-        executionProcess.StartInfo.RedirectStandardError = true;
-        executionProcess.StartInfo.UseShellExecute = false;
-        executionProcess.StartInfo.FileName = "convert";
-        executionProcess.StartInfo.Arguments = ppmFile + " " + pngFile;
-        executionProcess.Start();
-
-        errorMsg = executionProcess.StandardError.ReadToEnd();
+        diff = "No difference";
+      }
+      else
+      {        
+        diff = HtmlDiff.HtmlDiff.Execute(actual, expected);
       }
 
-      return errorMsg;
+      return diff;
+    }
+
+    /// <summary>
+    /// Builds the diff block.
+    /// </summary>
+    /// <returns>The diff block.</returns>
+    /// <param name="source">Text that denotes from which output this diff block was generated.</param>
+    /// <param name="htmlActualOutput">Html actual output.</param>
+    /// <param name="htmlExpectedOutput">Html expected output.</param>
+    /// <param name="htmlDiff">Html diff.</param>
+    public static string BuildDiffBlock(string source, string htmlActualOutput, string htmlExpectedOutput, string htmlDiff)
+    {
+      StringBuilder result = new StringBuilder();
+      result.Append("<p>" + source + "</p>");
+      result.Append("<table>");
+      result.Append("<tr>");
+      result.Append("<td>");
+      result.Append("<h3>Actual</h3>");
+      result.Append("<p>" + htmlActualOutput + "</p>");
+      result.Append("</td>");
+      result.Append("<td>");
+      result.Append("<h3>Expected</h3>");
+      result.Append("<p>" + htmlExpectedOutput + "</p>");
+      result.Append("</td>");
+      result.Append("<td>");
+      result.Append("<h3>Diff</h3>");
+      result.Append("<p>" + htmlDiff + "</p>");
+      result.Append("</td>");
+      result.Append("</tr>");
+      result.Append("</table>");
+
+      return result.ToString();
     }
   }
 }
