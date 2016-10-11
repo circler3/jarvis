@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace Jarvis
 {
@@ -16,24 +17,57 @@ namespace Jarvis
       {
         if (file.FileType == OutputFile.Type.PPM)
         {
-          string actualBase64Png = ConvertPpmToBase64Png(test.HomeworkPath + file.StudentFile);
-          string expectedBase64Png = ConvertPpmToBase64Png(test.TestsPath + file.CourseFile);
-          string htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
-          string htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
-
           string ppmActual = File.ReadAllText(test.HomeworkPath + file.StudentFile);
           string ppmExpected = File.ReadAllText(test.TestsPath + file.CourseFile);
 
+          string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
+          string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
+
+          Bitmap actual = new Bitmap(pngActual);
+          Bitmap expected = new Bitmap(pngExpected);
+
+          bool match = true;
+          for (int i = 0; i < actual.Width; ++i)
+          {
+            for (int j = 0; j < actual.Height; ++j)
+            {
+              Color actualColor = expected.GetPixel(i, j);
+              Color expectedColor = actual.GetPixel(i, j);
+
+              if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+              {
+                match = false;
+              }
+
+              if (Math.Abs(actualColor.G - expectedColor.G) > 10)
+              {
+                match = false;
+              }
+
+              if (Math.Abs(actualColor.B - expectedColor.B) > 10)
+              {
+                match = false;
+              }
+            }
+          }
+            
+          string actualBase64Png = ConvertToBase64(pngActual);
+          string expectedBase64Png = ConvertToBase64(pngExpected);
+          string htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
+          string htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
+
           string htmlDiff = string.Empty;
 
-          if (ppmExpected.Equals(ppmActual, StringComparison.Ordinal))
+          if (match)
           {
-            htmlDiff = "No difference";
+            htmlDiff = "No difference, or close enough... ;-]";
             test.Passed = true;
           }
           else
           {
+            
             htmlDiff = "Differences detected";
+            //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
             test.Passed = false;
           }
 
@@ -52,7 +86,7 @@ namespace Jarvis
     /// <returns>Error message returned by convert utility (if any)</returns>
     /// <param name="ppmFile">Full path to PPM file to convert</param>
     /// <param name="pngFile">Full path to PNG file output location</param>
-    public string ConvertPpmToBase64Png(string ppmFile)
+    private string ConvertPpmToPng(string ppmFile)
     {
       string pngFile = string.Format("/tmp/{0}.png", Guid.NewGuid().ToString());
       Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
@@ -69,14 +103,20 @@ namespace Jarvis
         executionProcess.WaitForExit();
       }
 
-      byte[] pngBytes = File.ReadAllBytes(pngFile);
+      return pngFile;
+    }
+
+    private string ConvertToBase64(string pngFile)
+    {
+      string result = string.Empty;
 
       if (File.Exists(pngFile))
       {
+        byte[] pngBytes = File.ReadAllBytes(pngFile);
         File.Delete(pngFile);
-      }
 
-      result = Convert.ToBase64String(pngBytes);
+        result = Convert.ToBase64String(pngBytes);
+      }
 
       return result;
     }

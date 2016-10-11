@@ -20,6 +20,9 @@ namespace Jarvis
       Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
       result.StyleMessage = StyleCheck(homework);
 
+      // Not ready for this yet
+      //result.JarvisStyleMessage = JarvisStyleCheck(homework);
+
       // Compile
       Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
       result.CompileMessage = Compile(homework);
@@ -54,6 +57,15 @@ namespace Jarvis
         writer.Flush();
         writer.Close();
       }
+    }
+
+    private string JarvisStyleCheck(Assignment homework)
+    {
+      StyleExecutor executor = new StyleExecutor();
+
+      string errors = executor.Run(homework.FullPath);
+
+      return Utilities.ToHtmlEncoding(errors);
     }
 
     private string StyleCheck (Assignment homework)

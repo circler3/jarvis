@@ -115,19 +115,21 @@ namespace Jarvis
       {
         stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
       }
-      
-      stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
-      
-      if (!result.CompileMessage.Contains("Success!!"))
-      {
-        stats.TotalNonCompile++;
-      }
-      
-      if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
-      {
-        stats.TotalBadStyle++;
-      }
 
+      if (result != null)
+      {
+        stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
+      
+        if (!result.CompileMessage.Contains("Success!!"))
+        {
+          stats.TotalNonCompile++;
+        }
+      
+        if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+        {
+          stats.TotalBadStyle++;
+        }
+      }
       Jarvis.Stats.WriteStats();
     }
   }

@@ -34,6 +34,11 @@ namespace Jarvis
 
         Directory.CreateDirectory(path);
 
+        if (File.Exists(homework.FullPath))
+        {
+          File.Delete(homework.FullPath);
+        }
+
         using (FileStream destinationStream = File.Create(homework.FullPath))
         {
           file.Value.Position = 0;

@@ -53,6 +53,7 @@
     <Reference Include="CsvHelper">
       <HintPath>..\packages\CsvHelper.2.16.1.0\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
@@ -78,6 +79,9 @@
     <Compile Include="Grading\Runner.cs" />
     <Compile Include="Grading\Grader.cs" />
     <Compile Include="Grading\RunResult.cs" />
+    <Compile Include="Style\IndentationChecker.cs" />
+    <Compile Include="Style\AbstractStyleChecker.cs" />
+    <Compile Include="Style\StyleExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -134,5 +138,6 @@
   <ItemGroup>
     <Folder Include="Utilities\" />
     <Folder Include="Viewers\" />
+    <Folder Include="Style\" />
   </ItemGroup>
 </Project>
