@@ -336,7 +336,8 @@ namespace Jarvis
         else
         {
           executionProcess.Kill();
-          output = "Sir, the program became unresponsive, either due to an infinite loop or waiting for input.";
+          //output = "Sir, the program became unresponsive, either due to an infinite loop or waiting for input.";
+          output = executionProcess.StandardOutput.ReadToEnd();
         }
 
         executionProcess.Close();
