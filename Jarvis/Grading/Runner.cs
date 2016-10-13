@@ -232,7 +232,7 @@ namespace Jarvis
         {
           executionProcess.Kill();
           output = executionProcess.StandardOutput.ReadToEnd();
-          //output += "\n[Unresponsive program terminated by Jarvis]\n";
+          output += "\n[Unresponsive program terminated by Jarvis]\n";
         }
 
         executionProcess.Close();
