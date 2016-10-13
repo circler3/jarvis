@@ -27,28 +27,37 @@ namespace Jarvis
           Bitmap expected = new Bitmap(pngExpected);
 
           bool match = true;
-          for (int i = 0; i < actual.Width; ++i)
-          {
-            for (int j = 0; j < actual.Height; ++j)
+          bool sizeMismatch = false;
+          if ((actual.Width == expected.Width) && (actual.Height == expected.Width))
+          {            
+            for (int i = 0; i < actual.Width; ++i)
             {
-              Color actualColor = expected.GetPixel(i, j);
-              Color expectedColor = actual.GetPixel(i, j);
-
-              if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+              for (int j = 0; j < actual.Height; ++j)
               {
-                match = false;
-              }
+                Color actualColor = expected.GetPixel(i, j);
+                Color expectedColor = actual.GetPixel(i, j);
 
-              if (Math.Abs(actualColor.G - expectedColor.G) > 10)
-              {
-                match = false;
-              }
+                if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+                {
+                  match = false;
+                }
 
-              if (Math.Abs(actualColor.B - expectedColor.B) > 10)
-              {
-                match = false;
+                if (Math.Abs(actualColor.G - expectedColor.G) > 10)
+                {
+                  match = false;
+                }
+
+                if (Math.Abs(actualColor.B - expectedColor.B) > 10)
+                {
+                  match = false;
+                }
               }
             }
+          }
+          else
+          {
+            match = false;
+            sizeMismatch = true;
           }
             
           string actualBase64Png = ConvertToBase64(pngActual);
@@ -64,9 +73,13 @@ namespace Jarvis
             test.Passed = true;
           }
           else
-          {
-            
-            htmlDiff = "Differences detected";
+          {            
+            htmlDiff = "Differences detected!";
+
+            if (sizeMismatch)
+            {
+              htmlDiff += "<br />Actual Size: " + actual.Width + "x" + actual.Height + ", Expected Size: " + expected.Width + "x" + expected.Height;
+            }
             //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
             test.Passed = false;
           }
