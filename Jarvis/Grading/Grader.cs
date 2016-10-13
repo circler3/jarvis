@@ -127,6 +127,7 @@ namespace Jarvis
         {
           if (assignment.ValidHeader && assignment.HomeworkId == currentAssignment)
           {
+            Logger.Info("~~~GRADING: {0}, HW: ", assignment.Filename, assignment.HomeworkId);
             // run grader on each file and save grading result
             Runner runner = new Runner();
             RunResult result = runner.Run(assignment);

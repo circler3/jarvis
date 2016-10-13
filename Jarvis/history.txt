@@ -14,3 +14,4 @@ Sep 29, 2016 ~ v1.4.3 ~ Really fixed the memory issue now...
 Oct 02, 2016 ~ v1.5.0 ~ Updates for HW 6
 Oct 03, 2016 ~ v1.5.1 ~ Updates to show \0 characters
 Oct 04, 2016 ~ v1.5.2 ~ Check for too large file output
+Oct 10, 2016 ~ v1.5.3 ~ Get output even if process was killed
