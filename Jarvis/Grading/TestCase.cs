@@ -6,7 +6,7 @@ namespace Jarvis
 {
   public class TestCase
   {
-    private bool passed = false;
+    private bool passed = true;
     public enum Type
     {
       Text,

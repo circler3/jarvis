@@ -18,3 +18,4 @@ Oct 10, 2016 ~ v1.5.3 ~ Get output even if process was killed
 Oct 12, 2016 ~ v1.6.0 ~ Add viewers for PPM, enable multithreaded grading
 Oct 12, 2016 ~ v1.6.1 ~ Don't let failed test change to passed
 Oct 12, 2016 ~ v1.6.2 ~ Fixed threading crash
+Oct 12, 2016 ~ v1.6.3 ~ Fixed always failing test cases
