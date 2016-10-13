@@ -69,6 +69,7 @@ namespace Jarvis
     {
       Id = id;
 
+      Passed = true;
       FileInputFiles = new List<InputFile>();
       FileOutputFiles = new List<OutputFile>();
       Viewers = new List<IViewer>();

@@ -17,8 +17,8 @@ namespace Jarvis
       {
         if (file.FileType == OutputFile.Type.PPM)
         {
-          string ppmActual = File.ReadAllText(test.HomeworkPath + file.StudentFile);
-          string ppmExpected = File.ReadAllText(test.TestsPath + file.CourseFile);
+          //string ppmActual = File.ReadAllText(test.HomeworkPath + file.StudentFile);
+          //string ppmExpected = File.ReadAllText(test.TestsPath + file.CourseFile);
 
           string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
           string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
@@ -90,7 +90,7 @@ namespace Jarvis
     {
       string pngFile = string.Format("/tmp/{0}.png", Guid.NewGuid().ToString());
       Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
-      string result = string.Empty;
+      //string result = string.Empty;
 
       using (Process executionProcess = new Process())
       {
