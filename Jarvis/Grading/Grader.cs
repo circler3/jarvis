@@ -11,7 +11,7 @@ namespace Jarvis
 {
   public class Grader
   {
-    private const int POOL_SIZE = 10;
+    private const int POOL_SIZE = 20;
     private List<Thread> threadPool = new List<Thread>();
 
     private ConcurrentQueue<Assignment> toBeGradedQueue = new ConcurrentQueue<Assignment>();
@@ -127,7 +127,7 @@ namespace Jarvis
         {
           if (assignment.ValidHeader && assignment.HomeworkId == currentAssignment)
           {
-            Logger.Info("~~~GRADING: {0}, HW: ", assignment.Filename, assignment.HomeworkId);
+            Logger.Info("~~~GRADING: {0}, HW: {1}", assignment.Filename, assignment.HomeworkId);
             // run grader on each file and save grading result
             Runner runner = new Runner();
             RunResult result = runner.Run(assignment);

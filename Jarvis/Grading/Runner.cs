@@ -188,6 +188,17 @@ namespace Jarvis
     private string ExecuteProgram(Assignment homework, string inputFile)
     {      
       string output = string.Empty;
+      string input = string.Empty;
+      if (File.Exists(inputFile))
+      {
+        using (StreamReader reader = new StreamReader(inputFile))
+        {
+          input = reader.ReadToEnd();
+
+          reader.Close();
+        }
+      }
+
       using (Process executionProcess = new Process())
       {
         executionProcess.StartInfo.WorkingDirectory = homework.Path;
@@ -203,19 +214,12 @@ namespace Jarvis
 
         executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
         executionProcess.Start();
+        executionProcess.StandardInput.Write(input);
 
         Jarvis.StudentProcesses.Add(executionProcess.Id);
 
 
-        if (File.Exists(inputFile))
-        {
-          StreamReader reader = new StreamReader(inputFile);
 
-          while (!reader.EndOfStream)
-          {
-            executionProcess.StandardInput.WriteLine(reader.ReadLine());
-          }
-        }
 
         executionProcess.WaitForExit(10000);
 
