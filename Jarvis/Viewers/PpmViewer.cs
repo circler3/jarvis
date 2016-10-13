@@ -28,7 +28,7 @@ namespace Jarvis
 
           bool match = true;
           bool sizeMismatch = false;
-          if ((actual.Width == expected.Width) && (actual.Height == expected.Width))
+          if ((actual.Width == expected.Width) && (actual.Height == expected.Height))
           {            
             for (int i = 0; i < actual.Width; ++i)
             {
