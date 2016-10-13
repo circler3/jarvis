@@ -218,9 +218,6 @@ namespace Jarvis
 
         Jarvis.StudentProcesses.Add(executionProcess.Id);
 
-
-
-
         executionProcess.WaitForExit(10000);
 
         if (executionProcess.HasExited)
