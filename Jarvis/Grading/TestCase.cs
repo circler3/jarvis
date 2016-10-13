@@ -6,6 +6,7 @@ namespace Jarvis
 {
   public class TestCase
   {
+    private bool passed = false;
     public enum Type
     {
       Text,
@@ -20,7 +21,21 @@ namespace Jarvis
     public List<InputFile> FileInputFiles { get; set; }
     public List<OutputFile> FileOutputFiles { get; set; }
 
-    public bool Passed { get; set; }
+    public bool Passed
+    { 
+      get
+      {
+        return passed;
+      }
+
+      set
+      {
+        if (passed) // Once we've failed, don't let this be updated
+        {
+          passed = value;
+        }
+      }
+    }
 
     public List<IViewer> Viewers { get; set; }
 
@@ -54,7 +69,6 @@ namespace Jarvis
     {
       Id = id;
 
-      Passed = true;
       FileInputFiles = new List<InputFile>();
       FileOutputFiles = new List<OutputFile>();
       Viewers = new List<IViewer>();
