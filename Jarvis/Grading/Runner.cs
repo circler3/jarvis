@@ -214,7 +214,11 @@ namespace Jarvis
 
         executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
         executionProcess.Start();
-        executionProcess.StandardInput.Write(input);
+
+        if (!string.IsNullOrEmpty(input))
+        {
+          executionProcess.StandardInput.Write(input);
+        }
 
         Jarvis.StudentProcesses.Add(executionProcess.Id);
 

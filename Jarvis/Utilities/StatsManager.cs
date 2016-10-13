@@ -22,7 +22,12 @@ namespace Jarvis
 
         foreach (string grade in TotalUniqueStudentsSubmissions.Values)
         {
-          total += float.Parse(grade);
+          float result;
+
+          if (float.TryParse(grade, out result))
+          {
+            total += result;
+          }
         }
 
         return total / (float) TotalUniqueStudentsSubmissions.Count;

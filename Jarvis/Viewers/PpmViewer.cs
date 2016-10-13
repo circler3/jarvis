@@ -27,6 +27,7 @@ namespace Jarvis
           Bitmap expected = new Bitmap(pngExpected);
 
           bool match = true;
+
           for (int i = 0; i < actual.Width; ++i)
           {
             for (int j = 0; j < actual.Height; ++j)
