@@ -9,83 +9,101 @@ namespace Jarvis
 {
   public class PpmViewer : IViewer
   {
+    private TestCase testCase;
     public string ToHtml(TestCase test)
     {
+      testCase = test;
       StringBuilder result = new StringBuilder();
 
       foreach (OutputFile file in test.FileOutputFiles)
       {
         if (file.FileType == OutputFile.Type.PPM)
         {
-          //string ppmActual = File.ReadAllText(test.HomeworkPath + file.StudentFile);
-          //string ppmExpected = File.ReadAllText(test.TestsPath + file.CourseFile);
+          string htmlDiff = string.Empty;
+          string htmlActual = string.Empty;
 
-          string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
           string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
-
-          Bitmap actual = new Bitmap(pngActual);
           Bitmap expected = new Bitmap(pngExpected);
-
-          bool match = true;
-          bool sizeMismatch = false;
-          if ((actual.Width == expected.Width) && (actual.Height == expected.Height))
-          {            
-            for (int i = 0; i < actual.Width; ++i)
-            {
-              for (int j = 0; j < actual.Height; ++j)
-              {
-                Color actualColor = expected.GetPixel(i, j);
-                Color expectedColor = actual.GetPixel(i, j);
-
-                if (Math.Abs(actualColor.R - expectedColor.R) > 10)
-                {
-                  match = false;
-                }
-
-                if (Math.Abs(actualColor.G - expectedColor.G) > 10)
-                {
-                  match = false;
-                }
-
-                if (Math.Abs(actualColor.B - expectedColor.B) > 10)
-                {
-                  match = false;
-                }
-              }
-            }
-          }
-          else
-          {
-            match = false;
-            sizeMismatch = true;
-          }
-            
-          string actualBase64Png = ConvertToBase64(pngActual);
           string expectedBase64Png = ConvertToBase64(pngExpected);
-          string htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
           string htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
 
-          string htmlDiff = string.Empty;
-
-          if (match)
+          try
           {
-            htmlDiff = "No difference, or close enough... ;-]";
-            test.Passed = true;
-          }
-          else
-          {            
-            htmlDiff = "Differences detected!";
+            bool match = true;
+            bool sizeMismatch = false;
+            string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
 
-            if (sizeMismatch)
+            if (File.Exists(pngActual))
             {
-              htmlDiff += "<br />Actual Size: " + actual.Width + "x" + actual.Height + ", Expected Size: " + expected.Width + "x" + expected.Height;
+              Bitmap actual = new Bitmap(pngActual);
+              
+              if ((actual.Width == expected.Width) && (actual.Height == expected.Height))
+              {            
+                for (int i = 0; i < actual.Width; ++i)
+                {
+                  for (int j = 0; j < actual.Height; ++j)
+                  {
+                    Color actualColor = expected.GetPixel(i, j);
+                    Color expectedColor = actual.GetPixel(i, j);
+                    
+                    if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+                    {
+                      match = false;
+                    }
+                    
+                    if (Math.Abs(actualColor.G - expectedColor.G) > 10)
+                    {
+                      match = false;
+                    }
+                    
+                    if (Math.Abs(actualColor.B - expectedColor.B) > 10)
+                    {
+                      match = false;
+                    }
+                  }
+                }
+              }
+              else
+              {
+                match = false;
+                sizeMismatch = true;
+              }
+              string actualBase64Png = ConvertToBase64(pngActual);
+              htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
+
+              
+              if (match)
+              {
+                htmlDiff = "No difference, or close enough... ;-]";
+                test.Passed = true;
+              }
+              else
+              {
+                htmlDiff = "Differences detected!";
+                
+                if (sizeMismatch)
+                {
+                  htmlDiff += "<br />Actual Size: " + actual.Width + "x" + actual.Height + ", Expected Size: " + expected.Width + "x" + expected.Height;
+                }
+                //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
+                test.Passed = false;
+              }
             }
-            //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
+            else
+            {
+              htmlDiff = "Differences detected!";
+              htmlActual = "Invalid image!";
+              test.Passed = false;
+            }
+          }
+          catch
+          {
+            htmlDiff = "Invalid image!";
+            htmlActual = "Invalid image!";
             test.Passed = false;
           }
 
           string diffBlock = Utilities.BuildDiffBlock("From PPM image:", htmlActual, htmlExpected, htmlDiff);
-
           result.Append(diffBlock);
         }
       }
@@ -101,7 +119,8 @@ namespace Jarvis
     /// <param name="pngFile">Full path to PNG file output location</param>
     private string ConvertPpmToPng(string ppmFile)
     {
-      string pngFile = string.Format("/tmp/{0}.png", Guid.NewGuid().ToString());
+      
+      string pngFile = string.Format("{0}{1}.png", testCase.HomeworkPath, Guid.NewGuid().ToString());
       Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
       //string result = string.Empty;
 
