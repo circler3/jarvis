@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Jarvis
 {
@@ -139,16 +140,10 @@ namespace Jarvis
       }
 
       // Quality check on header
-      if (string.IsNullOrEmpty(homework.StudentId))
+      if (string.IsNullOrEmpty(homework.StudentId) || !Regex.IsMatch(homework.StudentId,@"^[Aa]\d{8}$"))
       {
         homework.ValidHeader = false;
-        homework.ErrorMessage = "Header is missing a student ID.";
-        Logger.Warn(homework.ErrorMessage);
-      }
-      else if (!homework.StudentId.Contains("a"))
-      {
-        homework.ValidHeader = false;
-        homework.ErrorMessage = "A# should be in the format: a09999999, including the 'a'";
+        homework.ErrorMessage = "Header is missing a student ID, or the student ID is invalid. Format should be :'A12345678' (A followed by 8 numbers)";
         Logger.Warn(homework.ErrorMessage);
       }
       else if (homework.StudentId.Equals("a09999999", StringComparison.OrdinalIgnoreCase))
