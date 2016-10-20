@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Xml;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace Jarvis
 {
@@ -16,7 +17,7 @@ namespace Jarvis
   { 
     public static StatsManager Stats { get; set; }
     public static Configuration Config = null;
-    public  static List<int> StudentProcesses = new List<int>();
+    public static ConcurrentBag<int> StudentProcesses = new ConcurrentBag<int>();
     private static AutoResetEvent autoEvent = new AutoResetEvent(false);
     private static System.Timers.Timer processReaper = new System.Timers.Timer(10000);
 
@@ -132,9 +133,11 @@ namespace Jarvis
         }
       }
 
+      int result;
       foreach (int pid in expiredPids)
       {
-        StudentProcesses.Remove(pid);
+        result = pid;
+        StudentProcesses.TryTake(out result);
       }
     }
 

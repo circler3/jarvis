@@ -19,9 +19,15 @@
       <img src="@Path['~/Content/gradingHelp.png']" alt="Help" />
     </a>
   </div>
-  <form style='font-family: Courier;'>      
-    File:<input type='file' name='file' id='file' onchange='enableUpload();' />
+  <form style='font-family: Courier;'>
+    <label for='file'>File:</label>
+    <input type='file' name='file' id='file' onchange='enableUpload();' />
     <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/grade");' disabled/>
+    <br />
+    <label for='mossCheckBox'>MOSS:</label>
+    <input type='checkbox' id='runMoss' value='true' checked />
+    <label for='mossCheckBox'>Run assignments:</label>
+    <input type='checkbox' id='runCode' value='true' checked />
   </form>
   <br />
   <div id='output'>

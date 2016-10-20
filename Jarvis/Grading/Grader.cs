@@ -20,8 +20,14 @@ namespace Jarvis
     private string currentAssignment;
     private string currentCourse;
 
-    public Grader()
+    private bool runMoss = true;
+    private bool runCode = true;
+
+    public Grader(bool runMoss, bool runCode)
     {
+      this.runMoss = runMoss;  
+      this.runCode = runCode;
+
       // Create thread pool workers
       for (int i = 0; i < POOL_SIZE; ++i)
       {
@@ -34,6 +40,7 @@ namespace Jarvis
       // extract to temp directory
       // parse headers
       Logger.Trace("Extracting grader zip file");
+      string gradingReport = string.Empty;
 
       // copy to course directory structure
       currentAssignment = assignments[0].HomeworkId;
@@ -70,49 +77,67 @@ namespace Jarvis
 
         toBeGradedQueue.Enqueue(a);
       }
-
+      string mossResponse = string.Empty;
       // Check MOSS before grading so we don't have to wait for grading to find out if MOSS fails
-      string mossResponse = SendToMoss(hwPath, currentCourse, currentAssignment);
+      if (runMoss)
+      {        
+        mossResponse = SendToMoss(hwPath, currentCourse, currentAssignment);
 
-      if (string.IsNullOrEmpty(mossResponse))
+        if (string.IsNullOrEmpty(mossResponse))
+        {
+          mossResponse = "Moss didn't respond!";
+        }
+        else
+        {
+          mossResponse = "<a href='" + mossResponse + "'>" + mossResponse + "</a><br />";
+        }
+
+        // add MOSS URL to result
+        gradingReport = "<a href='" + mossResponse + "'>" + mossResponse + "</a><br />";
+      }
+      else
       {
-        return "MOSS Failed!";
+        gradingReport = "MOSS skipped.<br />";
       }
 
-      Logger.Info("Starting {0} grading threads to grade {1} assignments", POOL_SIZE, toBeGradedQueue.Count);
-      // Start worker pool
-      foreach (Thread t in threadPool)
+      if (runCode)
       {
-        t.Start();
-      }
+        Logger.Info("Starting {0} grading threads to grade {1} assignments", POOL_SIZE, toBeGradedQueue.Count);
 
-      Logger.Info("Waiting for threads to complete");
-      // Wait for all threads to exit
-      foreach (Thread t in threadPool)
+        // Start worker pool
+        foreach (Thread t in threadPool)
+        {
+          t.Start();
+        }
+
+        Logger.Info("Waiting for threads to complete");
+        // Wait for all threads to exit
+        foreach (Thread t in threadPool)
+        {
+          t.Join();
+        }
+
+        Logger.Info("Threads completed! {0} results received", resultQueue.Count);
+
+        gradingReport += SendFilesToSectionLeaders(hwPath, currentCourse, currentAssignment);
+
+        string graderEmail = File.ReadAllText(hwPath + "../grader.txt");
+
+        Logger.Info("Sending Canvas CSV to {0}", graderEmail);
+
+        CanvasFormatter canvasFormatter = new CanvasFormatter();
+
+        string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentAssignment, resultQueue.ToArray());
+
+        SendEmail(graderEmail,
+          "Grades for " + currentCourse + " " + currentAssignment,
+          "Hello! Attached are the grades for " + currentCourse + " " + currentAssignment + ". Happy grading!\n" + mossResponse,
+          gradesPath);
+      }
+      else
       {
-        t.Join();
+        gradingReport += "Execution skipped.<br />";
       }
-
-      Logger.Info("Threads completed! {0} results received", resultQueue.Count);
-
-      // add MOSS URL to result
-      string gradingReport = "<a href='" + mossResponse + "'>" + mossResponse + "</a><br />";
-
-      gradingReport += SendFilesToSectionLeaders(hwPath, currentCourse, currentAssignment);
-
-      string graderEmail = File.ReadAllText(hwPath + "../grader.txt");
-
-      Logger.Info("Sending Canvas CSV to {0}", graderEmail);
-
-      CanvasFormatter canvasFormatter = new CanvasFormatter();
-
-      string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentAssignment, resultQueue.ToArray());
-
-      SendEmail(graderEmail,
-        "Grades for " + currentCourse + " " + currentAssignment,
-        "Hello! Attached are the grades for " + currentCourse + " " + currentAssignment + ". Happy grading!\n" + mossResponse,
-        gradesPath);
-
       // Generate some kind of grading report
       return gradingReport;
     }

@@ -82,11 +82,13 @@ namespace Jarvis
         Guid temp = Guid.NewGuid();
         string baseDir = Jarvis.Config.AppSettings.Settings["workingDir"].Value;
         string gradingDir = baseDir + "/grading/" + temp.ToString() + "/";  
+        bool runMoss = this.Request.Form["runMoss"];
+        bool runCode = this.Request.Form["runCode"];
 
         var request = this.Bind<FileUploadRequest>();
         List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.File);
      
-        Grader grader = new Grader();
+        Grader grader = new Grader(runMoss, runCode);
 
         return grader.Grade(baseDir, assignments);
       };

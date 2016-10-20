@@ -28,10 +28,10 @@ namespace Jarvis
         double score = 0.0f;
 
         // 20% of grade for style
-        if (StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
-        {
+        //if (StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+        //{
           score += 2.0f;
-        }
+        //}
 
         // 80% of grade for correct execution
         if (CompileMessage == "Success!!")

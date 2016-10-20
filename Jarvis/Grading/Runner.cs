@@ -21,7 +21,7 @@ namespace Jarvis
       result.StyleMessage = StyleCheck(homework);
 
       // Not ready for this yet
-      //result.JarvisStyleMessage = JarvisStyleCheck(homework);
+      result.JarvisStyleMessage = "Coming&nbsp;soon!";
 
       // Compile
       Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
