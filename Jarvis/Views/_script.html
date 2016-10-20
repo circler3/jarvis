@@ -1,3 +1,9 @@
+<!-- Includes JQuery from CDN -->
+<script
+        src="http://code.jquery.com/jquery-1.12.4.min.js"
+        integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous">
+</script>
 <script>
   var dotterTimer;
   var dotCount = 0;
@@ -52,6 +58,20 @@
       {
         window.clearTimeout(dotterTimer);
         document.getElementById("output").innerHTML = xhttp.responseText;
+        $('.header').click(function(){
+          console.log('clicked');
+          $(this).toggleClass('expand').nextUntil('tr.header').slideToggle(100);
+        });
+        $('.header').toggleClass('expand').nextUntil('tr.header').slideToggle(100);
+      }
+      else if (xhttp.readyState === 4) //We have gotten a response, but it wasn't good
+      {
+        window.clearTimeout(dotterTimer);
+        document.getElementById("output").innerHTML = "<h1>There was an internal error with Jarvis. Please try again later.</h1>";
+        document.getElementById("output").innerHTML += "<h3>Please check if this error has been reported under the 'Jarvis' announcement on Canvas, and if not, please report it with the error message below.</h3>";
+        document.getElementById("output").innerHTML += "<span> The error message is: <code>" +
+        xhttp.responseText +
+          "</code></span>";
       }
     };
 
@@ -106,5 +126,4 @@
     filedrag.addEventListener("drop", FileSelectHandler, false);
     filedrag.style.display = "block";
   }
-
 </script>

@@ -19,7 +19,9 @@ namespace Jarvis
         string htmlExpectedStdOutput = Utilities.ToHtmlEncodingWithNewLines(expectedStdOutput);
         string htmlDiff = Utilities.GetDiff(htmlActualStdOutput, htmlExpectedStdOutput);
 
-        result.Append(Utilities.BuildDiffBlock("From stdout:", htmlActualStdOutput, htmlExpectedStdOutput, htmlDiff));
+        string caseHeaderText = string.IsNullOrWhiteSpace(test.StdOutText) 
+          ? "From stdout: <br/ > <span style=\"color:#ff0000\">Warning: actual output was empty!</span>" : "From stdout: " ;
+        result.Append(Utilities.BuildDiffBlock(caseHeaderText, htmlActualStdOutput, htmlExpectedStdOutput, htmlDiff));
 
         test.Passed = htmlDiff.Contains("No difference");
       }
