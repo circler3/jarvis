@@ -214,27 +214,33 @@ namespace Jarvis
 
         executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
         executionProcess.Start();
-
-        if (!string.IsNullOrEmpty(input))
+        try
         {
-          executionProcess.StandardInput.Write(input);
+          if (!string.IsNullOrEmpty(input))
+          {
+            executionProcess.StandardInput.Write(input);
+          }
+
+          Jarvis.StudentProcesses.Add(executionProcess.Id);
+
+          executionProcess.WaitForExit(10000);
+
+          if (executionProcess.HasExited)
+          {
+            output = executionProcess.StandardOutput.ReadToEnd();
+          }
+          else
+          {
+            executionProcess.Kill();
+            output = executionProcess.StandardOutput.ReadToEnd();
+            output += "\n[Unresponsive program terminated by Jarvis]\n";
+          }
         }
-
-        Jarvis.StudentProcesses.Add(executionProcess.Id);
-
-        executionProcess.WaitForExit(10000);
-
-        if (executionProcess.HasExited)
+        catch (Exception e)
         {
-          output = executionProcess.StandardOutput.ReadToEnd();
+          Logger.Fatal("Fatal exception while running program");
+          Logger.Fatal(e.ToString());
         }
-        else
-        {
-          executionProcess.Kill();
-          output = executionProcess.StandardOutput.ReadToEnd();
-          output += "\n[Unresponsive program terminated by Jarvis]\n";
-        }
-
         executionProcess.Close();
       }
       
