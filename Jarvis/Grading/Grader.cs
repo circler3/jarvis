@@ -148,6 +148,8 @@ namespace Jarvis
 
       while (!toBeGradedQueue.IsEmpty)
       {
+        int remaining = toBeGradedQueue.Count;
+        Logger.Info("=== {0} remaining assignments to grade", remaining);
         if (toBeGradedQueue.TryDequeue(out assignment))
         {
           if (assignment.ValidHeader && assignment.HomeworkId == currentAssignment)
