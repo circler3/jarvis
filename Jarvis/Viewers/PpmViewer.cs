@@ -124,9 +124,13 @@ namespace Jarvis
             }
           }
 
-
           string diffBlock = Utilities.BuildDiffBlock("From PPM image:", htmlActual, htmlExpected, htmlDiff);
           result.Append(diffBlock);
+
+          if (File.Exists(ppmFile))
+          {
+            File.Delete(ppmFile);
+          }
         }
       }
 
@@ -141,7 +145,6 @@ namespace Jarvis
     /// <param name="pngFile">Full path to PNG file output location</param>
     private string ConvertPpmToPng(string ppmFile)
     {
-      
       string pngFile = string.Format("{0}{1}.png", testCase.HomeworkPath, Guid.NewGuid().ToString());
       Logger.Info("Converting {0} to {1}", ppmFile, pngFile);
       //string result = string.Empty;
