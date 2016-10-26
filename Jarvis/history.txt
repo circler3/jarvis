@@ -28,3 +28,4 @@ Oct 26, 2016 ~ v1.7.1 ~ Fixed grading checkbox to run execution
 Oct 26, 2016 ~ v1.7.2 ~ Catching exceptions during program execution
 Oct 26, 2016 ~ v1.7.3 ~ Added Log statement for number of remaining assignments to grade
 Oct 26, 2016 ~ v1.7.4 ~ Added check for valid PPM header
+Oct 26, 2016 ~ v1.7.5 ~ Check that file exists before trying to do anything in PPM viewer

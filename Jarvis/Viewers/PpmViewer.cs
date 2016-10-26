@@ -23,7 +23,7 @@ namespace Jarvis
           string htmlActual = string.Empty;
           string htmlExpected = string.Empty;
 
-          if (CheckPpmHeader(test.HomeworkPath + file.StudentFile))
+          if (File.Exists(test.HomeworkPath + file.StudentFile) && CheckPpmHeader(test.HomeworkPath + file.StudentFile))
           {
             string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
             Bitmap expected = new Bitmap(pngExpected);
@@ -107,10 +107,14 @@ namespace Jarvis
               test.Passed = false;
             }
           }
+          else if (!File.Exists(test.HomeworkPath + file.StudentFile))
+          {
+            htmlDiff = "Differences detected!";
+            htmlActual = "No image found!";
+            test.Passed = false;
+          }
           else // Invalid header
           {
-            htmlDiff = "Didn't run due to invalid PPM header.";
-            htmlExpected = "Didn't run due to invalid PPM header.";
             htmlActual = "Invalid PPM header!<br />Please check for correct PPM before uploading to Jarvis.";
             test.Passed = false;
           }
