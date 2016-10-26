@@ -23,7 +23,24 @@ namespace Jarvis
           string htmlActual = string.Empty;
           string htmlExpected = string.Empty;
 
-          if (File.Exists(test.HomeworkPath + file.StudentFile) && CheckPpmHeader(test.HomeworkPath + file.StudentFile))
+          string ppmFile = test.HomeworkPath + file.StudentFile;
+
+          if (!File.Exists(ppmFile))
+          {
+            htmlActual = "No image found!";
+            test.Passed = false;
+          }
+          else if (new FileInfo(ppmFile).Length > 6000000)
+          {
+            htmlActual = string.Format("Generated PPM file is too large! {0} bytes!", new FileInfo(ppmFile).Length);
+            test.Passed = false;
+          }
+          else if (CheckPpmHeader(ppmFile)) // Invalid header
+          {
+            htmlActual = "Invalid PPM header!<br />Please check for correct PPM before uploading to Jarvis.";
+            test.Passed = false;
+          }
+          else
           {
             string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
             Bitmap expected = new Bitmap(pngExpected);
@@ -32,7 +49,6 @@ namespace Jarvis
 
             try
             {
-            
               bool match = true;
               bool sizeMismatch = false;
               string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
@@ -107,17 +123,7 @@ namespace Jarvis
               test.Passed = false;
             }
           }
-          else if (!File.Exists(test.HomeworkPath + file.StudentFile))
-          {
-            htmlDiff = "Differences detected!";
-            htmlActual = "No image found!";
-            test.Passed = false;
-          }
-          else // Invalid header
-          {
-            htmlActual = "Invalid PPM header!<br />Please check for correct PPM before uploading to Jarvis.";
-            test.Passed = false;
-          }
+
 
           string diffBlock = Utilities.BuildDiffBlock("From PPM image:", htmlActual, htmlExpected, htmlDiff);
           result.Append(diffBlock);
