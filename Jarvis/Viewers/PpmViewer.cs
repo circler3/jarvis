@@ -88,6 +88,8 @@ namespace Jarvis
                   match = false;
                   sizeMismatch = true;
                 }
+
+
                 string actualBase64Png = ConvertToBase64(pngActual);
                 htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
 
@@ -108,6 +110,8 @@ namespace Jarvis
                   //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
                   test.Passed = false;
                 }
+
+                actual.Dispose();
               }
               else
               {
@@ -122,6 +126,8 @@ namespace Jarvis
               htmlActual = "Invalid image!";
               test.Passed = false;
             }
+
+            expected.Dispose();
           }
 
           string diffBlock = Utilities.BuildDiffBlock("From PPM image:", htmlActual, htmlExpected, htmlDiff);
