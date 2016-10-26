@@ -32,6 +32,10 @@
       formData.append('runMoss', document.getElementById('runMoss').checked);
     }
 
+    if (document.getElementById('runCode') != undefined)
+    {
+      formData.append('runCode', document.getElementById('runCode').checked);
+    }
 
     if (document.getElementById('file').files[0] != undefined)
     {
