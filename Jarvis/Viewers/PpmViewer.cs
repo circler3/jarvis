@@ -35,7 +35,7 @@ namespace Jarvis
             htmlActual = string.Format("Generated PPM file is too large! {0} bytes!", new FileInfo(ppmFile).Length);
             test.Passed = false;
           }
-          else if (CheckPpmHeader(ppmFile)) // Invalid header
+          else if (!CheckPpmHeader(ppmFile)) // Invalid header
           {
             htmlActual = "Invalid PPM header!<br />Please check for correct PPM before uploading to Jarvis.";
             test.Passed = false;
