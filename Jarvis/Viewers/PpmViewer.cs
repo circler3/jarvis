@@ -21,85 +21,97 @@ namespace Jarvis
         {
           string htmlDiff = string.Empty;
           string htmlActual = string.Empty;
+          string htmlExpected = string.Empty;
 
-          string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
-          Bitmap expected = new Bitmap(pngExpected);
-          string expectedBase64Png = ConvertToBase64(pngExpected);
-          string htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
-
-          try
+          if (CheckPpmHeader(test.HomeworkPath + file.StudentFile))
           {
-            bool match = true;
-            bool sizeMismatch = false;
-            string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
+            string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
+            Bitmap expected = new Bitmap(pngExpected);
+            string expectedBase64Png = ConvertToBase64(pngExpected);
+            htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
 
-            if (File.Exists(pngActual))
+            try
             {
-              Bitmap actual = new Bitmap(pngActual);
-              
-              if ((actual.Width == expected.Width) && (actual.Height == expected.Height))
-              {            
-                for (int i = 0; i < actual.Width; ++i)
-                {
-                  for (int j = 0; j < actual.Height; ++j)
+            
+              bool match = true;
+              bool sizeMismatch = false;
+              string pngActual = ConvertPpmToPng(test.HomeworkPath + file.StudentFile);
+
+              if (File.Exists(pngActual))
+              {
+                Bitmap actual = new Bitmap(pngActual);
+                
+                if ((actual.Width == expected.Width) && (actual.Height == expected.Height))
+                {            
+                  for (int i = 0; i < actual.Width; ++i)
                   {
-                    Color actualColor = expected.GetPixel(i, j);
-                    Color expectedColor = actual.GetPixel(i, j);
-                    
-                    if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+                    for (int j = 0; j < actual.Height; ++j)
                     {
-                      match = false;
-                    }
-                    
-                    if (Math.Abs(actualColor.G - expectedColor.G) > 10)
-                    {
-                      match = false;
-                    }
-                    
-                    if (Math.Abs(actualColor.B - expectedColor.B) > 10)
-                    {
-                      match = false;
+                      Color actualColor = expected.GetPixel(i, j);
+                      Color expectedColor = actual.GetPixel(i, j);
+                      
+                      if (Math.Abs(actualColor.R - expectedColor.R) > 10)
+                      {
+                        match = false;
+                      }
+                      
+                      if (Math.Abs(actualColor.G - expectedColor.G) > 10)
+                      {
+                        match = false;
+                      }
+                      
+                      if (Math.Abs(actualColor.B - expectedColor.B) > 10)
+                      {
+                        match = false;
+                      }
                     }
                   }
                 }
-              }
-              else
-              {
-                match = false;
-                sizeMismatch = true;
-              }
-              string actualBase64Png = ConvertToBase64(pngActual);
-              htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
+                else
+                {
+                  match = false;
+                  sizeMismatch = true;
+                }
+                string actualBase64Png = ConvertToBase64(pngActual);
+                htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
 
-              
-              if (match)
-              {
-                htmlDiff = "No difference, or close enough... ;-]";
-                test.Passed = true;
+                
+                if (match)
+                {
+                  htmlDiff = "No difference, or close enough... ;-]";
+                  test.Passed = true;
+                }
+                else
+                {
+                  htmlDiff = "Differences detected!";
+                  
+                  if (sizeMismatch)
+                  {
+                    htmlDiff += "<br />Actual Size: " + actual.Width + "x" + actual.Height + ", Expected Size: " + expected.Width + "x" + expected.Height;
+                  }
+                  //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
+                  test.Passed = false;
+                }
               }
               else
               {
                 htmlDiff = "Differences detected!";
-                
-                if (sizeMismatch)
-                {
-                  htmlDiff += "<br />Actual Size: " + actual.Width + "x" + actual.Height + ", Expected Size: " + expected.Width + "x" + expected.Height;
-                }
-                //htmlDiff += "<br /><a href='data:text/html;base64," + Convert.ToBase64String( Encoding.ASCII.GetBytes()) + "'>Link here</a>";
+                htmlActual = "No image found!";
                 test.Passed = false;
               }
             }
-            else
+            catch
             {
-              htmlDiff = "Differences detected!";
+              htmlDiff = "Invalid image!";
               htmlActual = "Invalid image!";
               test.Passed = false;
             }
           }
-          catch
+          else // Invalid header
           {
-            htmlDiff = "Invalid image!";
-            htmlActual = "Invalid image!";
+            htmlDiff = "Didn't run due to invalid PPM header.";
+            htmlExpected = "Didn't run due to invalid PPM header.";
+            htmlActual = "Invalid PPM header!<br />Please check for correct PPM before uploading to Jarvis.";
             test.Passed = false;
           }
 
@@ -148,6 +160,35 @@ namespace Jarvis
         File.Delete(pngFile);
 
         result = Convert.ToBase64String(pngBytes);
+      }
+
+      return result;
+    }
+
+    private bool CheckPpmHeader(string ppmFile)
+    {
+      bool result = true;
+      List<string> header = new List<string>();
+
+      using (StreamReader reader = new StreamReader(ppmFile))
+      {
+        for (int i = 0; i < 3 && !reader.EndOfStream; ++i)
+        {
+          header.Add(reader.ReadLine().ToLower());
+        }
+      }
+
+      if (header.Count < 3)
+      {
+        result = false;
+      }
+      else if (header[0].Trim() != "p3")
+      {
+        result = false;
+      }
+      else if (header[2].Trim() != "255")
+      {
+        result = false;
       }
 
       return result;

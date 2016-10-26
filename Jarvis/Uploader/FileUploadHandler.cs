@@ -15,12 +15,15 @@ namespace Jarvis
 
       Logger.Trace ("Handling student upload");
       // Check file header
-      StreamReader reader = new StreamReader(file.Value);
 
       List<string> header = new List<string>();
-      for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+
+      using (StreamReader reader = new StreamReader(file.Value))
       {
-        header.Add(reader.ReadLine().ToLower());
+        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+        {
+          header.Add(reader.ReadLine().ToLower());
+        }
       }
 
       Assignment homework = ParseHeader(header);
