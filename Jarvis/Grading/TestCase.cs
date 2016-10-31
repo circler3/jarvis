@@ -53,11 +53,12 @@ namespace Jarvis
       {
         output.Append(viewer.ToHtml(this) + "<br />");
       }
-        
+
+      var passedText = Passed ? "<span style=\"color:#00ff00\">Passed</span>" : "<span style=\"color:#ff0000\">Failed</span>";
       StringBuilder result = new StringBuilder();
 
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-      result.AppendFormat("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case {0}: {1}</h3>",  Id, Passed ? "Passed" : "Failed");
+      result.AppendFormat("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case {0}: {1}</h3>",  Id, passedText);
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
       result.Append("<br />");
       result.Append(output.ToString());

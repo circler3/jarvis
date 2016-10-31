@@ -124,8 +124,15 @@ namespace Jarvis
       builder.Replace("<", "&lt;");
       builder.Replace(">", "&gt;");
       builder.Replace(" ", "&nbsp;");
+      //Handle ASCII non-printables
       builder.Replace("\0", "<span style='color: #888888; font-size: 10px;'>\\0</span>");
+      builder.Replace("\a", "<span style='color: #888888; font-size: 10px;'>\\a</span>");
+      builder.Replace("\b", "<span style='color: #888888; font-size: 10px;'>\\b</span>");
+      builder.Replace("\t", "<span style='color: #888888;'>&#8677;</span>"); //replace ascii tab with Unicode "RIGHT ARROW TO BAR"
       builder.Replace("\n", "<span style='color: #888888; font-size: 10px;'>\\n</span><br />");
+      builder.Replace("\v", "<span style='color: #888888; font-size: 10px;'>\\v</span>");
+      builder.Replace("\f", "<span style='color: #888888; font-size: 10px;'>\\f</span>");
+      builder.Replace("\r", "<span style='color: #888888; font-size: 10px;'>\\r</span>");
 
       return builder.ToString();
     }
@@ -203,8 +210,11 @@ namespace Jarvis
     public static string BuildDiffBlock(string source, string htmlActualOutput, string htmlExpectedOutput, string htmlDiff)
     {
       StringBuilder result = new StringBuilder();
-      result.Append("<p>" + source + "</p>");
-      result.Append("<table>");
+      result.Append("<table style=\"margin-left: 35px;\">");
+      result.Append("<tr class=\"header expand\" >");
+      result.Append("<th colspan=\"1\"><span class=\"sign\"></span></th>");
+      result.Append($"<th colspan=\"2\">{source}</th>");
+      result.Append("</tr>");
       result.Append("<tr>");
       result.Append("<td>");
       result.Append("<h3>Actual</h3>");
