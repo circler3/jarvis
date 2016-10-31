@@ -62,17 +62,21 @@ namespace Jarvis
       {
         if (a.ValidHeader)
         {
-          string oldPath = a.FullPath;
+          string oldPath = a.Path;
           a.Path = string.Format("{0}section{1}/{2}/", hwPath, a.Section, a.StudentId);
 
           Directory.CreateDirectory(a.Path);
-          if (File.Exists(a.FullPath))
-          {
-            File.Delete(a.FullPath);
-          }
 
-          Logger.Trace("Moving {0} to {1}", oldPath, a.FullPath);
-          File.Move(oldPath, a.FullPath);
+          foreach (string file in a.FileNames)
+          {
+            if (File.Exists(a.Path + file))
+            {
+              File.Delete(a.Path + file);
+            }
+
+            Logger.Trace("Moving {0} to {1}", oldPath + file, a.Path + file);
+            File.Move(oldPath + file, a.Path + file);
+          }
         }
 
         toBeGradedQueue.Enqueue(a);
@@ -154,7 +158,7 @@ namespace Jarvis
         {
           if (assignment.ValidHeader && assignment.HomeworkId == currentAssignment)
           {
-            Logger.Info("~~~GRADING: {0}, HW: {1}", assignment.Filename, assignment.HomeworkId);
+            Logger.Info("~~~GRADING: {0}, HW: {1}", assignment.StudentId, assignment.HomeworkId);
             // run grader on each file and save grading result
             Runner runner = new Runner();
             RunResult result = runner.Run(assignment);

@@ -41,6 +41,10 @@ namespace Jarvis
                     currentTest = new TestCase(id);
                     ++id;
                     break;
+                  
+                  case "source":
+                    currentTest.ProvidedSourceFiles.Add(reader.GetAttribute("file"));
+                    break;
 
                   case "stdin":
                     currentTest.StdInputFile = reader.GetAttribute("file");

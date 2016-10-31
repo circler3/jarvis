@@ -10,6 +10,6 @@ namespace Jarvis
   public class FileUploadRequest
   {
     public string Title { get; set; }
-    public HttpFile File { get; set; }
+    public List<HttpFile> Files { get; set; }
   }
 }

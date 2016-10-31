@@ -9,24 +9,34 @@ namespace Jarvis
   public class FileUploadHandler
   {
     // Note: Students upload single cpp files  
-    public Assignment HandleStudentUpload(HttpFile file)
+    public Assignment HandleStudentUpload(List<HttpFile> files)
     {
       Jarvis.Stats.TotalFilesProcessed++;
 
-      Logger.Trace ("Handling student upload");
-      // Check file header
+      Logger.Trace ("Handling student upload of {0} files", files.Count);
 
-      List<string> header = new List<string>();
-
-      using (StreamReader reader = new StreamReader(file.Value))
+      // Look through uploaded files for a valid header
+      Assignment homework = null;
+      foreach (HttpFile file in files)
       {
-        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+        List<string> header = new List<string>();
+
+        using (StreamReader reader = new StreamReader(file.Value))
         {
-          header.Add(reader.ReadLine().ToLower());
+          for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+          {
+            header.Add(reader.ReadLine().ToLower());
+          }
+        }
+
+        homework = ParseHeader(header);
+
+        if (homework.ValidHeader)
+        {
+          Logger.Trace("Found valid header in file {0}", file.Name);
+          break;
         }
       }
-
-      Assignment homework = ParseHeader(header);
 
       if (homework.ValidHeader)
       {
@@ -37,15 +47,24 @@ namespace Jarvis
 
         Directory.CreateDirectory(path);
 
-        if (File.Exists(homework.FullPath))
+        foreach (HttpFile file in files)
         {
-          File.Delete(homework.FullPath);
-        }
+          Logger.Trace("file.Name: {0}", file.Name);
 
-        using (FileStream destinationStream = File.Create(homework.FullPath))
-        {
-          file.Value.Position = 0;
-          file.Value.CopyTo(destinationStream);
+          homework.FileNames.Add(file.Name);
+
+          if (File.Exists(homework.Path + file.Name))
+          {
+            File.Delete(homework.Path + file.Name);
+          }
+
+          Logger.Trace("Copying {0} to {1}", file.Name, homework.Path);
+
+          using (FileStream destinationStream = File.Create(homework.Path + file.Name))
+          {
+            file.Value.Position = 0;
+            file.Value.CopyTo(destinationStream);
+          }
         }
       }
 
@@ -93,6 +112,7 @@ namespace Jarvis
         Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3}", assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId);
 
         assignment.Path = string.Format("{0}section{1}/", gradingDir, assignment.Section);
+
         if (assignment.ValidHeader)
         {
           Directory.CreateDirectory(assignment.Path);
@@ -100,12 +120,12 @@ namespace Jarvis
 
           try
           {
-            File.Move(cppFile, assignment.FullPath);
+            File.Move(cppFile, assignment.Path);
             assignments.Add(assignment);
           }
           catch (IOException)
           {
-            Logger.Warn("File " + assignment.FullPath + " already exists! Possible cheating?!");
+            Logger.Warn("File " + assignment.Path + " already exists! Possible cheating?!");
           }
         }
       }
