@@ -50,7 +50,7 @@ namespace Jarvis
         StringBuilder builder = new StringBuilder();
 
         FileUploadRequest request = this.Bind<FileUploadRequest>();
-        Assignment assignment = uploadHandler.HandleStudentUpload(request.File);
+        Assignment assignment = uploadHandler.HandleStudentUpload(request.Files);
         
         Logger.Info("Received assignment from {0} for {1} HW#{2} with {3} header", assignment.StudentId, assignment.Course, assignment.HomeworkId, assignment.ValidHeader ? "true" : "false");
         
@@ -66,7 +66,7 @@ namespace Jarvis
         else
         {
           builder.AppendLine("<p>");
-          builder.AppendLine("The uploaded file contains an invalid header, sir. I suggest you review the <a href='/help'>help</a>.");
+          builder.AppendLine("The uploaded files did not contain a valid header, sir. I suggest you review the <a href='/help'>help</a>.");
           builder.AppendFormat("<br />Parser error message: {0}", assignment.ErrorMessage);
           builder.AppendLine("</p>");
 
@@ -87,7 +87,7 @@ namespace Jarvis
         bool runCode = this.Request.Form["runCode"];
 
         var request = this.Bind<FileUploadRequest>();
-        List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.File);
+        List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.Files[0]);
      
         Grader grader = new Grader(runMoss, runCode);
 

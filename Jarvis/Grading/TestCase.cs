@@ -20,6 +20,7 @@ namespace Jarvis
 
     public List<InputFile> FileInputFiles { get; set; }
     public List<OutputFile> FileOutputFiles { get; set; }
+    public List<string> ProvidedSourceFiles { get; set; }
 
     public bool Passed
     { 
@@ -73,6 +74,7 @@ namespace Jarvis
       Passed = true;
       FileInputFiles = new List<InputFile>();
       FileOutputFiles = new List<OutputFile>();
+      ProvidedSourceFiles = new List<string>();
       Viewers = new List<IViewer>();
     }
   }

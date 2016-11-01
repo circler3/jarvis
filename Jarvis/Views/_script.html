@@ -7,7 +7,7 @@
 <script>
   var dotterTimer;
   var dotCount = 0;
-  var dragFile;
+  var dragFiles;
 
   function enableUpload()
   {
@@ -43,13 +43,19 @@
       formData.append('runCode', document.getElementById('runCode').checked);
     }
 
-    if (document.getElementById('file').files[0] != undefined)
+    if ((document.getElementById('file').files != undefined) && (document.getElementById('file').files.length > 0))
     {
-      formData.append('file', document.getElementById('file').files[0], "thefile");
+      for (i = 0; i < document.getElementById('file').files.length; i++)
+      {
+        formData.append('file', document.getElementById('file').files[i]);
+      }
     }
-    else if (dragFile !== undefined)
+    else if ((dragFiles !== undefined) && (dragFiles.length > 0))
     {
-      formData.append('file', dragFile, "thefile");
+      for (i = 0; i < dragFiles.length; i++)
+      {
+        formData.append('file', dragFiles[i]);
+      }
     }
     else
     {
@@ -117,8 +123,7 @@
   {
     // cancel event and hover styling
     FileDragHover(e);
-    var files = e.target.files || e.dataTransfer.files;
-    dragFile = files[0];
+    dragFiles = e.target.files || e.dataTransfer.files;
     uploadToJarvis('/run');
   }
 

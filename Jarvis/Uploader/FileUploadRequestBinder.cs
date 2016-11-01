@@ -16,7 +16,7 @@ namespace Jarvis
 
       var form = context.Request.Form;
 
-      fileUploadRequest.File = GetFileByKey(context, "file");
+      fileUploadRequest.Files = GetFileByKey(context, "file");
 
       return fileUploadRequest;
     }
@@ -34,12 +34,12 @@ namespace Jarvis
       }
     }
 
-    private HttpFile GetFileByKey(NancyContext context, string key)
+    private List<HttpFile> GetFileByKey(NancyContext context, string key)
     {
-      IEnumerable<HttpFile> files = context.Request.Files;
+      List<HttpFile> files = context.Request.Files.ToList();
       if (files != null)
       {
-        return files.FirstOrDefault(x => x.Key == key);
+        return files.FindAll(x => x.Key == key);
       }
       return null;
     }

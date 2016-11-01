@@ -15,34 +15,44 @@ namespace Jarvis
     public RunResult Run(Assignment homework)
     {
       RunResult result = new RunResult(homework);
+      string testsPath = string.Format("{0}/courses/{1}/tests/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course, homework.HomeworkId); 
 
-      // Style check
-      Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
-      result.StyleMessage = StyleCheck(homework);
-
-      // Not ready for this yet
-      result.JarvisStyleMessage = "Coming&nbsp;soon!";
-
-      // Compile
-      Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
-      result.CompileMessage = Compile(homework);
-
-      // Run tests
-      if (result.CompileMessage == "Success!!")
+      if (File.Exists(testsPath + "config.xml"))
       {
-        Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);
-        result.OutputMessage = RunAllTestCases(homework, result);
+        List<TestCase> testCases = Utilities.ReadTestCases(testsPath + "config.xml");
 
-        // Delete binary
-        File.Delete(homework.Path + homework.StudentId);
+        // Style check
+        Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
+        result.StyleMessage = StyleCheck(homework);
+
+        // Not ready for this yet
+        result.JarvisStyleMessage = "Coming&nbsp;soon!";
+
+        // Compile
+        Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
+        result.CompileMessage = Compile(homework, testCases[0].ProvidedSourceFiles);
+
+        // Run tests
+        if (result.CompileMessage == "Success!!")
+        {
+          Logger.Info("Running {0} {1}", homework.StudentId, homework.HomeworkId);
+          result.OutputMessage = RunAllTestCases(testCases, homework, result);
+
+          // Delete binary
+          File.Delete(homework.Path + homework.StudentId);
+        }
+        else
+        {
+          result.OutputMessage = "<p>Didn't compile... :(</p>";
+        }
+
+        // Write result into results file, writes a new entry for each run
+        RecordResult(homework, result);
       }
       else
       {
-        result.OutputMessage = "<p>Didn't compile... :(</p>";
+        result.OutputMessage = "<p>Sir, I cannot find any test case configurations for this assignment. Perhaps the instructor hasn't set it up yet?<p>";
       }
-
-      // Write result into results file, writes a new entry for each run
-      RecordResult(homework, result);
 
       return result;
     }
@@ -63,7 +73,12 @@ namespace Jarvis
     {
       StyleExecutor executor = new StyleExecutor();
 
-      string errors = executor.Run(homework.FullPath);
+      string errors = "";
+
+      foreach (string file in homework.FileNames)
+      {
+        errors += executor.Run(homework.Path + file);
+      }
 
       return Utilities.ToHtmlEncoding(errors);
     }
@@ -76,10 +91,15 @@ namespace Jarvis
         p.StartInfo.UseShellExecute = false;
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.RedirectStandardError = true;
+        p.StartInfo.WorkingDirectory = homework.Path;
 
         string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
         p.StartInfo.FileName = styleExe;
-        p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value + " " + homework.FullPath;
+        p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value;
+        foreach (string file in homework.FileNames)
+        {
+          p.StartInfo.Arguments += " " + homework.Path + file;
+        }
 
         Logger.Trace("Style checking with {0} and arguments {1}", styleExe, p.StartInfo.Arguments);
 
@@ -97,18 +117,49 @@ namespace Jarvis
       return result;
     }
 
-    private string Compile(Assignment homework)
+    private string Compile(Assignment homework, List<string> providedFiles)
     {
+      // Find all C++ source files
+      List<string> sourceFiles = new List<string>();
+      foreach (string file in homework.FileNames)
+      {
+        if (file.EndsWith(".cpp") || file.EndsWith(".cxx") || file.EndsWith(".cc"))
+        {
+          sourceFiles.Add(file);
+        }
+      }
+
+      // Add in provided files
+      string testsPath = string.Format("{0}/courses/{1}/tests/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course, homework.HomeworkId);
+      foreach (string file in providedFiles)
+      {
+        // Copy all provided files (headers and source)
+        Logger.Trace("Copying {0} to {1}", testsPath + file, homework.Path);
+        File.Copy(testsPath + file, homework.Path + file, true);
+
+        // Only build source files
+        if (file.EndsWith(".cpp") || file.EndsWith(".cxx") || file.EndsWith(".cc"))
+        {
+          sourceFiles.Add(file);
+        }
+      }
+
       string result = "";
       using (Process p = new Process())
       {
         p.StartInfo.UseShellExecute = false;
         p.StartInfo.RedirectStandardOutput = true;
         p.StartInfo.RedirectStandardError = true;
-
         p.StartInfo.FileName = "g++";
-        p.StartInfo.Arguments = "-DJARVIS -std=c++11 -Werror " + homework.FullPath + " -o" + homework.Path + homework.StudentId;
+        p.StartInfo.Arguments = "-DJARVIS -std=c++11 -Werror -o" + homework.Path + homework.StudentId + " -I" + homework.Path;
+        foreach (string source in sourceFiles)
+        {
+          p.StartInfo.Arguments += " " + homework.Path + source;
+        }
+
         p.Start();
+
+        Logger.Trace("Compilation string: {0} {1}", p.StartInfo.FileName, p.StartInfo.Arguments);
 
         Jarvis.StudentProcesses.Add(p.Id);
 
@@ -125,62 +176,51 @@ namespace Jarvis
       return (!string.IsNullOrEmpty(result)) ? result : "Success!!";
     }
 
-    private string RunAllTestCases(Assignment homework, RunResult grade)
+    private string RunAllTestCases(List<TestCase> tests, Assignment homework, RunResult grade)
     {
-      string testsPath = string.Format("{0}/courses/{1}/tests/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course, homework.HomeworkId); 
-
-      Logger.Trace("Running tests as configured in {0}", testsPath);
+      string testsPath = string.Format("{0}/courses/{1}/tests/hw{2}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course, homework.HomeworkId);
       StringBuilder result = new StringBuilder();
       int passingTestCases = 0;
 
-      if (File.Exists(testsPath + "config.xml"))
+      foreach (TestCase test in tests)
       {
-        List<TestCase> tests = Utilities.ReadTestCases(testsPath + "config.xml");
+        Logger.Info("Running test case {0}", test.Id);
+        string stdInput = string.Empty;
 
-        foreach (TestCase test in tests)
+        // clear out any previously created input/output files
+        DirectoryInfo dir = new DirectoryInfo(homework.Path);
+        foreach (FileInfo file in dir.GetFiles())
         {
-          Logger.Info("Running test case {0}", test.Id);
-          string stdInput = string.Empty;
-
-          // clear out any previously created input/output files
-          DirectoryInfo dir = new DirectoryInfo(homework.Path);
-          foreach (FileInfo file in dir.GetFiles())
+          if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
           {
-            if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
-            {
-              file.Delete(); 
-            }
-          }
-
-          // check for std input file
-          if (!string.IsNullOrEmpty(test.StdInputFile))
-          {
-            stdInput = testsPath + test.StdInputFile;
-          }
-
-          // check for file input files
-          foreach (InputFile filein in test.FileInputFiles)
-          {
-            File.Copy(testsPath + filein.CourseFile, homework.Path + filein.StudentFile, true);
-          }
-
-          // Execute the program
-          test.StdOutText = ExecuteProgram(homework, stdInput);
-
-          result.AppendLine(test.GetResults(homework.Path, testsPath));
-
-          if (test.Passed)
-          {
-            passingTestCases++;
+            file.Delete(); 
           }
         }
 
-        grade.OutputPercentage = passingTestCases / (double)tests.Count;
+        // check for std input file
+        if (!string.IsNullOrEmpty(test.StdInputFile))
+        {
+          stdInput = testsPath + test.StdInputFile;
+        }
+
+        // check for file input files
+        foreach (InputFile filein in test.FileInputFiles)
+        {
+          File.Copy(testsPath + filein.CourseFile, homework.Path + filein.StudentFile, true);
+        }
+
+        // Execute the program
+        test.StdOutText = ExecuteProgram(homework, stdInput);
+
+        result.AppendLine(test.GetResults(homework.Path, testsPath));
+
+        if (test.Passed)
+        {
+          passingTestCases++;
+        }
       }
-      else
-      {
-        result.Append("<p>Sir, I cannot find any test case configurations for this assignment. Perhaps the instructor hasn't set it up yet?<p>");
-      }
+
+      grade.OutputPercentage = passingTestCases / (double)tests.Count;
 
       return result.ToString();
     }

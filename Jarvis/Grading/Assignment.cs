@@ -1,10 +1,16 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Jarvis
 {
   public class Assignment
   {
+    public Assignment()
+    {
+      FileNames = new List<string>();
+    }
+
     public bool IsGrade { get; set; }
     public bool ValidHeader { get; set; }
     public string ErrorMessage { get; set; }
@@ -13,33 +19,6 @@ namespace Jarvis
     public string HomeworkId { get; set; }
     public string Section { get; set; }
     public string Path { get; set; }
-
-    public string Filename 
-    { 
-      get
-      {
-        string name;
-
-        if (IsGrade)
-        {
-          name = StudentId + "_grade.cpp";
-        }
-        else
-        {
-          name = StudentId + ".cpp";
-        }
-
-        return name;
-      }
-    }
-
-    public string FullPath 
-    {
-      get
-      {
-        return Path + Filename;
-      }
-    }
+    public List<string> FileNames { get; set; }
   }
 }
-
