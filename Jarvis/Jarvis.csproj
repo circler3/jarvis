@@ -82,6 +82,7 @@
     <Compile Include="Style\IndentationChecker.cs" />
     <Compile Include="Style\AbstractStyleChecker.cs" />
     <Compile Include="Style\StyleExecutor.cs" />
+    <Compile Include="Viewers\AnimationViewer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

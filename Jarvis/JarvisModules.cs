@@ -60,6 +60,8 @@ namespace Jarvis
           Logger.Debug("Assignment header was valid");
           result = runner.Run(assignment);
           builder.Append(result.ToHtml());
+
+          UpdateStats(assignment, result);
         }
         else
         {
@@ -71,7 +73,6 @@ namespace Jarvis
           Jarvis.Stats.TotalBadHeaders++;
         }
 
-        UpdateStats(assignment, result);
 
         return builder.ToString();
       };
