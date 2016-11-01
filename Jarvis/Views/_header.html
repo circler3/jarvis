@@ -63,24 +63,28 @@
 
   table, th 
   {
-    border: 1px solid #888888;
+    border: none;
     border-collapse:collapse;
   }
+
   th
   {
     text-align:left;
   }
+
   tr.header
   {
     cursor:pointer;
   }
+
   .header .sign:after
   {
-    content:"EXPAND RESULT +";
-    display:inline-block;      
+    content:"+";
+    display:inline-block;
   }
+
   .header.expand .sign:after
   {
-    content:"COLLAPSE RESULT -";
-   }
+    content:"-";
+  }
 </style>

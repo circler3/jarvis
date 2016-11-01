@@ -23,7 +23,7 @@ namespace Jarvis
 
         // Style check
         Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
-        result.StyleMessage = StyleCheck(homework);
+        // result.StyleMessage = StyleCheck(homework);
 
         // Not ready for this yet
         result.JarvisStyleMessage = "Coming&nbsp;soon!";

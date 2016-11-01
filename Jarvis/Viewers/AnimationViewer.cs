@@ -1,12 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Jarvis
 {
   public class AnimationViewer : IViewer
   {
-    public AnimationViewer()
+    private List<string> keywords = new List<string>();
+
+    public AnimationViewer(string words)
     {
-      
+      string[] wordArray = words.Split(',');
+
+      foreach (string word in wordArray)
+      {
+        keywords.Add(word);
+      }
     }
 
     public string ToHtml(TestCase data)

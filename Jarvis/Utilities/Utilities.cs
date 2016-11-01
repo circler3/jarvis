@@ -42,6 +42,10 @@ namespace Jarvis
                     ++id;
                     break;
                   
+                  case "animation":
+                    currentTest.Viewers.Add(new AnimationViewer(reader.GetAttribute("keywords")));
+                    break;
+
                   case "source":
                     currentTest.ProvidedSourceFiles.Add(reader.GetAttribute("file"));
                     break;
@@ -214,10 +218,10 @@ namespace Jarvis
     public static string BuildDiffBlock(string source, string htmlActualOutput, string htmlExpectedOutput, string htmlDiff)
     {
       StringBuilder result = new StringBuilder();
-      result.Append("<table style=\"margin-left: 35px;\">");
-      result.Append("<tr class=\"header expand\" >");
-      result.Append("<th colspan=\"1\"><span class=\"sign\"></span></th>");
-      result.Append($"<th colspan=\"2\">{source}</th>");
+      result.Append("<table>");
+      result.Append("<tr class='header expand' >");
+//      result.Append("<th colspan='1'><span class='sign'></span></th>");
+      result.Append("<th colspan='3'><p>" + source + "<span>[+]</span></p></th>");
       result.Append("</tr>");
       result.Append("<tr>");
       result.Append("<td>");

@@ -53,8 +53,8 @@ namespace Jarvis
       StringBuilder builder = new StringBuilder();
 
       builder.AppendFormat("<h1>Results - {0}%</h1>", Grade * 10);
-      builder.AppendFormat("<h2>Google Style Check</h2>");
-      builder.AppendFormat("<p>{0}</p>", StyleMessage);
+//      builder.AppendFormat("<h2>Google Style Check</h2>");
+//      builder.AppendFormat("<p>{0}</p>", StyleMessage);
       builder.AppendFormat("<h2>Jarvis Style Check</h2>");
       builder.AppendFormat("<p>{0}</p>", JarvisStyleMessage);
       builder.AppendFormat("<h2>Compile</h2>");

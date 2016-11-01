@@ -67,12 +67,24 @@
       if (xhttp.readyState === 4 && xhttp.status === 200)
       {
         window.clearTimeout(dotterTimer);
+
         document.getElementById("output").innerHTML = xhttp.responseText;
-        $('.header').click(function(){
-          console.log('clicked');
-          $(this).toggleClass('expand').nextUntil('tr.header').slideToggle(100);
+
+        $('.header').toggleClass('expand').nextUntil('tr.header').slideToggle(0);
+
+        $('.header').click(function()
+        {
+          $(this).toggleClass('expand').nextUntil('tr.header').slideToggle(0);
+
+          if ($(this).find("span").text() == "[+]")
+          {
+            $(this).find("span").text("[-]");
+          }
+          else
+          {
+            $(this).find("span").text("[+]");
+          }
         });
-        $('.header').toggleClass('expand').nextUntil('tr.header').slideToggle(100);
       }
       else if (xhttp.readyState === 4) //We have gotten a response, but it wasn't good
       {
