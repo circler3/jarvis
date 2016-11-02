@@ -44,7 +44,7 @@ namespace Jarvis
           {
             string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
             Bitmap expected = new Bitmap(pngExpected);
-            string expectedBase64Png = ConvertToBase64(pngExpected);
+            string expectedBase64Png = Utilities.ConvertToBase64(pngExpected);
             htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
 
             try
@@ -90,7 +90,7 @@ namespace Jarvis
                 }
 
 
-                string actualBase64Png = ConvertToBase64(pngActual);
+                string actualBase64Png = Utilities.ConvertToBase64(pngActual);
                 htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
 
                 
@@ -167,21 +167,6 @@ namespace Jarvis
       }
 
       return pngFile;
-    }
-
-    private string ConvertToBase64(string pngFile)
-    {
-      string result = string.Empty;
-
-      if (File.Exists(pngFile))
-      {
-        byte[] pngBytes = File.ReadAllBytes(pngFile);
-        File.Delete(pngFile);
-
-        result = Convert.ToBase64String(pngBytes);
-      }
-
-      return result;
     }
 
     private bool CheckPpmHeader(string ppmFile)

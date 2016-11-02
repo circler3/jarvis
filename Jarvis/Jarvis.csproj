@@ -83,6 +83,7 @@
     <Compile Include="Style\AbstractStyleChecker.cs" />
     <Compile Include="Style\StyleExecutor.cs" />
     <Compile Include="Viewers\AnimationViewer.cs" />
+    <Compile Include="StatusCodeHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -114,6 +115,9 @@
     <None Include="history.txt" />
     <None Include="Views\stats.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\error.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
