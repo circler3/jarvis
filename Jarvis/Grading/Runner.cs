@@ -154,7 +154,7 @@ namespace Jarvis
         p.StartInfo.Arguments = "-DJARVIS -std=c++11 -Werror -o" + homework.Path + homework.StudentId + " -I" + homework.Path;
         foreach (string source in sourceFiles)
         {
-          p.StartInfo.Arguments += " " + homework.Path + source;
+          p.StartInfo.Arguments += " \"" + homework.Path + source + "\"";
         }
 
         p.Start();
