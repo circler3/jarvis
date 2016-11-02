@@ -51,7 +51,7 @@ namespace Jarvis
       }
       else
       {
-        result.OutputMessage = "<p>Sir, I cannot find any test case configurations for this assignment. Perhaps the instructor hasn't set it up yet?<p>";
+        result.OutputMessage = "<p>Sir, I cannot find any test case configurations for this assignment. Is your assignment number correct?<p>";
       }
 
       return result;

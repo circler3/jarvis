@@ -11,6 +11,7 @@ namespace Jarvis
       StyleMessage = string.Empty;
       OutputMessage = string.Empty;
       OutputPercentage = 0.0;
+      ValidHeader = assignment.ValidHeader;
     }
 
     public Assignment Assignment { get; set; }

@@ -36,3 +36,4 @@ Oct 26, 2016 ~ v1.7.9 ~ Dispose images after use
 Nov 01, 2016 ~ v1.8.0 ~ Multifile upload, UI updates, and custom error messages
 Nov 01, 2016 ~ v1.8.1 ~ Allow spaces in file names
 Nov 02, 2016 ~ v1.8.2 ~ Internal server errors now send emails to Jacob
+Nov 02, 2016 ~ v1.8.3 ~ Fixed stats update null exception

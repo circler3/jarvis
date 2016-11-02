@@ -44,8 +44,7 @@ namespace Jarvis
       {
         case HttpStatusCode.InternalServerError:
           responseText.AppendFormat("<img style='display: block; margin: auto;' src='data:image/png;base64,{0}' /><br />", Utilities.ConvertToBase64(rootPath + "/Content/error.png"));
-          responseText.Append("<p>I'm sorry sir, it appears I have malfunctioned...<br />");
-          responseText.Append("Please send this text to my creator.<br /><br />");
+          responseText.Append("<p>I'm sorry sir, it appears I have malfunctioned... an email has been sent to my creator.<br /><br />");
           responseText.Append("Error message:<br />" + Utilities.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
           responseText.Append("</p>");
 

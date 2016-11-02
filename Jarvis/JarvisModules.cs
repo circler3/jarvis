@@ -73,7 +73,6 @@ namespace Jarvis
           Jarvis.Stats.TotalBadHeaders++;
         }
 
-
         return builder.ToString();
       };
 
@@ -119,7 +118,7 @@ namespace Jarvis
         stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
       }
 
-      if (result != null)
+      if (result != null && !result.OutputMessage.Contains("Is your assignment number correct"))
       {
         stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
       
