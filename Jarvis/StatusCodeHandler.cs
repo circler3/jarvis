@@ -48,6 +48,8 @@ namespace Jarvis
           responseText.Append("Please send this text to my creator.<br /><br />");
           responseText.Append("Error message:<br />" + Utilities.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
           responseText.Append("</p>");
+
+          Utilities.SendEmail("jacob.h.christensen@gmail.com", "Jarvis Internal Server Error!!", context.Items["ERROR_TRACE"].ToString(), "");
           break;
 
         case HttpStatusCode.NotFound:

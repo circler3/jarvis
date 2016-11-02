@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Mail;
 using System.Text;
 using System.IO.Compression;
 using System.Threading;
@@ -133,7 +132,7 @@ namespace Jarvis
 
         string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentAssignment, resultQueue.ToArray());
 
-        SendEmail(graderEmail,
+        Utilities.SendEmail(graderEmail,
           "Grades for " + currentCourse + " " + currentAssignment,
           "Hello! Attached are the grades for " + currentCourse + " " + currentAssignment + ". Happy grading!\n" + mossResponse,
           gradesPath);
@@ -209,21 +208,6 @@ namespace Jarvis
       return mossReponse;
     }
 
-
-    private void SendEmail(string to, string subject, string body, string attachment)
-    {
-      SmtpClient mailClient = new SmtpClient("localhost", 25);
-
-      MailMessage mail = new MailMessage("jarvis@jarvis.cs.usu.edu", to);
-      mail.Subject = subject;
-      mail.Body = body;
-      mail.Attachments.Add(new Attachment(attachment));
-
-      mailClient.Send(mail);
-
-      mailClient.Dispose();
-    }
-
     private string SendFilesToSectionLeaders(string hwPath, string currentCourse, string currentHomework)
     {
       // zip contents
@@ -254,7 +238,7 @@ namespace Jarvis
           Logger.Trace("Emailing zip file to {0}", leader);
 
           // attach to email to section leader
-          SendEmail(leader, 
+          Utilities.SendEmail(leader, 
             "Grades for " + currentCourse + " " + currentHomework,
             "Hello! Attached are the grades for " + currentCourse + " " + currentHomework + ". Happy grading!",
             zipFile);        

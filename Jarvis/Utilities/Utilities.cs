@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Xml;
 using System.Text;
+using System.Net.Mail;
 
 namespace Jarvis
 {
@@ -255,6 +256,24 @@ namespace Jarvis
       }
 
       return result;
+    }
+
+    public static void SendEmail(string to, string subject, string body, string attachment)
+    {
+      SmtpClient mailClient = new SmtpClient("localhost", 25);
+
+      MailMessage mail = new MailMessage("jarvis@jarvis.cs.usu.edu", to);
+      mail.Subject = subject;
+      mail.Body = body;
+
+      if (!string.IsNullOrEmpty(attachment))
+      {
+        mail.Attachments.Add(new Attachment(attachment));
+      }
+
+      mailClient.Send(mail);
+
+      mailClient.Dispose();
     }
   }
 }
