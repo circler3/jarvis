@@ -121,6 +121,8 @@ namespace Jarvis
       builder.Replace("<", "&lt;");
       builder.Replace(">", "&gt;");
       builder.Replace(" ", "&nbsp;");
+      builder.Replace("\\", "&#92;");
+      builder.Replace("/", "&#47;");
       builder.Replace("\n", "<br />");
 
       return builder.ToString();
