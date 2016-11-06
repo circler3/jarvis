@@ -211,6 +211,7 @@ namespace Jarvis
 
         // Execute the program
         test.StdOutText = ExecuteProgram(homework, stdInput);
+        test.Duration = homework.Duration;
 
         result.AppendLine(test.GetResults(homework.Path, testsPath));
 
@@ -252,10 +253,13 @@ namespace Jarvis
           Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
         }
 
+        DateTime startTime = DateTime.Now;
+        DateTime finishTime;
         executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
         executionProcess.Start();
         try
         {
+          executionProcess.StandardInput.AutoFlush = true;
           if (!string.IsNullOrEmpty(input))
           {
             executionProcess.StandardInput.Write(input);
@@ -264,6 +268,10 @@ namespace Jarvis
           Jarvis.StudentProcesses.Add(executionProcess.Id);
 
           executionProcess.WaitForExit(10000);
+
+          finishTime = DateTime.Now;
+
+          homework.Duration = finishTime - startTime;
 
           if (executionProcess.HasExited)
           {

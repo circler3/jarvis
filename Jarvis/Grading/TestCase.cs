@@ -13,6 +13,7 @@ namespace Jarvis
       PPM
     }
 
+    public TimeSpan Duration { get; set; }
     public int Id { get; set; }
     public string StdInputFile { get; set; }
     public string StdOutputFile { get; set; }
@@ -59,7 +60,7 @@ namespace Jarvis
       StringBuilder result = new StringBuilder();
 
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
-      result.AppendFormat("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case {0}: {1}</h3>",  Id, passedText);
+      result.AppendFormat("<h3 style='margin-top: 0px; margin-bottom: 0px;'>Test case {0}: {1} ({2} seconds)</h3>",  Id, passedText, Duration.TotalSeconds);
       result.Append("<p style='display: inline;'>------------------------------------------------------------------</p>");
       result.Append("<br />");
       result.Append(output.ToString());

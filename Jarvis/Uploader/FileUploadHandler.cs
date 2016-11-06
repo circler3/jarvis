@@ -39,6 +39,13 @@ namespace Jarvis
         }
       }
 
+      if (homework == null)
+      {
+        homework = new Assignment();
+        homework.ValidHeader = false;
+        homework.ErrorMessage = "Invalid file upload!";
+      }
+
       if (homework.ValidHeader)
       {
         string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);

@@ -226,16 +226,31 @@ namespace Jarvis
       result.Append("</tr>");
       result.Append("<tr>");
       result.Append("<td>");
-      result.Append("<h3>Actual</h3>");
-      result.Append("<p>" + htmlActualOutput + "</p>");
+
+      if (!string.IsNullOrEmpty(htmlActualOutput))
+      {
+        result.Append("<h3>Actual</h3>");
+        result.Append("<p>" + htmlActualOutput + "</p>");
+      }
+
       result.Append("</td>");
       result.Append("<td>");
-      result.Append("<h3>Expected</h3>");
-      result.Append("<p>" + htmlExpectedOutput + "</p>");
+
+      if (!string.IsNullOrEmpty(htmlExpectedOutput))
+      {
+        result.Append("<h3>Expected</h3>");
+        result.Append("<p>" + htmlExpectedOutput + "</p>");
+      }
+
       result.Append("</td>");
       result.Append("<td>");
-      result.Append("<h3>Diff</h3>");
-      result.Append("<p>" + htmlDiff + "</p>");
+
+      if (!string.IsNullOrEmpty(htmlDiff))
+      {
+        result.Append("<h3>Diff</h3>");
+        result.Append("<p>" + htmlDiff + "</p>");
+      }
+
       result.Append("</td>");
       result.Append("</tr>");
       result.Append("</table>");

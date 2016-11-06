@@ -10,7 +10,7 @@ namespace Jarvis
     {
       FileNames = new List<string>();
     }
-
+    public TimeSpan Duration { get; set; }
     public bool IsGrade { get; set; }
     public bool ValidHeader { get; set; }
     public string ErrorMessage { get; set; }
