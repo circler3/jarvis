@@ -102,7 +102,9 @@ namespace Jarvis
 
         foreach (string oneFile in files)
         {
-          assignment.FileNames.Add(Path.GetFileName(oneFile));
+          string newFilename = Path.GetFileName(oneFile);
+          newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
+          assignment.FileNames.Add(newFilename);
         }
 
         Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3} and {4} files", 

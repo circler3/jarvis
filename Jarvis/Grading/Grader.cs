@@ -10,7 +10,7 @@ namespace Jarvis
 {
   public class Grader
   {
-    private const int POOL_SIZE = 20;
+    private const int POOL_SIZE = 1;
     private List<Thread> threadPool = new List<Thread>();
 
     private ConcurrentQueue<Assignment> toBeGradedQueue = new ConcurrentQueue<Assignment>();
