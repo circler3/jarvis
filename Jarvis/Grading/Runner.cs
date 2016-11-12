@@ -251,45 +251,48 @@ namespace Jarvis
         if (!File.Exists(homework.Path + homework.StudentId))
         {
           Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
+          output = "[Jarvis could not find the executable!]";
         }
-
-        DateTime startTime = DateTime.Now;
-        DateTime finishTime;
-        executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
-        executionProcess.Start();
-        try
+        else
         {
-          executionProcess.StandardInput.AutoFlush = true;
-          if (!string.IsNullOrEmpty(input))
+          DateTime startTime = DateTime.Now;
+          DateTime finishTime;
+          executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
+          executionProcess.Start();
+          try
           {
-            executionProcess.StandardInput.Write(input);
+            executionProcess.StandardInput.AutoFlush = true;
+            if (!string.IsNullOrEmpty(input))
+            {
+              executionProcess.StandardInput.Write(input);
+            }
+
+            Jarvis.StudentProcesses.Add(executionProcess.Id);
+
+            executionProcess.WaitForExit(10000);
+
+            finishTime = DateTime.Now;
+
+            homework.Duration = finishTime - startTime;
+
+            if (executionProcess.HasExited)
+            {
+              output = executionProcess.StandardOutput.ReadToEnd();
+            }
+            else
+            {
+              executionProcess.Kill();
+              output = executionProcess.StandardOutput.ReadToEnd();
+              output += "\n[Unresponsive program terminated by Jarvis]\n";
+            }
           }
-
-          Jarvis.StudentProcesses.Add(executionProcess.Id);
-
-          executionProcess.WaitForExit(10000);
-
-          finishTime = DateTime.Now;
-
-          homework.Duration = finishTime - startTime;
-
-          if (executionProcess.HasExited)
+          catch (Exception e)
           {
-            output = executionProcess.StandardOutput.ReadToEnd();
+            Logger.Fatal("Fatal exception while running program");
+            Logger.Fatal(e.ToString());
           }
-          else
-          {
-            executionProcess.Kill();
-            output = executionProcess.StandardOutput.ReadToEnd();
-            output += "\n[Unresponsive program terminated by Jarvis]\n";
-          }
+          executionProcess.Close();
         }
-        catch (Exception e)
-        {
-          Logger.Fatal("Fatal exception while running program");
-          Logger.Fatal(e.ToString());
-        }
-        executionProcess.Close();
       }
       
       return output;

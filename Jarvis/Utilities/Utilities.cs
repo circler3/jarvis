@@ -260,14 +260,18 @@ namespace Jarvis
       return result.ToString();
     }
 
-    public static string ConvertToBase64(string pngFile)
+    public static string ConvertToBase64(string pngFile, bool deleteAfter = true)
     {
       string result = string.Empty;
 
       if (File.Exists(pngFile))
       {
         byte[] pngBytes = File.ReadAllBytes(pngFile);
-        File.Delete(pngFile);
+
+        if (deleteAfter)
+        {
+          File.Delete(pngFile);
+        }
 
         result = Convert.ToBase64String(pngBytes);
       }

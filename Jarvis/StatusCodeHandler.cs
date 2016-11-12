@@ -32,8 +32,6 @@ namespace Jarvis
       }
 
       return result;
-      //return statusCode == HttpStatusCode.InternalServerError;
-//      return statusCode == HttpStatusCode.NotFound;
     }
 
     public void Handle(HttpStatusCode statusCode, NancyContext context)
@@ -43,12 +41,8 @@ namespace Jarvis
       switch (statusCode)
       {
         case HttpStatusCode.InternalServerError:
-          responseText.AppendFormat("<img style='display: block; margin: auto;' src='data:image/png;base64,{0}' /><br />", Utilities.ConvertToBase64(rootPath + "/Content/error.png"));
-          responseText.Append("<p>I'm sorry sir, it appears I have malfunctioned... an email has been sent to my creator.<br /><br />");
-          responseText.Append("Error message:<br />" + Utilities.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
-          responseText.Append("</p>");
-
-          Utilities.SendEmail("jacob.h.christensen@gmail.com", "Jarvis Internal Server Error!!", context.Items["ERROR_TRACE"].ToString(), "");
+          string response = Get5xx(context);
+          responseText.Append(response);
           break;
 
         case HttpStatusCode.NotFound:
@@ -67,6 +61,20 @@ namespace Jarvis
           writer.Write(responseText.ToString());
         }
       };
+    }
+
+    private string Get5xx(NancyContext context)
+    {
+      StringBuilder responseText = new StringBuilder();
+
+      responseText.AppendFormat("<img style='display: block; margin: auto;' src='data:image/png;base64,{0}' /><br />", Utilities.ConvertToBase64(rootPath + "/Content/error.png", false));
+      responseText.Append("<p>I'm sorry sir, it appears I have malfunctioned... an email has been sent to my creator.<br /><br />");
+      responseText.Append("Error message:<br />" + Utilities.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
+      responseText.Append("</p>");
+
+      Utilities.SendEmail("jacob.h.christensen@gmail.com", "Jarvis Internal Server Error!!", context.Items["ERROR_TRACE"].ToString(), "");
+
+      return responseText.ToString();
     }
 
     private string Get404()
