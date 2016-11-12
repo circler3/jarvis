@@ -100,20 +100,19 @@ namespace Jarvis
         // check header and make assigment object
         Assignment assignment = ParseHeader(File.OpenRead(files[0]));
 
-        foreach (string oneFile in files)
-        {
-          string newFilename = Path.GetFileName(oneFile);
-          newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
-          assignment.FileNames.Add(newFilename);
-        }
-
-        Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3} and {4} files", 
-          assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId, assignment.FileNames.Count);
-
-        assignment.Path = string.Format("{0}section{1}/", gradingDir, assignment.Section);
-
         if (assignment.ValidHeader)
         {
+          foreach (string oneFile in files)
+          {
+            string newFilename = Path.GetFileName(oneFile);
+            newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
+            assignment.FileNames.Add(newFilename);
+          }
+          
+          Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3} and {4} files", 
+            assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId, assignment.FileNames.Count);
+          
+          assignment.Path = string.Format("{0}section{1}/{2}/", gradingDir, assignment.Section, assignment.StudentId);
           Directory.CreateDirectory(assignment.Path);
 
           try
