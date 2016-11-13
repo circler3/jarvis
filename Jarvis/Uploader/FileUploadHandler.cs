@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 
+
 namespace Jarvis
 {
   public class FileUploadHandler
@@ -20,17 +21,7 @@ namespace Jarvis
       Assignment homework = null;
       foreach (HttpFile file in files)
       {
-        List<string> header = new List<string>();
-
-        using (StreamReader reader = new StreamReader(file.Value))
-        {
-          for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
-          {
-            header.Add(reader.ReadLine().ToLower());
-          }
-        }
-
-        homework = ParseHeader(header);
+        homework = ParseHeader(file.Value);
 
         if (homework.ValidHeader)
         {
@@ -51,7 +42,6 @@ namespace Jarvis
         string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);
 
         homework.Path = path;
-        Logger.Trace ("Checking if {0} exists", path);
 
         Directory.CreateDirectory(path);
 
@@ -99,36 +89,40 @@ namespace Jarvis
       // unzip contents
       ZipFile.ExtractToDirectory(gradingDir + "files.zip", gradingDir + "files");
 
-      string[] files = Directory.GetFiles(gradingDir + "files");
-      Logger.Trace("Found {0} files in grader zip file", files.Length);
+      string[] allFiles = Directory.GetFiles(gradingDir + "files");
+      Logger.Trace("Found {0} files in grader zip file", allFiles.Length);
+
+      Dictionary<string, List<string>> assignmentFiles = GetAssignmentFiles(allFiles);
 
       // for each file
-      foreach (string cppFile in files)
+      foreach (List<string> files in assignmentFiles.Values)
       {
-        StreamReader reader = new StreamReader(File.OpenRead(cppFile));
-        List<string> header = new List<string>();
-        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
-        {
-          header.Add(reader.ReadLine().ToLower());
-        }
-
-        reader.Close();
-
         // check header and make assigment object
-        Assignment assignment = ParseHeader(header);
-
-        Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3}", assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId);
-
-        assignment.Path = string.Format("{0}section{1}/", gradingDir, assignment.Section);
+        Assignment assignment = ParseHeader(File.OpenRead(files[0]));
 
         if (assignment.ValidHeader)
         {
+          foreach (string oneFile in files)
+          {
+            string newFilename = Path.GetFileName(oneFile);
+            newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
+            assignment.FileNames.Add(newFilename);
+          }
+          
+          Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3} and {4} files", 
+            assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId, assignment.FileNames.Count);
+          
+          assignment.Path = string.Format("{0}section{1}/{2}/", gradingDir, assignment.Section, assignment.StudentId);
           Directory.CreateDirectory(assignment.Path);
-          // move to section and rename each file
 
           try
           {
-            File.Move(cppFile, assignment.Path);
+            for (int i = 0; i < files.Count; ++i)
+            {
+              // move to section and rename each file
+              File.Move(files[i], assignment.Path + assignment.FileNames[i]);
+            }
+
             assignments.Add(assignment);
           }
           catch (IOException)
@@ -141,9 +135,39 @@ namespace Jarvis
       return assignments;
     }
 
-    private Assignment ParseHeader(List<string> header)
+    private Dictionary<string, List<string>> GetAssignmentFiles(string[] files)
+    {
+      Dictionary<string, List<string>> assignmentFiles = new Dictionary<string, List<string>>();
+
+      foreach (string file in files)
+      {
+        // parse file to unique portion
+        string key = file.Substring(0, file.LastIndexOf('_') - 2);
+
+        // look in dictionary, and add or create new item
+        if (!assignmentFiles.ContainsKey(key))
+        {
+          assignmentFiles.Add(key, new List<string>());
+        }
+
+        assignmentFiles[key].Add(file);
+      }
+
+      return assignmentFiles;
+    }
+
+    private Assignment ParseHeader(Stream file)
     {
       Assignment homework = new Assignment();
+      List<string> header = new List<string>();
+
+      using (StreamReader reader = new StreamReader(file))
+      {
+        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+        {
+          header.Add(reader.ReadLine().ToLower());
+        }
+      }
 
       foreach (String s in header)
       {

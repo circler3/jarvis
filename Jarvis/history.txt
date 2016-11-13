@@ -38,3 +38,6 @@ Nov 01, 2016 ~ v1.8.1 ~ Allow spaces in file names
 Nov 02, 2016 ~ v1.8.2 ~ Internal server errors now send emails to Jacob
 Nov 02, 2016 ~ v1.8.3 ~ Fixed stats update null exception
 Nov 09, 2016 ~ v1.9.0 ~ Added animation viewer
+Nov 12, 2016 ~ v1.10.0 ~ Fixed grading for multiple files
+Nov 12, 2016 ~ v1.10.1 ~ Fixed grading upload file naming
+Nov 12, 2016 ~ v1.10.2 ~ Give each student a directory on grading upload to avoid name collisions

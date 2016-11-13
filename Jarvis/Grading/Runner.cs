@@ -154,7 +154,8 @@ namespace Jarvis
         p.StartInfo.Arguments = "-DJARVIS -std=c++11 -Werror -o" + homework.Path + homework.StudentId + " -I" + homework.Path;
         foreach (string source in sourceFiles)
         {
-          p.StartInfo.Arguments += " \"" + homework.Path + source + "\"";
+          //string temp = source.Replace("_", "\_");
+          p.StartInfo.Arguments += string.Format(" \"{0}{1}\"", homework.Path, source);
         }
 
         p.Start();
@@ -251,41 +252,44 @@ namespace Jarvis
         if (!File.Exists(homework.Path + homework.StudentId))
         {
           Logger.Fatal("Executable " + homework.Path + homework.StudentId + " did not exist!!");
+          output = "[Jarvis could not find the executable!]";
         }
-
-        DateTime startTime = DateTime.Now;
-        DateTime finishTime;
-        executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
-        executionProcess.Start();
-        try
+        else
         {
-          executionProcess.StandardInput.AutoFlush = true;
-          if (!string.IsNullOrEmpty(input))
+          DateTime startTime = DateTime.Now;
+          DateTime finishTime;
+          executionProcess.StartInfo.FileName = homework.Path + homework.StudentId;
+          executionProcess.Start();
+          try
           {
-            executionProcess.StandardInput.Write(input);
+            executionProcess.StandardInput.AutoFlush = true;
+            if (!string.IsNullOrEmpty(input))
+            {
+              executionProcess.StandardInput.Write(input);
+            }
+
+            Jarvis.StudentProcesses.Add(executionProcess.Id);
+
+            output = executionProcess.StandardOutput.ReadToEnd();
+            executionProcess.WaitForExit(10000);
+
+            finishTime = DateTime.Now;
+
+            homework.Duration = finishTime - startTime;
+
+            if (!executionProcess.HasExited)
+            {
+              executionProcess.Kill();
+              output += "\n[Unresponsive program terminated by Jarvis]\n";
+            }
           }
-
-          Jarvis.StudentProcesses.Add(executionProcess.Id);
-
-          output = executionProcess.StandardOutput.ReadToEnd();
-          executionProcess.WaitForExit(10000);
-
-          finishTime = DateTime.Now;
-
-          homework.Duration = finishTime - startTime;
-
-          if (!executionProcess.HasExited)
+          catch (Exception e)
           {
-            executionProcess.Kill();
-            output += "\n[Unresponsive program terminated by Jarvis]\n";
+            Logger.Fatal("Fatal exception while running program");
+            Logger.Fatal(e.ToString());
           }
+          executionProcess.Close();
         }
-        catch (Exception e)
-        {
-          Logger.Fatal("Fatal exception while running program");
-          Logger.Fatal(e.ToString());
-        }
-        executionProcess.Close();
       }
       
       return output;
