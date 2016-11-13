@@ -267,20 +267,16 @@ namespace Jarvis
 
           Jarvis.StudentProcesses.Add(executionProcess.Id);
 
+          output = executionProcess.StandardOutput.ReadToEnd();
           executionProcess.WaitForExit(10000);
 
           finishTime = DateTime.Now;
 
           homework.Duration = finishTime - startTime;
 
-          if (executionProcess.HasExited)
-          {
-            output = executionProcess.StandardOutput.ReadToEnd();
-          }
-          else
+          if (!executionProcess.HasExited)
           {
             executionProcess.Kill();
-            output = executionProcess.StandardOutput.ReadToEnd();
             output += "\n[Unresponsive program terminated by Jarvis]\n";
           }
         }
