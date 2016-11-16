@@ -106,6 +106,14 @@ namespace Jarvis
           {
             string newFilename = Path.GetFileName(oneFile);
             newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
+
+
+            // Handle files that were uploaded multiple times
+            for (int i = 1; i <= 10; ++i)
+            {
+              newFilename = newFilename.Replace(string.Format("-{0}", i), "");
+            }
+
             assignment.FileNames.Add(newFilename);
           }
           

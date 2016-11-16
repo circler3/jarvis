@@ -17,7 +17,7 @@ namespace Jarvis
     public string GenerateCanvasCsv(string csvPath, string homeworkId, RunResult[] results)
     {            
       // open course csv
-      string gradesPath = string.Format("{0}/grades_hw{1}.csv", csvPath, homeworkId);
+      string gradesPath = string.Format("{0}grades_hw{1}.csv", csvPath, homeworkId);
       CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(csvPath + "../canvas.csv")));
       CsvWriter writer = new CsvWriter(new StreamWriter(File.OpenWrite(gradesPath)));
 
