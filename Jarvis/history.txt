@@ -41,3 +41,4 @@ Nov 09, 2016 ~ v1.9.0 ~ Added animation viewer
 Nov 12, 2016 ~ v1.10.0 ~ Fixed grading for multiple files
 Nov 12, 2016 ~ v1.10.1 ~ Fixed grading upload file naming
 Nov 12, 2016 ~ v1.10.2 ~ Give each student a directory on grading upload to avoid name collisions
+Nov 15, 2016 ~ v1.10.3 ~ Fixed dead lock on long stdout
