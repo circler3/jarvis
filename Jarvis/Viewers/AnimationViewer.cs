@@ -171,7 +171,6 @@ faster{0} = function()
       builder.AppendFormat(script3, data.Id);
 
       return Utilities.BuildDiffBlock("Animation:", builder.ToString(), "", "");
-
     }
 
     private string[] RemoveEmptyFrames(string[] frames)

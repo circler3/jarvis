@@ -17,7 +17,7 @@ namespace Jarvis
       int id = 0;
 
       if (File.Exists(path))
-      {        
+      {
         FileStream stream = File.OpenRead(path);
 
         using (XmlReader reader = XmlReader.Create(stream))
@@ -43,6 +43,13 @@ namespace Jarvis
                     ++id;
                     break;
                   
+                  case "script":
+                    // Immediately execute script
+                    string script = reader.GetAttribute("file");
+                    string workingDir = reader.GetAttribute("workingDir");
+                    Utilities.RunScript(script, workingDir);
+                    break;
+
                   case "animation":
                     currentTest.Viewers.Add(new AnimationViewer(reader.GetAttribute("keywords")));
                     break;
@@ -107,6 +114,27 @@ namespace Jarvis
       return testCases;
     }
 
+    private static void RunScript(string script, string workingDir)
+    {
+      using (Process p = new Process())
+      {
+        p.StartInfo.UseShellExecute = false;
+        p.StartInfo.RedirectStandardOutput = true;
+        p.StartInfo.RedirectStandardError = true;
+        p.StartInfo.WorkingDirectory = workingDir;
+
+        p.StartInfo.FileName = workingDir + "/" + script;
+
+        Logger.Trace("Running script {0} in working dir of {1}", script, workingDir);
+
+        p.Start();
+
+        p.WaitForExit();
+
+        p.Close();
+      }
+    }
+
     public static string ReadFileContents(string path)
     {
       StreamReader reader = new StreamReader(path);
@@ -121,9 +149,14 @@ namespace Jarvis
       builder.Replace("<", "&lt;");
       builder.Replace(">", "&gt;");
       builder.Replace(" ", "&nbsp;");
+
       builder.Replace("\\", "&#92;");
       builder.Replace("/", "&#47;");
       builder.Replace("\n", "<br />");
+
+      builder.Replace("\x1B[0;31m", "<span style='color: #880000;'>");
+      builder.Replace("\x1B[0;35m", "<span style='color: #000088;'>");
+      builder.Replace("\x1B[0m", "</span>");
 
       return builder.ToString();
     }
@@ -135,6 +168,7 @@ namespace Jarvis
       builder.Replace("<", "&lt;");
       builder.Replace(">", "&gt;");
       builder.Replace(" ", "&nbsp;");
+
       //Handle ASCII non-printables
       builder.Replace("\0", "<span style='color: #888888; font-size: 10px;'>\\0</span>");
       builder.Replace("\a", "<span style='color: #888888; font-size: 10px;'>\\a</span>");
