@@ -214,11 +214,20 @@ namespace Jarvis
         test.StdOutText = ExecuteProgram(homework, stdInput);
         test.Duration = homework.Duration;
 
-        result.AppendLine(test.GetResults(homework.Path, testsPath));
+        string output = test.GetResults(homework.Path, testsPath);
 
-        if (test.Passed)
+        if (output.Length < 100000)
         {
-          passingTestCases++;
+          result.AppendLine(output);
+
+          if (test.Passed)
+          {
+            passingTestCases++;
+          }
+        }
+        else
+        {
+          result.AppendLine("Too much output!");
         }
       }
 

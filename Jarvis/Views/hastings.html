@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  @Partial['_header.html'];
+  @Partial['_script.html'];
+</head>
+<body onload="initHandlers()">
+  <a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" style='vertical-align: middle; margin: auto; display: block;' /></a>
+  <h2 style='text-align: center; margin: 0px;'>Welcome to the Hastings Tournament!</h2>
+
+  <table  style='width: 100%; border-style: solid; border-width: 2px;'>
+    <tr>
+      <td style='width: 30%;'>
+        <div id='currentStudents' style='border-style: solid; border-width: 2px; width: 100%; height: 100%;'>
+          <table>
+            <thead>
+              <tr>
+                <th colspan='2'>Select players</th>
+              </tr>
+            </thead>
+            @Each.Players
+              <tr>
+                <td><input type='checkbox' /></td>
+                <td>@Current</td>
+              </tr>
+            @EndEach
+          </table>
+          <input type='button' id='uploadButton' value='Load Battle' onclick='uploadToJarvis("/run");' disabled />
+          <br />
+          <p>Upload your player</p>
+          <form style='font-family: Courier;'>
+            <label for='file'>File:</label>
+            <input type='file' name='file' id='file' onchange='enableUpload();' multiple />
+            <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/run");' disabled />
+          </form>
+          <div id="filedrag">or drop file(s) here</div>
+        </div>
+      </td>
+      <td style='width: 70%;'>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

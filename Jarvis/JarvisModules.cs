@@ -38,6 +38,12 @@ namespace Jarvis
         Logger.Trace("Handling get for /stats");
         return View["stats", Jarvis.Stats];
       };
+
+      Get["hastings"] = _ =>
+      {
+        Logger.Trace("Handling get for /hastings");
+        return View["hastings", new UploadedPlayers()];
+      };
       #endregion
 
       #region Posts

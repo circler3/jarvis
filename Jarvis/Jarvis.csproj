@@ -23,7 +23,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -84,6 +83,7 @@
     <Compile Include="Style\StyleExecutor.cs" />
     <Compile Include="Viewers\AnimationViewer.cs" />
     <Compile Include="StatusCodeHandler.cs" />
+    <Compile Include="Hastings\UploadedPlayers.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -130,6 +130,9 @@
     <Content Include="Content\error.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Views\hastings.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -144,5 +147,6 @@
     <Folder Include="Utilities\" />
     <Folder Include="Viewers\" />
     <Folder Include="Style\" />
+    <Folder Include="Hastings\" />
   </ItemGroup>
 </Project>
