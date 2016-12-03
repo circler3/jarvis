@@ -42,3 +42,4 @@ Nov 12, 2016 ~ v1.10.0 ~ Fixed grading for multiple files
 Nov 12, 2016 ~ v1.10.1 ~ Fixed grading upload file naming
 Nov 12, 2016 ~ v1.10.2 ~ Give each student a directory on grading upload to avoid name collisions
 Nov 15, 2016 ~ v1.10.3 ~ Fixed dead lock on long stdout
+Nov 28, 2016 ~ v1.11.0 ~ Added colorizing for Hastings
