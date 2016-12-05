@@ -83,7 +83,12 @@
     <Compile Include="Style\StyleExecutor.cs" />
     <Compile Include="Viewers\AnimationViewer.cs" />
     <Compile Include="StatusCodeHandler.cs" />
-    <Compile Include="Hastings\UploadedPlayers.cs" />
+    <Compile Include="Hastings\Hastings.cs" />
+    <Compile Include="Hastings\HastingsPlayer.cs" />
+    <Compile Include="Utilities\JarvisEncoding.cs" />
+    <Compile Include="Utilities\Compiler.cs" />
+    <Compile Include="Hastings\HastingsModules.cs" />
+    <Compile Include="Hastings\HastingsViewer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

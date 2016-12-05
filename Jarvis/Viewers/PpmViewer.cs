@@ -44,7 +44,7 @@ namespace Jarvis
           {
             string pngExpected = ConvertPpmToPng(test.TestsPath + file.CourseFile);
             Bitmap expected = new Bitmap(pngExpected);
-            string expectedBase64Png = Utilities.ConvertToBase64(pngExpected);
+            string expectedBase64Png = JarvisEncoding.ConvertToBase64(pngExpected);
             htmlExpected = string.Format("<img src='data:image/png;base64,{0}' />", expectedBase64Png);
 
             try
@@ -90,7 +90,7 @@ namespace Jarvis
                 }
 
 
-                string actualBase64Png = Utilities.ConvertToBase64(pngActual);
+                string actualBase64Png = JarvisEncoding.ConvertToBase64(pngActual);
                 htmlActual = string.Format("<img src='data:image/png;base64,{0}' />", actualBase64Png);
 
                 

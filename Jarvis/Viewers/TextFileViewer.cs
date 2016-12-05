@@ -21,10 +21,10 @@ namespace Jarvis
           {
             string actualOutput = Utilities.ReadFileContents(test.HomeworkPath + fileout.StudentFile);
 
-            string htmlExpectedOutput = Utilities.ToHtmlEncodingWithNewLines(expectedOutput);
-            string htmlActualOutput = Utilities.ToHtmlEncodingWithNewLines(actualOutput);
+            string htmlExpectedOutput = JarvisEncoding.ToHtmlEncodingWithNewLines(expectedOutput);
+            string htmlActualOutput = JarvisEncoding.ToHtmlEncodingWithNewLines(actualOutput);
 
-            string htmlDiff = Utilities.GetDiff(htmlActualOutput, htmlExpectedOutput);
+            string htmlDiff = JarvisEncoding.GetDiff(htmlActualOutput, htmlExpectedOutput);
 
             result.Append(Utilities.BuildDiffBlock("From " + fileout.StudentFile + ":", htmlActualOutput, htmlExpectedOutput, htmlDiff));
 

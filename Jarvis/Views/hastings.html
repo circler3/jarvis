@@ -3,40 +3,162 @@
 <head>
   @Partial['_header.html'];
   @Partial['_script.html'];
+
+  <script>
+    var numPlayersSelected = 0;
+    function playerBoxClick(box)
+    {
+      if (box.checked)
+      {
+        numPlayersSelected++;
+      }
+      else
+      {
+        numPlayersSelected--;
+      }
+
+      document.getElementById('loadBattleButton').disabled = (numPlayersSelected != 2);
+    }
+
+    function loadBattle(battleButton)
+    {
+      document.getElementById("loadBattleButton").disabled = true;
+      var boxes = document.getElementsByName('playerBoxes');
+      var players = [];
+      for (var i = 0; i < boxes.length; ++i)
+      {
+        if (boxes[i].checked)
+        {          
+          if (players.length < 2)
+          {
+            players.push(boxes[i].id);
+          }
+        }
+      }
+
+      var formData = new FormData();
+
+      formData.append('player1', players[0]);
+      formData.append('player2', players[1]);
+
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function()
+      {
+        if (xhttp.readyState === 4 && xhttp.status === 200)
+        {
+          document.getElementById('output').innerHTML = xhttp.responseText;
+
+          var animations = document.getElementsByClassName('animation');
+
+          for (var i = 0; i < animations.length; ++i)
+          {
+            eval(animations[i].innerHTML);
+          }
+
+          document.getElementById("loadBattleButton").disabled = false;
+        }
+        else if (xhttp.readyState === 4) //We have gotten a response, but it wasn't good
+        {
+          window.clearTimeout(dotterTimer);
+          document.getElementById("output").innerHTML = xhttp.responseText
+        }
+      };
+
+      xhttp.open("POST", "/loadHastingsBattle", true);
+      xhttp.send(formData);
+    }
+
+function uploadHastingsPlayer()
+  {
+    document.getElementById("output").innerHTML = "Uploading, on success this page should refresh!";
+
+    var xhttp = new XMLHttpRequest();
+
+    var formData = new FormData();
+
+    if ((document.getElementById('file').files != undefined) && (document.getElementById('file').files.length > 0))
+    {
+      for (i = 0; i < document.getElementById('file').files.length; i++)
+      {
+        formData.append('file', document.getElementById('file').files[i]);
+      }
+    }
+    else if ((dragFiles !== undefined) && (dragFiles.length > 0))
+    {
+      for (i = 0; i < dragFiles.length; i++)
+      {
+        formData.append('file', dragFiles[i]);
+      }
+    }
+    else
+    {
+      alert('ooops, no file was selected');
+    }
+
+    xhttp.onreadystatechange = function()
+    {
+      if (xhttp.readyState === 4 && xhttp.status === 200)
+      {
+        if (xhttp.responseText === "")
+        {
+          location.reload(true);
+        }
+        else
+        {
+          document.getElementById("output").innerHTML = xhttp.responseText;
+        }
+      }
+      else if (xhttp.readyState === 4) //We have gotten a response, but it wasn't good
+      {
+        document.getElementById("output").innerHTML = xhttp.responseText;
+      }
+    };
+
+    xhttp.open("POST", "/uploadHastingsPlayer", true);
+    xhttp.send(formData);
+
+    document.getElementById('file').value = "";
+    document.getElementById("uploadButton").disabled = true;
+  }
+
+  </script>
 </head>
 <body onload="initHandlers()">
-  <a href="/"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" style='vertical-align: middle; margin: auto; display: block;' /></a>
+  <a href="/hastings"><img src="@Path['~/Content/jarvis.png']" alt="Jarvis logo" style='vertical-align: middle; margin: auto; display: block;' /></a>
   <h2 style='text-align: center; margin: 0px;'>Welcome to the Hastings Tournament!</h2>
 
-  <table  style='width: 100%; border-style: solid; border-width: 2px;'>
+  <table  style='width: 100%;'>
     <tr>
       <td style='width: 30%;'>
-        <div id='currentStudents' style='border-style: solid; border-width: 2px; width: 100%; height: 100%;'>
+        <div id='currentStudents' style='<!--border-style: solid; border-width: 2px; -->width: 100%; height: 100%;'>
           <table>
             <thead>
               <tr>
-                <th colspan='2'>Select players</th>
+                <th colspan='2'><p style='margin-left: 0px;'>Select players</p></th>
               </tr>
             </thead>
-            @Each.Players
+            @Each
               <tr>
-                <td><input type='checkbox' /></td>
-                <td>@Current</td>
+                <td><input type='checkbox' name='playerBoxes' id='@Current.Name' onclick='playerBoxClick(this);'/></td>
+                <td><p style='margin-left: 0px;'>@Current.DisplayName</p></td>
               </tr>
             @EndEach
           </table>
-          <input type='button' id='uploadButton' value='Load Battle' onclick='uploadToJarvis("/run");' disabled />
+          <input type='button' id='loadBattleButton' value='Load Battle' onclick='loadBattle(this);' disabled />
           <br />
           <p>Upload your player</p>
           <form style='font-family: Courier;'>
             <label for='file'>File:</label>
             <input type='file' name='file' id='file' onchange='enableUpload();' multiple />
-            <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/run");' disabled />
+            <input type='button' id='uploadButton' value='Upload' onclick='uploadHastingsPlayer();' disabled />
           </form>
           <div id="filedrag">or drop file(s) here</div>
         </div>
       </td>
       <td style='width: 70%;'>
+        <div id='output'>
+          <p>Choose players or upload your files.</p>
+        </div>
       </td>
     </tr>
   </table>

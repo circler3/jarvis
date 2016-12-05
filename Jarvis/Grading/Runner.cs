@@ -80,7 +80,7 @@ namespace Jarvis
         errors += executor.Run(homework.Path + file);
       }
 
-      return Utilities.ToHtmlEncoding(errors);
+      return JarvisEncoding.ToHtmlEncoding(errors);
     }
 
     private string StyleCheck (Assignment homework)
@@ -108,7 +108,7 @@ namespace Jarvis
 
         result = p.StandardError.ReadToEnd();
         result = result.Replace(homework.Path, "");
-        result = Utilities.ToHtmlEncoding(result);
+        result = JarvisEncoding.ToHtmlEncoding(result);
         p.WaitForExit();
 
         p.Close();
@@ -166,7 +166,7 @@ namespace Jarvis
 
         result = p.StandardError.ReadToEnd();
         result = result.Replace(homework.Path, "");
-        result = Utilities.ToHtmlEncoding(result);
+        result = JarvisEncoding.ToHtmlEncoding(result);
 
         p.WaitForExit();
 

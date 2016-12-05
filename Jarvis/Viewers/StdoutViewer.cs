@@ -17,9 +17,9 @@ namespace Jarvis
         {
           string expectedStdOutput = Utilities.ReadFileContents(test.TestsPath + test.StdOutputFile);
 
-          string htmlActualStdOutput = Utilities.ToHtmlEncodingWithNewLines(test.StdOutText);
-          string htmlExpectedStdOutput = Utilities.ToHtmlEncodingWithNewLines(expectedStdOutput);
-          string htmlDiff = Utilities.GetDiff(htmlActualStdOutput, htmlExpectedStdOutput);
+          string htmlActualStdOutput = JarvisEncoding.ToHtmlEncodingWithNewLines(test.StdOutText);
+          string htmlExpectedStdOutput = JarvisEncoding.ToHtmlEncodingWithNewLines(expectedStdOutput);
+          string htmlDiff = JarvisEncoding.GetDiff(htmlActualStdOutput, htmlExpectedStdOutput);
 
           string caseHeaderText = "From stdout:";
 

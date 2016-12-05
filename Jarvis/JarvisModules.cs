@@ -11,7 +11,7 @@ namespace Jarvis
   public class JarvisModules : NancyModule
   {
     private FileUploadHandler uploadHandler = new FileUploadHandler();
-
+    
     public JarvisModules()
     {
       #region Gets
@@ -38,12 +38,6 @@ namespace Jarvis
         Logger.Trace("Handling get for /stats");
         return View["stats", Jarvis.Stats];
       };
-
-      Get["hastings"] = _ =>
-      {
-        Logger.Trace("Handling get for /hastings");
-        return View["hastings", new UploadedPlayers()];
-      };
       #endregion
 
       #region Posts
@@ -67,7 +61,7 @@ namespace Jarvis
           result = runner.Run(assignment);
           builder.Append(result.ToHtml());
 
-          UpdateStats(assignment, result);
+          StatsManager.UpdateStats(assignment, result);
         }
         else
         {
@@ -99,46 +93,6 @@ namespace Jarvis
         return grader.Grade(baseDir, assignments);
       };
       #endregion
-    }
-
-    private void UpdateStats(Assignment homework, RunResult result)
-    {
-      AssignmentStats stats = null;
-      string name = homework.Course + " - hw" + homework.HomeworkId;
-
-      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
-      {
-        stats = new AssignmentStats();
-        stats.Name = name;
-        Jarvis.Stats.AssignmentData.Add(name, stats);
-      }
-      else
-      {
-        stats = Jarvis.Stats.AssignmentData[name];
-      }
-      
-      stats.TotalSubmissions++;
-      
-      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
-      {
-        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
-      }
-
-      if (result != null && !result.OutputMessage.Contains("Is your assignment number correct"))
-      {
-        stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
-      
-        if (!result.CompileMessage.Contains("Success!!"))
-        {
-          stats.TotalNonCompile++;
-        }
-      
-        if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
-        {
-          stats.TotalBadStyle++;
-        }
-      }
-      Jarvis.Stats.WriteStats();
     }
   }
 }

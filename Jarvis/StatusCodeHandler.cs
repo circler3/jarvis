@@ -67,9 +67,9 @@ namespace Jarvis
     {
       StringBuilder responseText = new StringBuilder();
 
-      responseText.AppendFormat("<img style='display: block; margin: auto;' src='data:image/png;base64,{0}' /><br />", Utilities.ConvertToBase64(rootPath + "/Content/error.png", false));
+      responseText.AppendFormat("<img style='display: block; margin: auto;' src='data:image/png;base64,{0}' /><br />", JarvisEncoding.ConvertToBase64(rootPath + "/Content/error.png", false));
       responseText.Append("<p>I'm sorry sir, it appears I have malfunctioned... an email has been sent to my creator.<br /><br />");
-      responseText.Append("Error message:<br />" + Utilities.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
+      responseText.Append("Error message:<br />" + JarvisEncoding.ToHtmlEncoding(context.Items["ERROR_TRACE"].ToString()));
       responseText.Append("</p>");
 
       Utilities.SendEmail("jacob.h.christensen@gmail.com", "Jarvis Internal Server Error!!", context.Items["ERROR_TRACE"].ToString(), "");

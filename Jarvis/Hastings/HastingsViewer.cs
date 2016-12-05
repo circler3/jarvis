@@ -4,22 +4,8 @@ using System.Text;
 
 namespace Jarvis
 {
-  public class AnimationViewer : IViewer
+  public class HastingsViewer
   {
-    private class Keyword
-    {
-      public Keyword(string word)
-      {
-        Word = word;
-        Found = false;
-      }
-
-      public string Word { get; set; }
-      public bool Found { get; set; }
-    }
-
-    private List<Keyword> keywords = new List<Keyword>();
-    private string keywordList;
     #region Script
     private const string script1 = @"
 <script type='text/javascript' class='animation'> ";
@@ -90,6 +76,9 @@ faster{0} = function()
 
   speedBox{0}.value = (1000 / timerDelay{0}) + 'x';
 }}//# sourceURL=animation.js
+
+faster{0}();
+play{0}();
 </script> ";
 
     string script3 = @"
@@ -109,37 +98,22 @@ faster{0} = function()
 </div> ";
     #endregion
 
-    public AnimationViewer(string words)
+    public HastingsViewer()
     {
-      keywordList = words;
-      string[] splitWords = words.Split(',');
-
-      foreach (string word in splitWords)
-      {
-        string trimedWord = word.Trim();
-        keywords.Add(new Keyword(trimedWord));
-      }
+      // empty
     }
 
-    public string ToHtml(TestCase data)
+    public string ToHtml(string player1Name, string player2Name, string battleOutput)
     {
       Logger.Trace("Viewing output as Animation");
 
       string[] splitters = { "=~=" };
-      string[] frames = data.StdOutText.Split(splitters, StringSplitOptions.None);
+      string[] frames = battleOutput.Split(splitters, StringSplitOptions.None);
       frames = RemoveEmptyFrames(frames);
 
       StringBuilder scriptFramesVar = new StringBuilder("var frames{0} = [");
       for (int i = 0; i < frames.Length; ++i)
       {
-        foreach (Keyword keyword in keywords)
-        {
-          if (frames[i].Contains(keyword.Word))
-          {
-            keyword.Found = true;
-          }
-        }
-
         string htmlFrame = JarvisEncoding.ToHtmlEncoding(frames[i].TrimEnd(' '));
         scriptFramesVar.AppendFormat("\"{0}\"", htmlFrame);
 
@@ -151,26 +125,14 @@ faster{0} = function()
 
       scriptFramesVar.Append("]; ");
 
-      bool foundAllKeywords = true;
-      foreach (Keyword keyword in keywords)
-      {
-        if (!keyword.Found)
-        {
-          foundAllKeywords = false;
-          break; // Once we've missed one, then we don't need to keep looking
-        }
-      }
-
-      data.Passed = foundAllKeywords;
-
       StringBuilder builder = new StringBuilder();
-      builder.AppendFormat(script1, data.Id);
-      builder.AppendFormat(scriptFramesVar.ToString(), data.Id);
-      builder.AppendFormat(script2, data.Id);
-      builder.AppendFormat("<p>Searched for: \"{0}\"</p> ", keywordList);
-      builder.AppendFormat(script3, data.Id);
+      builder.AppendFormat(script1, 0);
+      builder.AppendFormat(scriptFramesVar.ToString(), 0);
+      builder.AppendFormat(script2, 0);
+      builder.AppendFormat("<h3>{0} vs. {1}</h3> ", player1Name, player2Name);
+      builder.AppendFormat(script3, 0);
 
-      return Utilities.BuildDiffBlock("Animation:", builder.ToString(), "", "");
+      return builder.ToString();
     }
 
     private string[] RemoveEmptyFrames(string[] frames)

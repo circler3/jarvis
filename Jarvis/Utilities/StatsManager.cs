@@ -193,6 +193,46 @@ namespace Jarvis
       stream.Close();
       stream.Dispose();
     }
+
+    public static void UpdateStats(Assignment homework, RunResult result)
+    {
+      AssignmentStats stats = null;
+      string name = homework.Course + " - hw" + homework.HomeworkId;
+
+      if (!Jarvis.Stats.AssignmentData.ContainsKey(name))
+      {
+        stats = new AssignmentStats();
+        stats.Name = name;
+        Jarvis.Stats.AssignmentData.Add(name, stats);
+      }
+      else
+      {
+        stats = Jarvis.Stats.AssignmentData[name];
+      }
+
+      stats.TotalSubmissions++;
+
+      if (!stats.TotalUniqueStudentsSubmissions.ContainsKey(homework.StudentId))
+      {
+        stats.TotalUniqueStudentsSubmissions.Add(homework.StudentId, string.Empty);
+      }
+
+      if (result != null && !result.OutputMessage.Contains("Is your assignment number correct"))
+      {
+        stats.TotalUniqueStudentsSubmissions[homework.StudentId] = result.Grade.ToString();
+
+        if (!result.CompileMessage.Contains("Success!!"))
+        {
+          stats.TotalNonCompile++;
+        }
+
+        if (!result.StyleMessage.Contains("Total&nbsp;errors&nbsp;found:&nbsp;0"))
+        {
+          stats.TotalBadStyle++;
+        }
+      }
+      Jarvis.Stats.WriteStats();
+    }
   }
 }
 
