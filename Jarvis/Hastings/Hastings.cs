@@ -89,6 +89,13 @@ namespace Jarvis
           string compileResult = Compiler.CompileCpp("hastings", assignment.Path, includeDirs, sourceFiles);
           if (compileResult == "Success!!")
           {
+            if (players.ContainsKey(newPlayer.Name))
+            {
+              players.Remove(newPlayer.Name);
+            }
+
+            players.Add(newPlayer.Name, newPlayer);
+
             // delete win loss record for player
             newPlayer.Wins = 0;
             newPlayer.Losses = 0;
@@ -109,6 +116,9 @@ namespace Jarvis
             }
 
             LoadPlayers();
+
+            WriteSoldierFile();
+            WritePlayerInfoFile();
 
             // rebuild hastings binary
             sourceFiles.Clear();
@@ -144,6 +154,11 @@ namespace Jarvis
         {
           result = "Unknown player";
         }
+      }
+
+      if (!string.IsNullOrEmpty(result))
+      {
+        result = "<p>" + result + "</p>";
       }
 
       return result;
@@ -337,6 +352,50 @@ namespace Jarvis
       }
 
       return player;
+    }
+
+    private static void WriteSoldierFile()
+    {
+      using (StreamWriter writer = new StreamWriter(hastingsDir + "code/makeSoldier.txt", false))
+      {
+        foreach (string name in players.Keys)
+        {
+          writer.WriteLine("if (tla == \"{0}\") pNewUnit = new {0}(rank);", name);
+        }
+
+        writer.Close();
+      }
+    }
+
+    private static void WritePlayerInfoFile()
+    {
+      using (StreamWriter writer = new StreamWriter(hastingsDir + "code/playerInfo.h"))
+      {
+        writer.WriteLine("#ifndef PLAYERINFO1_H");
+        writer.WriteLine("#define PLAYERINFO1_H");
+        writer.WriteLine("");
+        writer.WriteLine("#define NUMTLAS {0}", players.Count);
+        writer.WriteLine("");
+
+        foreach (string name in players.Keys)
+        {
+          writer.WriteLine("#include \"players/{0}.h\"", name);
+        }
+
+        writer.WriteLine("");
+        writer.WriteLine("static const string tlalist[NUMTLAS] = {");
+
+        foreach (string name in players.Keys)
+        {
+          writer.WriteLine("  \"{0}\",", name);
+        }
+
+        writer.WriteLine("};");
+        writer.WriteLine("");
+        writer.WriteLine("#endif");
+
+        writer.Close();
+      }
     }
   }
 }
