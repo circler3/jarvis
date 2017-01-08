@@ -211,8 +211,18 @@ namespace Jarvis
           File.Copy(testsPath + filein.CourseFile, homework.Path + filein.StudentFile, true);
         }
 
+        // Store input text
+        if (File.Exists(stdInput))
+        {
+          using (StreamReader reader = new StreamReader(stdInput))
+          {
+            test.StdInText = reader.ReadToEnd();
+            reader.Close();
+          }
+        }
+
         // Execute the program
-        test.StdOutText = ExecuteProgram(homework, stdInput);
+        test.StdOutText = ExecuteProgram(homework, test.StdInText);
         test.Duration = homework.Duration;
 
         string output = test.GetResults(homework.Path, testsPath);
@@ -229,19 +239,9 @@ namespace Jarvis
       return result.ToString();
     }
 
-    private string ExecuteProgram(Assignment homework, string inputFile)
+    private string ExecuteProgram(Assignment homework, string input)
     {      
       string output = string.Empty;
-      string input = string.Empty;
-      if (File.Exists(inputFile))
-      {
-        using (StreamReader reader = new StreamReader(inputFile))
-        {
-          input = reader.ReadToEnd();
-
-          reader.Close();
-        }
-      }
 
       using (Process executionProcess = new Process())
       {

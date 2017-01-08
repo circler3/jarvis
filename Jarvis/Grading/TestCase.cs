@@ -17,6 +17,7 @@ namespace Jarvis
     public int Id { get; set; }
     public string StdInputFile { get; set; }
     public string StdOutputFile { get; set; }
+    public string StdInText { get; set; }
     public string StdOutText { get; set; }
 
     public List<InputFile> FileInputFiles { get; set; }

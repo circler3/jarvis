@@ -226,6 +226,38 @@ namespace Jarvis
       return result.ToString();
     }
 
+
+    /// <summary>
+    /// Builds the input block.
+    /// </summary>
+    /// <returns>The input block.</returns>
+    /// <param name="source">Text that denotes from which output this diff block was generated.</param>
+    /// <param name="htmlInput">Html input.</param>
+    public static string BuildInputBlock(string source, string htmlInput)
+    {
+      StringBuilder result = new StringBuilder();
+      result.Append("<table>");
+      result.Append("<tr class='header expand' >");
+      result.Append("<th colspan='3'><p>" + source + "<span>[+]</span></p></th>");
+      result.Append("</tr>");
+      result.Append("<tr>");
+      result.Append("<td>");
+
+      if (!string.IsNullOrEmpty(htmlInput))
+      {
+        result.Append("<p>" + htmlInput + "</p>");
+      }
+
+      result.Append("</td>");
+      result.Append("<td>");
+
+      result.Append("</td>");
+      result.Append("</tr>");
+      result.Append("</table>");
+
+      return result.ToString();
+    }
+
     public static void SendEmail(string to, string subject, string body, string attachment)
     {
       SmtpClient mailClient = new SmtpClient("localhost", 25);

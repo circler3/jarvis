@@ -10,9 +10,19 @@ namespace Jarvis
     {
       StringBuilder result = new StringBuilder();
 
+      // Check for std input
+      if (!string.IsNullOrEmpty(test.StdInText))
+      {
+        string htmlStdInput = JarvisEncoding.ToHtmlEncodingWithNewLines(test.StdInText);
+        string caseHeaderText = "Test Input:";
+
+        result.Append(Utilities.BuildInputBlock(caseHeaderText, htmlStdInput));
+      }
+
       // check for std output file
       if (!string.IsNullOrEmpty(test.StdOutputFile))
       {
+
         if (test.StdOutText.Length < 100000)
         {
           string expectedStdOutput = Utilities.ReadFileContents(test.TestsPath + test.StdOutputFile);
@@ -21,7 +31,7 @@ namespace Jarvis
           string htmlExpectedStdOutput = JarvisEncoding.ToHtmlEncodingWithNewLines(expectedStdOutput);
           string htmlDiff = JarvisEncoding.GetDiff(htmlActualStdOutput, htmlExpectedStdOutput);
 
-          string caseHeaderText = "From stdout:";
+          string caseHeaderText = "Test Output:";
 
           if (string.IsNullOrWhiteSpace(test.StdOutText))
           {
