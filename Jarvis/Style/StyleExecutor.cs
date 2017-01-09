@@ -36,6 +36,9 @@ namespace Jarvis
 
         reader.Close();
       }
+
+      result.AppendFormat("Total errors found: {0}\n", errors.Count);
+
       foreach (string message in errors)
       {
         result.AppendLine(message);
