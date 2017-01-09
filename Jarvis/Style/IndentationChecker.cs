@@ -8,6 +8,7 @@ namespace Jarvis
     private const int INDENT_SIZE = 2;
     private int currentIndentLevel = 0;
     private bool inComment = false;
+
     public IndentationChecker(StyleExecutor executor) : base(executor)
     {
       // empty

@@ -42,6 +42,7 @@ namespace Jarvis
       reader.Read(); // skip the points possible line
       while (reader.Read())
       {
+        bool hasGrade = false;
         // copy all required columns
         string studentName = reader.GetField<string>(reader.FieldHeaders[STUDENT_NAME]);
         string canvasId = reader.GetField<string>(reader.FieldHeaders[CANVAS_ID]);
@@ -61,11 +62,17 @@ namespace Jarvis
           if (result.Assignment.StudentId.Equals(studentId, StringComparison.OrdinalIgnoreCase))
           {
             writer.WriteField<string>(result.Grade.ToString());
-          }  
+            hasGrade = true;
+          }
         }
-        
+
+        if (!hasGrade)
+        {
+          writer.WriteField<string>("0");
+        }
+
         writer.NextRecord();
-      }                
+      }
 
       reader.Dispose();
       writer.Dispose();

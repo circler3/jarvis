@@ -39,7 +39,7 @@ namespace Jarvis
 
       if (homework.ValidHeader)
       {
-        string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.Section, homework.StudentId);
+        string path = string.Format("{0}/courses/{1}/hw{2}/section{3}/{4}/", Jarvis.Config.AppSettings.Settings["workingDir"].Value, homework.Course.ToLower(), homework.HomeworkId, homework.LabSection, homework.StudentId);
 
         homework.Path = path;
 
@@ -118,9 +118,9 @@ namespace Jarvis
           }
           
           Logger.Trace("Found assignment with A#: {0}, Course: {1}, Section: {2}, HW#: {3} and {4} files", 
-            assignment.StudentId, assignment.Course, assignment.Section, assignment.HomeworkId, assignment.FileNames.Count);
+            assignment.StudentId, assignment.Course, assignment.LabSection, assignment.HomeworkId, assignment.FileNames.Count);
           
-          assignment.Path = string.Format("{0}section{1}/{2}/", gradingDir, assignment.Section, assignment.StudentId);
+          assignment.Path = string.Format("{0}section{1}/{2}/", gradingDir, assignment.LabSection, assignment.StudentId);
           Directory.CreateDirectory(assignment.Path);
 
           try
@@ -171,7 +171,7 @@ namespace Jarvis
 
       using (StreamReader reader = new StreamReader(file))
       {
-        for (int i = 0; i < 5 && !reader.EndOfStream; ++i)
+        for (int i = 0; i < 6 && !reader.EndOfStream; ++i)
         {
           header.Add(reader.ReadLine().ToLower());
         }
@@ -189,10 +189,15 @@ namespace Jarvis
           homework.Course = s.Split(':')[1].Trim();
           Logger.Trace ("Parse header course: {0}", homework.Course);
         }
-        else if (s.Contains("section:"))
+        else if (s.Contains("cs1405 section:"))
         {
-          homework.Section = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }).Trim(); // Trim spaces and leading 0's
-          Logger.Trace ("Parse header section: {0}", homework.Section);
+          homework.LabSection = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }).Trim(); // Trim spaces and leading 0's
+          Logger.Trace ("Parse header lab section: {0}", homework.LabSection);
+        }
+        else if (s.Contains("cs1400 section:"))
+        {
+          homework.CourseSection = s.Split(':')[1].TrimStart(new char[] { ' ', '0' }).Trim();
+          Logger.Trace ("Parse header course section: {0}", homework.CourseSection);
         }
         else if (s.Contains("hw#:"))
         {
@@ -238,16 +243,22 @@ namespace Jarvis
         homework.ErrorMessage = string.Format("{0} is not a valid homework ID.", homework.HomeworkId);
         Logger.Warn(homework.ErrorMessage);
       }
-      else if (string.IsNullOrEmpty(homework.Section))
+      else if (string.IsNullOrEmpty(homework.LabSection))
       {
         homework.ValidHeader = false;
-        homework.ErrorMessage = "Header is missing section information.";
+        homework.ErrorMessage = "Header is missing CS1405 Section information.";
         Logger.Warn(homework.ErrorMessage);
       }
-      else if (ValidateSection(homework.Course, homework.HomeworkId, homework.Section))
+      else if (string.IsNullOrEmpty(homework.CourseSection))
       {
         homework.ValidHeader = false;
-        homework.ErrorMessage = string.Format("{0} is not a valid section.", homework.Section);
+        homework.ErrorMessage = "Header is missing CS1400 Section information.";
+        Logger.Warn(homework.ErrorMessage);
+      }
+      else if (ValidateSection(homework.Course, homework.HomeworkId, homework.LabSection))
+      {
+        homework.ValidHeader = false;
+        homework.ErrorMessage = string.Format("{0} is not a valid section.", homework.LabSection);
         Logger.Warn(homework.ErrorMessage);
       }
       else
@@ -265,7 +276,7 @@ namespace Jarvis
 
       Logger.Trace("Validating course with path {0}", coursePath);
 
-      return !Directory.Exists(coursePath);          
+      return !Directory.Exists(coursePath);
     }
 
     private bool ValidateHomeworkId(string course, string homeworkdId)

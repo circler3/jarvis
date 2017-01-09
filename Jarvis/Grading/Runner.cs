@@ -24,10 +24,10 @@ namespace Jarvis
 
         // Style check
         Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
-        // result.StyleMessage = StyleCheck(homework);
+        //result.StyleMessage = StyleCheck(homework);
 
         // Not ready for this yet
-        result.JarvisStyleMessage = "Coming&nbsp;soon!";
+        result.JarvisStyleMessage = StyleCheck(homework);
 
         // Compile
         Logger.Info("Compiling {0} {1}", homework.StudentId, homework.HomeworkId);
@@ -70,52 +70,20 @@ namespace Jarvis
       }
     }
 
-    private string JarvisStyleCheck(Assignment homework)
+    private string StyleCheck(Assignment homework)
     {
+      StringBuilder result = new StringBuilder();
       StyleExecutor executor = new StyleExecutor();
-
-      string errors = "";
 
       foreach (string file in homework.FileNames)
       {
-        errors += executor.Run(homework.Path + file);
+        string errors = executor.Run(homework.Path + file);
+
+        result.AppendFormat("File: {0}\n", file);
+        result.AppendFormat("{0}\n", errors);
       }
 
-      return JarvisEncoding.ToHtmlEncoding(errors);
-    }
-
-    private string StyleCheck (Assignment homework)
-    {
-      string result = string.Empty;
-      using (Process p = new Process())
-      {
-        p.StartInfo.UseShellExecute = false;
-        p.StartInfo.RedirectStandardOutput = true;
-        p.StartInfo.RedirectStandardError = true;
-        p.StartInfo.WorkingDirectory = homework.Path;
-
-        string styleExe = Jarvis.Config.AppSettings.Settings["styleExe"].Value;
-        p.StartInfo.FileName = styleExe;
-        p.StartInfo.Arguments = Jarvis.Config.AppSettings.Settings["styleExemptions"].Value;
-        foreach (string file in homework.FileNames)
-        {
-          p.StartInfo.Arguments += " " + homework.Path + file;
-        }
-
-        Logger.Trace("Style checking with {0} and arguments {1}", styleExe, p.StartInfo.Arguments);
-
-        p.Start();
-        Jarvis.StudentProcesses.Add(p.Id);
-
-        result = p.StandardError.ReadToEnd();
-        result = result.Replace(homework.Path, "");
-        result = JarvisEncoding.ToHtmlEncoding(result);
-        p.WaitForExit();
-
-        p.Close();
-      }
-
-      return result;
+      return JarvisEncoding.ToHtmlEncoding(result.ToString());
     }
 
     private string Compile(Assignment homework, List<string> providedFiles)

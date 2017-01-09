@@ -41,6 +41,11 @@ namespace Jarvis
         result.AppendLine(message);
       }
 
+      if (result.Length == 0)
+      {
+        result.Append("No errors!");
+      }
+
       return result.ToString();
     }
 

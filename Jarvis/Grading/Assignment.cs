@@ -17,7 +17,8 @@ namespace Jarvis
     public string StudentId { get; set; }
     public string Course { get; set; }
     public string HomeworkId { get; set; }
-    public string Section { get; set; }
+    public string CourseSection { get; set; }
+    public string LabSection { get; set; }
     public string Path { get; set; }
     public List<string> FileNames { get; set; }
   }

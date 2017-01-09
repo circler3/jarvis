@@ -62,7 +62,7 @@ namespace Jarvis
         if (a.ValidHeader)
         {
           string oldPath = a.Path;
-          a.Path = string.Format("{0}section{1}/{2}/", hwPath, a.Section, a.StudentId);
+          a.Path = string.Format("{0}section{1}/{2}/", hwPath, a.LabSection, a.StudentId);
 
           Directory.CreateDirectory(a.Path);
 
