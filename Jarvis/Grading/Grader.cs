@@ -216,6 +216,7 @@ namespace Jarvis
       string[] directories = Directory.GetDirectories(hwPath, "section*", SearchOption.AllDirectories);
       StringBuilder gradingReport = new StringBuilder();
       gradingReport.AppendLine("<p>");
+
       foreach (string section in directories)
       {
         Logger.Trace("Processing section at {0}", section);

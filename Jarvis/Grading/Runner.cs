@@ -24,9 +24,6 @@ namespace Jarvis
 
         // Style check
         Logger.Info("Running style check on {0} {1}", homework.StudentId, homework.HomeworkId);
-        //result.StyleMessage = StyleCheck(homework);
-
-        // Not ready for this yet
         result.StyleMessage = StyleCheck(homework);
 
         // Compile
@@ -161,7 +158,7 @@ namespace Jarvis
         DirectoryInfo dir = new DirectoryInfo(homework.Path);
         foreach (FileInfo file in dir.GetFiles())
         {
-          if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt"))
+          if (!file.Name.Contains(homework.StudentId) && !file.Name.Equals("results.txt") && !file.Name.Contains(".cpp") && !file.Name.Contains(".h"))
           {
             file.Delete(); 
           }
