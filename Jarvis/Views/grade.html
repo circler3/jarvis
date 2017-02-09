@@ -20,14 +20,45 @@
     </a>
   </div>
   <form style='font-family: Courier;'>
-    <label for='file'>File:</label>
-    <input type='file' name='file' id='file' onchange='enableUpload();' />
-    <input type='button' id='uploadButton' value='Upload' onclick='uploadToJarvis("/grade");' disabled/>
-    <br />
-    <label for='runMoss'>MOSS:</label>
-    <input type='checkbox' id='runMoss' value='true' checked />
-    <label for='runCode'>Run assignments:</label>
-    <input type='checkbox' id='runCode' value='true' checked />
+    <table>
+      <tr>
+        <td>
+          <label for='file'>Zip file:</label>
+        </td>
+        <td>
+          <input type='file' name='file' id='file' accept='.zip' onchange='enableUpload();' />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label for='canvasFile'>Canvas:</label>
+        </td>
+        <td>
+          <input type='file' name='canvasFile' accept='.csv' id='canvasFile' />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label for='runMoss'>MOSS:</label>
+        </td>
+        <td>
+          <input type='checkbox' id='runMoss' value='true' checked />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label for='runCode'>Run assignments:</label>
+        </td>
+        <td>
+          <input type='checkbox' id='runCode' value='true' checked />
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type='button' id='uploadButton' value='Grade!' onclick='uploadToJarvis("/grade");' disabled/>
+        </td>
+      </tr>
+    </table>
   </form>
   <br />
   <div id='output'>

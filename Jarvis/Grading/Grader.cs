@@ -34,7 +34,7 @@ namespace Jarvis
       }
     }
 
-    public string Grade(string baseDir, List<Assignment> assignments)
+    public string Grade(string canvasCsv, string baseDir, List<Assignment> assignments)
     {            
       // extract to temp directory
       // parse headers
@@ -130,7 +130,7 @@ namespace Jarvis
 
         CanvasFormatter canvasFormatter = new CanvasFormatter();
 
-        string gradesPath = canvasFormatter.GenerateCanvasCsv(hwPath, currentAssignment, resultQueue.ToArray());
+        string gradesPath = canvasFormatter.GenerateCanvasCsv(canvasCsv, hwPath, currentAssignment, resultQueue.ToArray());
 
         Utilities.SendEmail(graderEmail,
           "Grades for " + currentCourse + " " + currentAssignment,

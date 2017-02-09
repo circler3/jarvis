@@ -14,11 +14,11 @@ namespace Jarvis
     private const int STUDENT_ID   = 3;
     private const int SECTION      = 5;
 
-    public string GenerateCanvasCsv(string csvPath, string homeworkId, RunResult[] results)
-    {            
+    public string GenerateCanvasCsv(string canvasCsv, string csvPath, string homeworkId, RunResult[] results)
+    {
       // open course csv
       string gradesPath = string.Format("{0}grades_hw{1}.csv", csvPath, homeworkId);
-      CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(csvPath + "../canvas.csv")));
+      CsvReader reader = new CsvReader(new StreamReader(File.OpenRead(canvasCsv)));
       CsvWriter writer = new CsvWriter(new StreamWriter(File.OpenWrite(gradesPath)));
 
       reader.ReadHeader();

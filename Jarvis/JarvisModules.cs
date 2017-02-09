@@ -86,11 +86,11 @@ namespace Jarvis
         bool runCode = this.Request.Form["runCode"];
 
         var request = this.Bind<FileUploadRequest>();
-        List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.Files[0]);
-     
+        List<Assignment> assignments = uploadHandler.HandleGraderUpload(gradingDir, request.Files);
+
         Grader grader = new Grader(runMoss, runCode);
 
-        return grader.Grade(baseDir, assignments);
+        return grader.Grade(gradingDir + "canvas.csv", baseDir, assignments);
       };
       #endregion
     }

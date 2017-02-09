@@ -70,7 +70,7 @@ namespace Jarvis
     }
 
     // Note: Graders upload zip files containing many cpp files
-    public List<Assignment> HandleGraderUpload(string gradingDir, HttpFile file)
+    public List<Assignment> HandleGraderUpload(string gradingDir, List<HttpFile> uploadedFiles)
     {      
       Logger.Trace ("Handling grader upload");
       List<Assignment> assignments = new List<Assignment>();
@@ -79,11 +79,18 @@ namespace Jarvis
       // create grading directory
       Directory.CreateDirectory(gradingDir);
 
+      // Copy canvas file
+      using (FileStream stream = File.Create(gradingDir + "canvas.csv"))
+      {
+        uploadedFiles[1].Value.Position = 0;
+        uploadedFiles[1].Value.CopyTo(stream);
+      }
+
       // Copy zip file to grading directory
       using (FileStream destinationStream = File.Create(gradingDir + "files.zip"))
       {
-        file.Value.Position = 0;
-        file.Value.CopyTo(destinationStream);
+        uploadedFiles[0].Value.Position = 0;
+        uploadedFiles[0].Value.CopyTo(destinationStream);
       }
 
       // unzip contents
@@ -106,7 +113,6 @@ namespace Jarvis
           {
             string newFilename = Path.GetFileName(oneFile);
             newFilename = newFilename.Substring(newFilename.LastIndexOf("_") + 1);
-
 
             // Handle files that were uploaded multiple times
             for (int i = 1; i <= 10; ++i)
