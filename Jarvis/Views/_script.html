@@ -62,7 +62,7 @@
       alert('ooops, no file was selected');
     }
 
-    if ((document.getElementById('canvasFile').files != undefined) && (document.getElementById('canvasFile').files.length > 0))
+    if ((document.getElementById('canvasFile') != null) && (document.getElementById('canvasFile').files != undefined) && (document.getElementById('canvasFile').files.length > 0))
     {
       for (i = 0; i < document.getElementById('canvasFile').files.length; i++)
       {
