@@ -271,7 +271,7 @@ namespace Jarvis
         mail.Attachments.Add(new Attachment(attachment));
       }
 
-      //mailClient.Send(mail);
+      mailClient.Send(mail);
 
       mailClient.Dispose();
     }
