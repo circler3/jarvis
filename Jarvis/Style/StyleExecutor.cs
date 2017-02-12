@@ -8,6 +8,7 @@ namespace Jarvis
   public class StyleExecutor
   {
     private int lineCount = 0;
+    private int errorCount = 0;
 
     private List<AbstractStyleChecker> checkers = new List<AbstractStyleChecker>();
     private List<string> errors = new List<string>();
@@ -20,6 +21,10 @@ namespace Jarvis
 
     public string Run(string file)
     {
+      lineCount = 0;
+      errorCount = 0;
+      errors.Clear();
+
       StringBuilder result = new StringBuilder();
       using (StreamReader reader = new StreamReader(File.OpenRead(file)))
       {
@@ -35,6 +40,8 @@ namespace Jarvis
         }
 
         reader.Close();
+
+        Logger.Trace("Found {0} erros in {1}", errorCount, file);
       }
 
       result.AppendFormat("Total errors found: {0}\n", errors.Count);
@@ -54,6 +61,7 @@ namespace Jarvis
 
     public void ReportStyleError(string text, params object[] items)
     {
+      errorCount++;
       string message = string.Format(text, items);
 
       message = string.Format("Line {0}: {1}", lineCount, message);

@@ -8,6 +8,7 @@ namespace Jarvis
     private const int INDENT_SIZE = 2;
     private int currentIndentLevel = 0;
     private bool inComment = false;
+    private bool inCase = false;
 
     public IndentationChecker(StyleExecutor executor) : base(executor)
     {
@@ -18,6 +19,11 @@ namespace Jarvis
     {
       int spaceCount = 0;
       if (line.Contains("}"))
+      {
+        currentIndentLevel--;
+      }
+
+      if (line.Contains("private:") || line.Contains("public:"))
       {
         currentIndentLevel--;
       }
@@ -39,12 +45,29 @@ namespace Jarvis
         }
       }
 
-      if (line != "" && !inComment && spaceCount != currentIndentLevel * INDENT_SIZE)
+      if (line != "" && !inComment && spaceCount != currentIndentLevel * INDENT_SIZE && !line.Contains("#"))
       {
         executor.ReportStyleError("Indentation should be {0} spaces", currentIndentLevel * INDENT_SIZE);
       }
 
       if (line.Contains("{"))
+      {
+        currentIndentLevel++;
+      }
+
+      if ((line.Contains("case") && line.Contains(":")) || line.Contains("default:"))
+      {
+        inCase = true;
+        currentIndentLevel++;
+      }
+
+      if (line.Contains ("break;") && inCase)
+      {
+        currentIndentLevel--;
+        inCase = false;
+      }
+
+      if (line.Contains("private:") || line.Contains("public:"))
       {
         currentIndentLevel++;
       }
