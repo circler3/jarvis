@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Hastings\Table.cs" />
+    <Compile Include="Hastings\TieBreakHandler.cs" />
+    <Compile Include="Hastings\Tournament.cs" />
     <Compile Include="JarvisModules.cs" />
     <Compile Include="Jarvis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,10 +151,5 @@
   </Target>
   -->
   <ItemGroup />
-  <ItemGroup>
-    <Folder Include="Utilities\" />
-    <Folder Include="Viewers\" />
-    <Folder Include="Style\" />
-    <Folder Include="Hastings\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

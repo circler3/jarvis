@@ -12,8 +12,21 @@ namespace Jarvis
     public int Uploads { get; set; }
     public string Name { get; set; }
     public string PlayerDirectory { get; set; }
+	public int Byes { get; set; }
+	public int MatchPoints { get; set; }
+	public float MatchWinPercentage { get; set; }
+	public float OpponentsMatchWinPercentage { get; set; }
+	public int GamePoints { get; set; }
+	public float GameWinPercentage { get; set; }
+	public int GamesPlayed { get; set; }
+	public float OpponentsGameWinPercentage { get; set; }
+	public List<HastingsPlayer> Opponents { get; set; }
+	public bool hasTable { get; set; }
+	public int Rank { get; set; }
 
-    public string DisplayName
+
+
+	public string DisplayName
     {
       get
       {
@@ -23,7 +36,8 @@ namespace Jarvis
 
     public HastingsPlayer()
     {
-      // empty
+			// empty
+		Name = "*** BYE ***";
     }
 
     public HastingsPlayer(string header)
